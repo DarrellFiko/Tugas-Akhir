@@ -16,14 +16,21 @@ import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 
-const routes = [
+const loginRoutes = [
+  {
+    section: "login",
+    items: [
+      { path: "/", element: <LoginPage />, label: "Login", icon: <ExitToAppOutlinedIcon /> },
+    ],
+  },
+];
+
+const studentRoutes = [
   {
     section: "Pages",
     items: [
-      { path: "/", element: <HomePage />, label: "Dashboard", icon: <DashboardCustomizeOutlinedIcon /> },
-      { path: "/login", element: <LoginPage />, label: "Login", icon: <ExitToAppOutlinedIcon /> },
+      { path: "/dashboard", element: <HomePage />, label: "Dashboard", icon: <DashboardCustomizeOutlinedIcon /> },
       { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
-      { path: "/not-found", element: <NotFoundPage />, label: "Not Found", icon: <DoNotTouchOutlinedIcon /> },
     ],
   },
   {
@@ -37,9 +44,43 @@ const routes = [
   {
     section: "notfound",
     items: [
-      { path: "*", element: <NotFoundPage />, },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
 ];
 
-export default routes;
+const teacherRoutes = [
+  {
+    section: "Pages",
+    items: [
+      { path: "/dashboard", element: <HomePage />, label: "Dashboard", icon: <DashboardCustomizeOutlinedIcon /> },
+      { path: "/not-found", element: <NotFoundPage />, label: "Not Found", icon: <DoNotTouchOutlinedIcon /> },
+    ],
+  },
+  {
+    section: "Components",
+    items: [
+      { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
+    ],
+  },
+  {
+    section: "notfound",
+    items: [
+      { path: "*", element: <NotFoundPage /> },
+    ],
+  },
+];
+
+// Function to get routes by role
+export function getRoutes(role) {
+  switch (role) {
+    case "student":
+      return [...studentRoutes];
+    case "teacher":
+      return [...teacherRoutes];
+    default:
+      return [...loginRoutes];
+  }
+}
+
+

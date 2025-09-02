@@ -172,7 +172,7 @@ export default function NavigationSidebar({
 
       {/* Menu */}
       {routes
-      .filter((section) => section.section !== "notfound") // filter out notfound
+      .filter((section) => section.section !== "notfound")
       .map((section, sectionIndex) => (
         <Box key={section.section}>
           {(sectionIndex < routes.length && section?.section) &&

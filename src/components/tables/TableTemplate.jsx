@@ -458,8 +458,6 @@ export default function TableTemplate({
           {...tableProps}
           sx={{
             width: '100%',
-            tableLayout: 'fixed',
-            wordWrap: 'break-word',
           }}
         >
           {/* Table Header */}
@@ -488,7 +486,7 @@ export default function TableTemplate({
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
-                        height: 200, // adjust as needed
+                        height: 200,
                       }}
                     >
                       <CircularProgress />
@@ -543,24 +541,26 @@ export default function TableTemplate({
                       {/* Action Body */}
                       {(isUpdate || isDelete) && (
                         <TableCell align="center">
-                          {isUpdate && (
-                            <IconButton
-                              color="warning"
-                              size="small"
-                              onClick={() => onUpdate && onUpdate(row.id)}
-                            >
-                              <EditOutlinedIcon />
-                            </IconButton>
-                          )}
-                          {isDelete && (
-                            <IconButton
-                              color="error"
-                              size="small"
-                              onClick={() => onDelete && onDelete(row.id)}
-                            >
-                              <DeleteOutlineOutlinedIcon />
-                            </IconButton>
-                          )}
+                          <Box sx={{ display: "flex", justifyContent: "center" }}>
+                            {isUpdate && (
+                              <IconButton
+                                color="warning"
+                                size="small"
+                                onClick={() => onUpdate && onUpdate(row.id)}
+                              >
+                                <EditOutlinedIcon />
+                              </IconButton>
+                            )}
+                            {isDelete && (
+                              <IconButton
+                                color="error"
+                                size="small"
+                                onClick={() => onDelete && onDelete(row.id)}
+                              >
+                                <DeleteOutlineOutlinedIcon />
+                              </IconButton>
+                            )}
+                          </Box>
                         </TableCell>
                       )}
                     </TableRow>

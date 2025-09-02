@@ -11,7 +11,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 // Import Others
 import { PopupDelete } from "../../composables/sweetalert";
 
-export default function NavigationAppbar({ isMobile, handleSideBar, onToggleSidebar, isDark, setIsDark }) {
+export default function NavigationAppbar({ isMobile, handleSideBar, onToggleSidebar, isDark, setIsDark, onLogout }) {
   // Utils
   const navigate = useNavigate();
 
@@ -21,10 +21,8 @@ export default function NavigationAppbar({ isMobile, handleSideBar, onToggleSide
 
   const handleLogout = async () => {
     const confirm = await PopupDelete.fire({ title: "Logout" });
-    
     if (confirm.isConfirmed) {
-      localStorage.removeItem("auth");
-      navigate("/");
+      onLogout();
     }
   };
 

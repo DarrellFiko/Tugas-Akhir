@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   Box,
   Card,
@@ -13,14 +13,16 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
+  Button,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { BorderBottom } from "@mui/icons-material";
 import useIsMobile from "../plugins/useIsMobile";
+import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 
 export default function HomePage() {
   // States
+  const boxRef = useRef(null);
   const isMobile = useIsMobile();
   const [pengumuman, setPengumuman] = useState([]);
   const [search, setSearch] = useState("");
@@ -31,7 +33,7 @@ export default function HomePage() {
   const paginationLength = useMemo(() => {
     return Math.ceil(
       pengumuman.filter((item) =>
-        item.toLowerCase().includes(search.toLowerCase())
+        item.detail.toLowerCase().includes(search.toLowerCase())
       ).length / itemsPerPage
     );
   }, [pengumuman, search]);
@@ -39,27 +41,81 @@ export default function HomePage() {
   // Paginated & filtered data
   const paginatedData = useMemo(() => {
     const filtered = pengumuman.filter((item) =>
-      item.toLowerCase().includes(search.toLowerCase())
+      item.title.toLowerCase().includes(search.toLowerCase())
     );
     const startIndex = (page - 1) * itemsPerPage;
     return filtered.slice(startIndex, startIndex + itemsPerPage);
   }, [pengumuman, search, page]);
 
-  // On mount, fill announcements
+  // Dummy Data
   useEffect(() => {
     const data = [];
     for (let i = 1; i <= 95; i++) {
-      data.push("Ini pengumuman yang ke-" + i);
+      // Random apakah ada komentar atau tidak
+      const hasComments = Math.random() > 0.5;
+
+      const comments = hasComments
+        ? [
+            {
+              from: "Fiko",
+              text: `Komentar A untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar B untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },{
+              from: "No Name",
+              text: `Komentar C untuk pengumuman ${i}`
+            },
+          ]
+        : [];
+
+      data.push({
+        id: i,
+        title: `Pengumuman ${i}`,
+        detail: `Ini detail pengumuman yang ke-${i}`,
+        comments: comments,
+        file: Math.random() > 0.5, // random true / false
+        from: "admin"
+      });
     }
     setPengumuman(data);
   }, []);
+
+  useEffect(() => { if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight; }, []);
 
   return (
     <div>
       <Typography variant="h4" sx={{ mb: 3 }}>
         Dashboard
       </Typography>
-
+      
       <Grid container spacing={2}>
         {/* Pengumuman */}
         <Grid size={{ xs:12, md:8 }}>
@@ -96,27 +152,88 @@ export default function HomePage() {
 
             {/* Accordion Pengumuman */}
             <Box sx={{ minHeight: "60vh" }}>
-              {paginatedData.map((item, idx) => (
+              {paginatedData.map((item) => (
                 <Accordion
-                  key={idx}
+                  key={item.id}
                   disableGutters
                   square
                   sx={{ borderBottom: "1px solid", borderColor: 'divider', }}
+                  onChange={(event, isExpanded) => {
+                    if (isExpanded && boxRef.current) {
+                      setTimeout(() => {
+                        boxRef.current.scrollTop = boxRef.current.scrollHeight;
+                      }, 0);
+                    }
+                  }}
                 >
                   <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
-                    aria-controls={`panel-${idx}-content`}
-                    id={`panel-${idx}-header`}
+                    aria-controls={`panel-${item.id}-content`}
+                    id={`panel-${item.id}-header`}
                   >
-                    <Typography variant="subtitle1" fontWeight="500">
-                      {item}
+                    <Typography sx={{ fontSize: 17, fontWeight: 500 }}>
+                      { item.title }
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Typography variant="body2" color="text.secondary">
-                      {item} ini adalah detail lengkap pengumuman. Anda bisa
-                      menambahkan informasi lebih rinci di sini sesuai kebutuhan.
-                    </Typography>
+                    <Grid container sx={{ alignItems: "start" }}>
+                      <Grid size={{ xs: 11 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          { item.detail }
+                        </Typography>
+                      </Grid>
+                      <Grid size={{ xs: 1 }} sx={{ display: "flex", justifyContent: "flex-end"}}>
+                        <IconButton
+                          size="small"
+                          variant="outlined"
+                          color="info"
+                          onClick={ () => {} }
+                          sx={{
+                            backgroundColor: 'primary.main',
+                            color: 'white',
+                            borderRadius: 2,
+                            padding: '3px',
+                            '&:hover': {
+                              backgroundColor: 'primary.main',
+                              color: 'white',
+                            },
+                          }}
+                        >
+                          <DownloadOutlinedIcon size="small" />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                    
+                    <Box sx={{ border: "solid 1px", borderRadius: 2, mt: 2, p: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Komentar
+                      </Typography>
+
+                      <hr />
+                      
+                      {item.comments.length > 0 ? (
+                        <Box
+                          ref={boxRef}
+                          sx={{
+                            maxHeight: "300px",
+                            overflowY: "auto",
+                            display: "flex",
+                            flexDirection: "column",
+                          }}
+                        >
+                          {item.comments.map((comment) => (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                              { comment.from } : {comment.text}
+                            </Typography>
+                          ))}
+                        </Box>
+                      ) : (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                          Tidak Ada Komentar...  
+                        </Typography>
+                      )}
+                    </Box>
+
                   </AccordionDetails>
                 </Accordion>
               ))}
@@ -145,7 +262,6 @@ export default function HomePage() {
           <Card sx={{ borderRadius: 2 }}>
             <CardContent>
               <Typography variant="h6">Calendar</Typography>
-              {/* You can add a calendar component here later */}
             </CardContent>
           </Card>
         </Grid>
