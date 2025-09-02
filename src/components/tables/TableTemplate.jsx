@@ -99,7 +99,7 @@ function TableTemplateHead({
             align={col.align || 'left'}
             padding={col.disablePadding ? 'none' : 'normal'}
             sortDirection={orderBy === col.field ? order : false}
-            sx={{ bgcolor: 'background.paper' }}
+            sx={{ bgcolor: 'background.paper', width: col.width }}
           >
             {col.sortable ? (
               <TableSortLabel
@@ -155,7 +155,8 @@ function TableTemplateToolbar({
   isDownload,
   onCreate,
   onUpload,
-  onDownload
+  onDownload,
+  hideToolbar
 }) {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
@@ -197,7 +198,7 @@ function TableTemplateToolbar({
           </>
         ) : (
           // Title & Action Button
-          <Grid container sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Grid container sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: (!isCreate && !isUpload && !isDownload && hideToolbar) ? "center" : "space-between" }}>
             <Grid size={{ xs: "auto" }}>
               <Typography variant="h6">{ title }</Typography>
             </Grid>
@@ -217,105 +218,107 @@ function TableTemplateToolbar({
       </Box>
 
       {/* Bottom Section */}
-      <Box sx={{ width: '100%', mb: 2 }}>
-        <Grid
-          container
-          sx={{
-            width: '100%',
-            display: 'flex',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 1,
-          }}
-        >
-          {/* Header Filter */}
-          <Grid size={{ xs: 12, md:"auto" }}>
-            {columns.length > 0 && (
-              <>
-                <IconButton
-                  variant="outlined"
-                  color="info"
-                  onClick={handleFilterClick}
-                  sx={{
-                    backgroundColor: 'primary.main',
-                    color: 'white',
-                    borderRadius: 2,
-                    padding: '6px',
-                    '&:hover': {
+      { !hideToolbar && (
+        <Box sx={{ width: '100%', mb: 2 }} className="no-print">
+          <Grid
+            container
+            sx={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 1,
+            }}
+          >
+            {/* Header Filter */}
+            <Grid size={{ xs: 12, md:"auto" }}>
+              {columns.length > 0 && (
+                <>
+                  <IconButton
+                    variant="outlined"
+                    color="info"
+                    onClick={handleFilterClick}
+                    sx={{
                       backgroundColor: 'primary.main',
                       color: 'white',
-                    },
-                  }}
-                >
-                  <FilterListIcon />
-                </IconButton>
+                      borderRadius: 2,
+                      padding: '6px',
+                      '&:hover': {
+                        backgroundColor: 'primary.main',
+                        color: 'white',
+                      },
+                    }}
+                  >
+                    <FilterListIcon />
+                  </IconButton>
 
-                <Popper
-                  anchorEl={anchorEl}
-                  open={open}
-                  placement="right"
-                  sx={{ zIndex: 1300 }}
-                >
-                  <ClickAwayListener onClickAway={handleFilterClose}>
-                    <Grow in={open} style={{ transformOrigin: 'left top' }}>
-                      <Box
-                        sx={{
-                          bgcolor: 'transparent',
-                          boxShadow: 'none',
-                          border: 'none',
-                          p: 1,
-                        }}
-                      >
-                        <Autocomplete
-                          multiple
-                          options={columns}
-                          value={visibleColumns}
-                          onChange={(e, value) => onVisibleColumnsChange(value)}
-                          getOptionLabel={(option) => option.label}
-                          renderTags={(value) =>
-                            value.length > 0 ? (
-                              <Chip
-                                label={`${value.length} column(s) applied`}
-                                color="primary"
-                                size="small"
-                              />
-                            ) : null
-                          }
-                          size="small"
-                          renderInput={(params) => (
-                            <TextField {...params} label="Columns" />
-                          )}
-                        />
-                      </Box>
-                    </Grow>
-                  </ClickAwayListener>
-                </Popper>
-              </>
-            )}
-          </Grid>
+                  <Popper
+                    anchorEl={anchorEl}
+                    open={open}
+                    placement="right"
+                    sx={{ zIndex: 1300 }}
+                  >
+                    <ClickAwayListener onClickAway={handleFilterClose}>
+                      <Grow in={open} style={{ transformOrigin: 'left top' }}>
+                        <Box
+                          sx={{
+                            bgcolor: 'transparent',
+                            boxShadow: 'none',
+                            border: 'none',
+                            p: 1,
+                          }}
+                        >
+                          <Autocomplete
+                            multiple
+                            options={columns}
+                            value={visibleColumns}
+                            onChange={(e, value) => onVisibleColumnsChange(value)}
+                            getOptionLabel={(option) => option.label}
+                            renderTags={(value) =>
+                              value.length > 0 ? (
+                                <Chip
+                                  label={`${value.length} column(s) applied`}
+                                  color="primary"
+                                  size="small"
+                                />
+                              ) : null
+                            }
+                            size="small"
+                            renderInput={(params) => (
+                              <TextField {...params} label="Columns" />
+                            )}
+                          />
+                        </Box>
+                      </Grow>
+                    </ClickAwayListener>
+                  </Popper>
+                </>
+              )}
+            </Grid>
 
-          {/* Search */}
-          <Grid size={{xs: 12, md: "auto"}}>
-            <TextField
-              variant="outlined"
-              size="small"
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton size="small" color="primary">
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ width: '100%' }}
-            />
+            {/* Search */}
+            <Grid size={{xs: 12, md: "auto"}}>
+              <TextField
+                variant="outlined"
+                size="small"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => onSearchChange(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton size="small" color="primary">
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ width: '100%' }}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Box>
+        </Box>
+      )}
     </Box>
   );
 }
@@ -340,7 +343,9 @@ export default function TableTemplate({
   onUpdate,
   onDelete,
   onUpload,
-  onDownload
+  onDownload,
+  isPagination = true,
+  hideToolbar = false,
 }) {
   const [order, setOrder] = React.useState(null);
   const [orderBy, setOrderBy] = React.useState(null);
@@ -441,6 +446,7 @@ export default function TableTemplate({
           onCreate={onCreate}
           onUpload={onUpload}
           onDownload={onDownload}
+          hideToolbar={hideToolbar}
         />
       )}
       <TableContainer
@@ -449,7 +455,7 @@ export default function TableTemplate({
           border: '1px solid',
           borderColor: 'divider',
           width: '100%',
-          maxHeight: tableHeight,
+          height: tableHeight,
           overflowX: 'auto',
         }}
       >
@@ -504,7 +510,7 @@ export default function TableTemplate({
                       role={isCheckbox ? 'checkbox' : 'row'}
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.id}
+                      key={row.id || index}
                       selected={isItemSelected}
                       sx={{
                         cursor: isCheckbox ? 'default' : 'pointer',
@@ -533,8 +539,9 @@ export default function TableTemplate({
                           key={col.field}
                           align={col.align || 'left'}
                           padding={col.disablePadding ? 'none' : 'normal'}
+                          sx={{ width: col.width, maxWidth: col.width, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                         >
-                          {row[col.field]}
+                          { row[col.field] }
                         </TableCell>
                       ))}
 
@@ -586,19 +593,22 @@ export default function TableTemplate({
               </TableBody>
         </Table>
       </TableContainer>
+
       {/* Pagination */}
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={filteredRows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        sx={{
-          width: '100%',
-        }}
-      />
+      {isPagination && (
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredRows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+          sx={{
+            width: '100%',
+          }}
+        />
+      )}
     </Paper>
   );
 }
@@ -623,4 +633,5 @@ TableTemplate.propTypes = {
   onDelete: PropTypes.func,
   onUpload: PropTypes.func,
   onDownload: PropTypes.func,
+  isPagination: PropTypes.bool,
 };

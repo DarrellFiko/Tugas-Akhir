@@ -1,5 +1,3 @@
-// src/App.jsx
-
 // Import Libs
 import { useEffect, useState } from "react";
 import {
@@ -20,12 +18,13 @@ import { lightTheme, darkTheme } from "./plugins/theme";
 import { applyThemeVariables } from "./plugins/themeVariables";
 import { getRoutes } from "./router/routes.jsx";
 import useIsMobile from "./plugins/useIsMobile.js";
+import './App.css';
 
 // Import Components
 import NavigationAppbar from "./components/navigations/NavigationAppBar";
 import NavigationSidebar from "./components/navigations/NavigationSidebar";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";
+import LoginPage from "./pages/General/LoginPage.jsx";
 
 function AppContent({
   isDark,
