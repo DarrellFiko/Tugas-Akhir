@@ -52,3 +52,42 @@ export const handleDownloadFile = (items, fileName = "download") => {
   }
 };
 
+// Print Pages
+export const handlePrint = (printRef) => {
+  const printContent = printRef.current.innerHTML;
+  const iframe = document.createElement("iframe");
+
+  iframe.style.position = "absolute";
+  iframe.style.width = "0px";
+  iframe.style.height = "0px";
+  iframe.style.border = "0";
+
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow.document;
+  doc.open();
+  doc.write(`
+    <html>
+      <head>
+        <title>Print</title>
+        <style>
+          @media print {
+            body { -webkit-print-color-adjust: exact; }
+            table { border-collapse: collapse; width: 100%; }
+            th, td { border: 1px solid #ccc; padding: 8px; }
+          }
+        </style>
+      </head>
+      <body>${printContent}</body>
+    </html>
+  `);
+  doc.close();
+
+  iframe.contentWindow.focus();
+  iframe.contentWindow.print();
+
+  setTimeout(() => {
+    document.body.removeChild(iframe);
+  }, 1000);
+};
+
