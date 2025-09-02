@@ -11,6 +11,7 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
+import ProfilePage from "../pages/General/ProfilePage";
 
 const loginRoutes = [
   {
@@ -36,8 +37,9 @@ const studentRoutes = [
     ],
   },
   {
-    section: "notfound",
+    section: "dont-show",
     items: [
+      { path: "/profile", element: <ProfilePage /> },
       { path: "*", element: <NotFoundPage /> },
     ],
   },

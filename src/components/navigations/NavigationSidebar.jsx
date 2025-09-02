@@ -144,10 +144,22 @@ export default function NavigationSidebar({
       {/* Header */}
       <Paper sx={{ position: 'sticky', top: 0, zIndex: 1, bgcolor: theme.palette.background.paper, borderRadius: 0 }}>
         <DrawerHeader sx={{ justifyContent: isMobile ? "center" : "start", pl: isMobile ? 1.5 : 2, borderBottom: theme => `1px solid ${theme.palette.divider}` }}>
-          <Avatar src="/broken-image.jpg" sx={{ width: 35, height: 35, bgcolor: "primary.main" }} />
+          <Avatar 
+            src="/broken-image.jpg" 
+            sx={{ width: 35, height: 35, bgcolor: "primary.main", cursor: "pointer" }} 
+            onClick={() => {
+              navigate("/profile");
+              if (isMobile) handleSidebar(false);
+            }} 
+          />
           {(!isMobile && open) && (
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pl: 2, pr: 1, width: "87%" }}>
-              <Box sx={{ width: "70%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <Box 
+                sx={{ width: "70%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", cursor: "pointer" }}
+                onClick={() => {
+                  navigate("/profile");
+                }}  
+              >
                 {name}
               </Box>
               <IconButton size="small" onClick={handlePinSidebar} sx={{ color: theme.palette.text.primary }}>
@@ -163,7 +175,13 @@ export default function NavigationSidebar({
             </Box>
           )}
           {isMobile && (
-            <Box sx={{ pl: 2, pr: 1, width: "78%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <Box 
+              sx={{ pl: 2, pr: 1, width: "78%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}
+              onClick={() => {
+                navigate("/profile");
+                if (isMobile) handleSidebar(false);
+              }}  
+            >
               {name}
             </Box>
           )}
@@ -172,7 +190,7 @@ export default function NavigationSidebar({
 
       {/* Menu */}
       {routes
-      .filter((section) => section.section !== "notfound")
+      .filter((section) => section.section !== "dont-show")
       .map((section, sectionIndex) => (
         <Box key={section.section}>
           {(sectionIndex < routes.length && section?.section) &&
