@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -24,7 +24,7 @@ import logoCarolus from "../assets/images/logoCarolus.png";
 import logoTarakanita from "../assets/images/logoTarakanita.png";
 import bgLogin from "../assets/images/bgLogin.jpeg";
 
-export default function LoginPage() {
+export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();
 
   // Toggle password visibility
@@ -45,16 +45,16 @@ export default function LoginPage() {
   // Methods
   const onSubmit = (data) => {
     if (data.username && data.password) {
-      if (
-        localStorage.getItem("auth") === null ||
-        localStorage.getItem("role") === null
-      ) {
-        localStorage.setItem("auth", data.username);
-        localStorage.setItem("role", "student");
-      }
-      navigate("/");
+      onLogin({ data });
     }
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <Grid
@@ -180,7 +180,6 @@ export default function LoginPage() {
                       },
                     }}
                     sx={{
-                      // 🚫 Hide default browser password reveal/clear buttons
                       "& input[type=password]::-ms-reveal": { display: "none" },
                       "& input[type=password]::-ms-clear": { display: "none" },
                       "& input[type=password]::-webkit-credentials-auto-fill-button": {

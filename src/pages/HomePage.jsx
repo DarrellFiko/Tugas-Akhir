@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+// Import Libs
+import { useState, useMemo, useEffect, useRef } from "react";
 import {
   Box,
   Card,
@@ -13,23 +14,28 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Button,
 } from "@mui/material";
+
+// Import Icons
 import SearchIcon from "@mui/icons-material/Search";
+import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import useIsMobile from "../plugins/useIsMobile";
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+
+// Import Utils
+import useIsMobile from "../plugins/useIsMobile";
 
 export default function HomePage() {
   // States
-  const boxRef = useRef(null);
   const isMobile = useIsMobile();
   const [pengumuman, setPengumuman] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+  const [commentInputs, setCommentInputs] = useState({});
+  const commentRefs = useRef({});
 
-  // Computed pagination length
   const paginationLength = useMemo(() => {
     return Math.ceil(
       pengumuman.filter((item) =>
@@ -38,7 +44,6 @@ export default function HomePage() {
     );
   }, [pengumuman, search]);
 
-  // Paginated & filtered data
   const paginatedData = useMemo(() => {
     const filtered = pengumuman.filter((item) =>
       item.title.toLowerCase().includes(search.toLowerCase())
@@ -47,85 +52,55 @@ export default function HomePage() {
     return filtered.slice(startIndex, startIndex + itemsPerPage);
   }, [pengumuman, search, page]);
 
-  // Dummy Data
+  // Methods
+  const sendComment = (id, text, setText) => {
+    if (!text.trim()) return; // ignore empty comments
+    console.log("Pengumuman ID:", id, "Comment:", text);
+    setText(""); // clear input after sending
+  };
+
+  // Use Effect
   useEffect(() => {
     const data = [];
     for (let i = 1; i <= 95; i++) {
-      // Random apakah ada komentar atau tidak
       const hasComments = Math.random() > 0.5;
 
       const comments = hasComments
-        ? [
-            {
-              from: "Fiko",
-              text: `Komentar A untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar B untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },{
-              from: "No Name",
-              text: `Komentar C untuk pengumuman ${i}`
-            },
-          ]
+        ? Array.from({ length: 12 }, (_, idx) => ({
+            from: idx % 2 === 0 ? "Fiko" : "No Name",
+            text: `Komentar ${String.fromCharCode(65 + idx)} untuk pengumuman aaaaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaa aaa aaa ${i}`,
+          }))
         : [];
 
       data.push({
         id: i,
         title: `Pengumuman ${i}`,
         detail: `Ini detail pengumuman yang ke-${i}`,
-        comments: comments,
-        file: Math.random() > 0.5, // random true / false
-        from: "admin"
+        comments,
+        file: Math.random() > 0.5,
+        from: "admin",
       });
     }
     setPengumuman(data);
   }, []);
-
-  useEffect(() => { if (boxRef.current) boxRef.current.scrollTop = boxRef.current.scrollHeight; }, []);
 
   return (
     <div>
       <Typography variant="h4" sx={{ mb: 3 }}>
         Dashboard
       </Typography>
-      
+
       <Grid container spacing={2}>
-        {/* Pengumuman */}
-        <Grid size={{ xs:12, md:8 }}>
+        <Grid item size={{ xs:12, md:8 }}>
           <Card elevation={3} sx={{ borderRadius: 2 }}>
             <CardContent>
+
               {/* Header with Search */}
               <Grid container alignItems="center" justifyContent="space-between">
-                <Grid >
+                <Grid>
                   <Typography variant="h6">Pengumuman</Typography>
                 </Grid>
+
                 <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <TextField
                     value={search}
@@ -157,11 +132,12 @@ export default function HomePage() {
                   key={item.id}
                   disableGutters
                   square
-                  sx={{ borderBottom: "1px solid", borderColor: 'divider', }}
+                  sx={{ borderBottom: "1px solid", borderColor: "divider" }}
                   onChange={(event, isExpanded) => {
-                    if (isExpanded && boxRef.current) {
+                    if (isExpanded && commentRefs.current[item.id]) {
                       setTimeout(() => {
-                        boxRef.current.scrollTop = boxRef.current.scrollHeight;
+                        commentRefs.current[item.id].scrollTop =
+                          commentRefs.current[item.id].scrollHeight;
                       }, 0);
                     }
                   }}
@@ -177,25 +153,46 @@ export default function HomePage() {
                   </AccordionSummary>
                   <AccordionDetails>
                     <Grid container sx={{ alignItems: "start" }}>
-                      <Grid size={{ xs: 11 }}>
+                      <Grid item size={{ xs: 9, md: 11 }}>
                         <Typography variant="body2" color="text.secondary">
                           { item.detail }
                         </Typography>
                       </Grid>
-                      <Grid size={{ xs: 1 }} sx={{ display: "flex", justifyContent: "flex-end"}}>
+                      <Grid item size={{ xs: 3, md: 1 }} gap={1} sx={{ display: "flex", justifyContent: "flex-end" }}>
+                        {/* View */}
                         <IconButton
                           size="small"
                           variant="outlined"
                           color="info"
-                          onClick={ () => {} }
+                          onClick={() => {}}
                           sx={{
-                            backgroundColor: 'primary.main',
-                            color: 'white',
+                            backgroundColor: "primary.main",
+                            color: "white",
                             borderRadius: 2,
-                            padding: '3px',
-                            '&:hover': {
-                              backgroundColor: 'primary.main',
-                              color: 'white',
+                            padding: "3px",
+                            "&:hover": {
+                              backgroundColor: "primary.main",
+                              color: "white",
+                            },
+                          }}
+                        >
+                          <VisibilityOutlinedIcon size="small" />
+                        </IconButton>
+
+                        {/* Download */}
+                        <IconButton
+                          size="small"
+                          variant="outlined"
+                          color="info"
+                          onClick={() => {}}
+                          sx={{
+                            backgroundColor: "primary.main",
+                            color: "white",
+                            borderRadius: 2,
+                            padding: "3px",
+                            "&:hover": {
+                              backgroundColor: "primary.main",
+                              color: "white",
                             },
                           }}
                         >
@@ -203,50 +200,98 @@ export default function HomePage() {
                         </IconButton>
                       </Grid>
                     </Grid>
-                    
+
+                    {/* Comment */}
                     <Box sx={{ border: "solid 1px", borderRadius: 2, mt: 2, p: 2 }}>
                       <Typography variant="body2" color="text.secondary">
                         Komentar
                       </Typography>
 
                       <hr />
-                      
+
                       {item.comments.length > 0 ? (
                         <Box
-                          ref={boxRef}
+                          ref={(el) => (commentRefs.current[item.id] = el)}
                           sx={{
                             maxHeight: "300px",
                             overflowY: "auto",
                             display: "flex",
                             flexDirection: "column",
+                            px: 2
                           }}
                         >
-                          {item.comments.map((comment) => (
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                              { comment.from } : {comment.text}
-                            </Typography>
+                          {item.comments.map((comment, index) => (
+                            <Box
+                              key={index}
+                              sx={{ display: "flex", gap: 1, mt: 1, alignItems: "flex-start" }}
+                            >
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{ width: "80px", fontWeight: 500 }}
+                              >
+                                {comment.from}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                : 
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {comment.text}
+                              </Typography>
+                            </Box>
                           ))}
                         </Box>
                       ) : (
                         <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                          Tidak Ada Komentar...  
+                          Tidak Ada Komentar...
                         </Typography>
                       )}
-                    </Box>
 
+                      <TextField
+                        fullWidth
+                        size="small"
+                        margin="dense"
+                        variant="outlined"
+                        placeholder="Tulis Komentar..."
+                        value={commentInputs[item.id] || ""}
+                        onChange={(e) =>
+                          setCommentInputs((prev) => ({ ...prev, [item.id]: e.target.value }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            sendComment(item.id, commentInputs[item.id], (val) =>
+                              setCommentInputs((prev) => ({ ...prev, [item.id]: val }))
+                            );
+                          }
+                        }}
+                        InputProps={{
+                          sx: { mt: 2, padding: "1px", fontSize: "0.875rem" },
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() =>
+                                  sendComment(item.id, commentInputs[item.id], (val) =>
+                                    setCommentInputs((prev) => ({ ...prev, [item.id]: val }))
+                                  )
+                                }
+                              >
+                                <SendOutlinedIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                    </Box>
                   </AccordionDetails>
                 </Accordion>
               ))}
             </Box>
 
             {/* Pagination */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                py: 2,
-              }}
-            >
+            <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
               <Pagination
                 count={paginationLength}
                 page={page}
@@ -258,7 +303,7 @@ export default function HomePage() {
         </Grid>
 
         {/* Calendar */}
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid item size={{ xs:12, md:4 }}>
           <Card sx={{ borderRadius: 2 }}>
             <CardContent>
               <Typography variant="h6">Calendar</Typography>
