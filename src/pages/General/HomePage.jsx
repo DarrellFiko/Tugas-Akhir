@@ -24,7 +24,7 @@ import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 
 // Import Utils
-import useIsMobile from "../plugins/useIsMobile";
+import useIsMobile from "../../plugins/useIsMobile";
 
 export default function HomePage() {
   // States

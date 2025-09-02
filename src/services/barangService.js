@@ -1,5 +1,5 @@
 // src/services/barangService.js
-import { getAPI } from "../plugins/axios-api";
+import { getAPI } from "../plugins/axiosApi";
 import { ToastSuccess } from "../composables/sweetalert";
 import { ENDPOINTS } from "./endpoint";
 

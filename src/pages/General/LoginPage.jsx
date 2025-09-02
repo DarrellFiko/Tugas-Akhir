@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -20,9 +20,9 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 
-import logoCarolus from "../assets/images/logoCarolus.png";
-import logoTarakanita from "../assets/images/logoTarakanita.png";
-import bgLogin from "../assets/images/bgLogin.jpeg";
+import logoCarolus from "../../assets/images/logoCarolus.png";
+import logoTarakanita from "../../assets/images/logoTarakanita.png";
+import bgLogin from "../../assets/images/bgLogin.jpeg";
 
 export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();

@@ -1,20 +1,16 @@
 // Page import
-import ChartPage from "../pages/ChartPage";
-import HomePage from "../pages/HomePage";
-import SweetAlertPage from "../pages/SweetAlertPage";
+import HomePage from "../pages/General/HomePage";
 import TablePage from "../pages/TablePage";
 import NotFoundPage from "../pages/NotFoundPage";
-import LoginPage from "../pages/LoginPage";
-import BackendPage from "../pages/BackendPage";
+import LoginPage from "../pages/General/LoginPage";
+import JadwalPage from "../pages/Akademik/JadwalPage";
 
 // Icon import
 import DashboardCustomizeOutlinedIcon from '@mui/icons-material/DashboardCustomizeOutlined';
-import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
-import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
-import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 
 const loginRoutes = [
   {
@@ -27,18 +23,16 @@ const loginRoutes = [
 
 const studentRoutes = [
   {
-    section: "Pages",
+    section: "General",
     items: [
       { path: "/dashboard", element: <HomePage />, label: "Dashboard", icon: <DashboardCustomizeOutlinedIcon /> },
-      { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
     ],
   },
   {
-    section: "Components",
+    section: "Akademik",
     items: [
-      { path: "/sweet-alert", element: <SweetAlertPage />, label: "Popup & Toast", icon: <NotificationsOutlinedIcon /> },
-      { path: "/chart", element: <ChartPage />, label: "Charts", icon: <InsertChartOutlinedIcon /> },
-      { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
+      { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Pelajaran", icon: <CalendarMonthOutlinedIcon /> },
+      { path: "/table", element: <TablePage />, label: "table", icon: <CalendarMonthOutlinedIcon /> },
     ],
   },
   {

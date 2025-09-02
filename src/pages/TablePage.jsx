@@ -11,10 +11,10 @@ import { handleDownloadFile, handleUploadFile } from "../utils/utils";
 
 export default function TablePage() {
   const columns = [
-    { field: "id", label: "ID", sortable: true, width: 500, },
-    { field: "name", label: "Name", sortable: true, width: 100, },
-    { field: "email", label: "Email", width: 100, },
-    { field: "phone", label: "Phone", width: 100, },
+    { field: "id", label: "ID", width: 80, sortable: true },
+    { field: "name", label: "Name", width: 150, sortable: true, align: "center" },
+    { field: "email", label: "Email", width: 250 },
+    { field: "phone", label: "Phone", width: 150 },
   ];
 
   const rows = [
