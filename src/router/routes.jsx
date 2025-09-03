@@ -3,7 +3,9 @@ import HomePage from "../pages/General/HomePage";
 import TablePage from "../pages/TablePage";
 import NotFoundPage from "../pages/NotFoundPage";
 import LoginPage from "../pages/General/LoginPage";
-import JadwalPage from "../pages/Akademik/JadwalPage";
+import JadwalPage from "../pages/General/JadwalPage";
+import ProfilePage from "../pages/General/ProfilePage";
+import NilaiSiswaPage from "../pages/Siswa/NilaiSiswaPage";
 
 // Icon import
 import DashboardCustomizeOutlinedIcon from '@mui/icons-material/DashboardCustomizeOutlined';
@@ -11,7 +13,7 @@ import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
 import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
-import ProfilePage from "../pages/General/ProfilePage";
+import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 
 const loginRoutes = [
   {
@@ -33,7 +35,8 @@ const studentRoutes = [
     section: "Akademik",
     items: [
       { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Pelajaran", icon: <CalendarMonthOutlinedIcon /> },
-      { path: "/table", element: <TablePage />, label: "table", icon: <CalendarMonthOutlinedIcon /> },
+      { path: "/nilai", element: <NilaiSiswaPage />, label: "Nilai Akademik", icon: <SchoolOutlinedIcon /> },
+      // { path: "/table", element: <TablePage />, label: "table", icon: <CalendarMonthOutlinedIcon /> },
     ],
   },
   {

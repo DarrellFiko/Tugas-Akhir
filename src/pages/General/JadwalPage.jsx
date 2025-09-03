@@ -38,7 +38,7 @@ export default function JadwalPage() {
 
       {/* Print Button */}
       <Button variant="contained" color="primary" endIcon={ <PrintOutlinedIcon /> } onClick={ () => handlePrint(printRef) } sx={{ mb: 2 }}>
-        Print Jadwal
+        Cetak Jadwal
       </Button>
     </Box>
 
@@ -50,7 +50,7 @@ export default function JadwalPage() {
             title="Senin"
             columns={ columns }
             rows={ rows }
-            initialRowsPerPage={ 100 } 
+            initialRowsPerPage={ 999 } 
             tableHeight={ 400 }
             isCheckbox={ false }
             isUpdate={ false }
