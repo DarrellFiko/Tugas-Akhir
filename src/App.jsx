@@ -74,7 +74,7 @@ function AppContent({
 
   // Layout normal (sudah login)
   return (
-    <Box display={isMobile ? "" : "flex"}>
+    <Box display="flex">
       <NavigationSidebar
         isMobile={isMobile}
         isSidebar={isSidebar}
@@ -83,7 +83,7 @@ function AppContent({
         name="Darrell Fiko"
       />
 
-      <Box component="main" flexGrow={1} sx={{ mx: isMobile ? 0 : 3 }}>
+      <Box component="main" flexGrow={1} sx={{ mx: isMobile ? 0 : 3, minWidth: 0 }}>
         <NavigationAppbar
           isMobile={isMobile}
           handleSideBar={setIsSidebar}
@@ -92,7 +92,16 @@ function AppContent({
           onLogout={onLogout}
         />
 
-        <Box width="100%" sx={{ py: 2, px: isMobile ? 3 : 0 }}>
+        <Box
+          width="100%"
+          sx={{
+            py: 2,
+            px: isMobile ? 3 : 0,
+            display: "block",
+            flex: "none",
+            minWidth: 0,
+          }}
+        >
           <Routes>
             {routes.flatMap((section) =>
               section.items.map((item) => (
