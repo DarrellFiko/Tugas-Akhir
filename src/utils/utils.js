@@ -1,6 +1,13 @@
-// utils/fileUtils.js
 import readXlsFile from "read-excel-file";
 import * as XLSX from "xlsx";
+import moment from "moment";
+import 'moment/locale/id';
+// import 'moment/locale/en-gb';
+
+export const formatDate = (date, format = "dddd, DD MMMM YYYY", language = "id") => {
+  const dt = date instanceof Date ? date : new Date(date);
+  return moment(dt).locale(language, true).format(format);
+};
 
 // Upload Excel file and validate headers
 export const handleUploadFile = async (file, headers, onSuccess, onError) => {
