@@ -87,7 +87,7 @@ export default function HomePage() {
   return (
     <div>
       <Typography variant="h4" sx={{ mb: 3 }}>
-        Dashboard
+        Pengumuman
       </Typography>
 
       <Grid container spacing={2}>
