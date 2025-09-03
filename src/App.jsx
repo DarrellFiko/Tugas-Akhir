@@ -11,6 +11,7 @@ import {
   Route,
   useLocation,
   Navigate,
+  matchPath,
 } from "react-router-dom";
 
 // Import Others
@@ -33,7 +34,7 @@ function AppContent({
   setIsSidebar,
   routes,
   onLogin,
-  onLogout 
+  onLogout,
 }) {
   const isMobile = useIsMobile();
   const location = useLocation();
@@ -41,7 +42,7 @@ function AppContent({
   const token = localStorage.getItem("authToken");
   const isLoginPage = location.pathname === "/";
 
-  // Proteksi route
+  // --- Proteksi route ---
   if (!token && !isLoginPage) {
     return <Navigate to="/" replace />;
   }
@@ -53,15 +54,20 @@ function AppContent({
     return null;
   }
 
-  // cek NotFound tapi exclude login & notfound
+  // --- Cek NotFound ---
   const isNotFound =
     !routes.some((section) =>
-      section.items.some((item) => item.path === location.pathname)
+      section.items.some((item) =>
+        matchPath({ path: item.path, end: true }, location.pathname)
+      )
     ) && !["/", "/notfound"].includes(location.pathname);
 
-  if (isNotFound) return <NotFoundPage />;
+  // --- Fullscreen NotFound ---
+  if (isNotFound) {
+    return <NotFoundPage />;
+  }
 
-  // Halaman login
+  // --- Halaman login (full screen) ---
   if (isLoginPage) {
     return (
       <Box width="100%" height="100vh">
@@ -72,7 +78,7 @@ function AppContent({
     );
   }
 
-  // Layout normal (sudah login)
+  // --- Layout normal (sudah login) ---
   return (
     <Box display="flex">
       <NavigationSidebar
@@ -83,7 +89,11 @@ function AppContent({
         name="Darrell Fiko"
       />
 
-      <Box component="main" flexGrow={1} sx={{ mx: isMobile ? 0 : 3, minWidth: 0 }}>
+      <Box
+        component="main"
+        flexGrow={1}
+        sx={{ mx: isMobile ? 0 : 3, minWidth: 0 }}
+      >
         <NavigationAppbar
           isMobile={isMobile}
           handleSideBar={setIsSidebar}
@@ -112,7 +122,6 @@ function AppContent({
                 />
               ))
             )}
-            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Box>
       </Box>
@@ -134,7 +143,7 @@ export default function App() {
   const handleLogin = (data) => {
     localStorage.setItem("authToken", "dummy-token");
     localStorage.setItem("authUser", data.username);
-    localStorage.setItem("role", "student"); 
+    localStorage.setItem("role", "student");
     setRole("student");
   };
 
