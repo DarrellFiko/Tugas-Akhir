@@ -24,11 +24,14 @@ export default function DetailKelasSiswaPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const [tab, setTab] = React.useState(0);
+  // ambil tab terakhir dari localStorage, default = 0
+  const savedTab = Number(localStorage.getItem("detailKelasSiswaTab") || 0);
+  const [tab, setTab] = React.useState(savedTab);
   const [notifCount, setNotifCount] = React.useState(3); // contoh awal notifikasi >0
 
   const handleTabChange = (e, newValue) => { 
     setTab(newValue);
+    localStorage.setItem("detailKelasSiswaTab", newValue); // simpan ke localStorage
   };
 
   // Reset notifCount jika tab pengumuman dibuka
@@ -36,7 +39,7 @@ export default function DetailKelasSiswaPage() {
     if(tab === 4 && notifCount > 0){
       setNotifCount(0);
     }
-  }, [tab]);
+  }, [tab, notifCount]);
 
   // === Data & Columns tetap sama ===
   const columnsListSiswa = [
@@ -153,7 +156,7 @@ export default function DetailKelasSiswaPage() {
         {kelas?.title}
       </Typography>
 
-      {/* Print Button */}
+      {/* Back Button */}
       <Button variant="contained" color="warning" startIcon={ <ArrowBackOutlinedIcon /> } onClick={ () => navigate("/kelas") } sx={{ mb: 2 }}>
         Kembali
       </Button>

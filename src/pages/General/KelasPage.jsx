@@ -39,7 +39,8 @@ export default function KelasPage() {
 
   const handleCardClick = (kelas) => {
     console.log(kelas)
-    navigate(`/kelas/detail/${kelas.id}`, { state: { kelas } });;
+    localStorage.setItem("detailKelasSiswaTab", 0);
+    navigate(`/kelas/detail/${kelas.id}`, { state: { kelas } });
   };
 
   const handleChangeKelas = (e) => {
