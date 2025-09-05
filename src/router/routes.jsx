@@ -7,6 +7,9 @@ import LoginPage from "../pages/General/LoginPage";
 import JadwalPage from "../pages/General/JadwalPage";
 import ProfilePage from "../pages/General/ProfilePage";
 import KelasPage from "../pages/General/KelasPage";
+import ChartPage from "../pages/ChartPage";
+import SweetAlertPage from "../pages/SweetAlertPage";
+import BackendPage from "../pages/BackendPage";
 
 // Siswa
 import NilaiSiswaPage from "../pages/Siswa/NilaiSiswaPage";
@@ -23,6 +26,11 @@ import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import DetailKelasSiswaPage from "../pages/Siswa/Kelas/DetailKelasSiswaPage";
+
+import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
+import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
+import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
+import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
 
 const loginRoutes = [
   {
@@ -51,10 +59,20 @@ const studentRoutes = [
     ],
   },
   {
+    section: "Template",
+    items: [
+      { path: "/sweet-alert", element: <SweetAlertPage />, label: "Popup & Toast", icon: <NotificationsOutlinedIcon /> },
+      { path: "/chart", element: <ChartPage />, label: "Charts", icon: <InsertChartOutlinedIcon /> },
+      { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
+      { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
+    ],
+  },
+  {
     section: "dont-show",
     items: [
       { path: "/profile", element: <ProfilePage /> },
       { path: "/kelas/detail/:id", element: <DetailKelasSiswaPage /> },
+      { path: "/kelas/detail/:id/module/:modulId", element: <DetailModuleSiswaPage /> },
       // { path: "*", element: <NotFoundPage /> },
     ],
   },

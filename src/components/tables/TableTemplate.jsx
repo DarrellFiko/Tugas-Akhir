@@ -41,7 +41,6 @@ import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
-// Sorting helpers
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1;
   if (b[orderBy] > a[orderBy]) return 1;
@@ -54,7 +53,6 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// Table Head
 function TableTemplateHead({
   columns,
   order,
@@ -73,7 +71,6 @@ function TableTemplateHead({
   return (
     <TableHead>
       <TableRow>
-        {/* Checkbox Header */}
         {isCheckbox && (
           <TableCell padding="checkbox" sx={{ bgcolor: 'background.paper' }}>
             <Checkbox
@@ -92,7 +89,6 @@ function TableTemplateHead({
           </TableCell>
         )}
 
-        {/* Normal Header */}
         {columns.map((col) => (
           <TableCell
             key={col.field}
@@ -124,7 +120,6 @@ function TableTemplateHead({
           </TableCell>
         ))}
 
-        {/* Action Header */}
         {(isUpdate || isDelete) && (
           <TableCell
             key="action"
@@ -134,13 +129,11 @@ function TableTemplateHead({
             Action
           </TableCell>
         )}
-
       </TableRow>
     </TableHead>
   );
 }
 
-// Toolbar
 function TableTemplateToolbar({
   numSelected,
   onDelete,
@@ -166,7 +159,6 @@ function TableTemplateToolbar({
 
   return (
     <Box sx={{ flexDirection: 'column', gap: 1 }}>
-      {/* Top Section */}
       <Box
         sx={{
           width: '100%',
@@ -186,7 +178,6 @@ function TableTemplateToolbar({
       >
         {numSelected > 0 ? (
           <>
-            {/* Multiple Delete */}
             <Typography color="inherit" variant="subtitle1" sx={{ pl: 1 }}>
               {numSelected} selected
             </Typography>
@@ -197,7 +188,6 @@ function TableTemplateToolbar({
             </Tooltip>
           </>
         ) : (
-          // Title & Action Button
           <Grid container sx={{ width: "100%", display: "flex", alignItems: "center", justifyContent: (!isCreate && !isUpload && !isDownload && hideToolbar) ? "center" : "space-between" }}>
             <Grid size={{ xs: "auto" }}>
               <Typography variant="h6">{ title }</Typography>
@@ -217,7 +207,6 @@ function TableTemplateToolbar({
         )}
       </Box>
 
-      {/* Bottom Section */}
       { !hideToolbar && (
         <Box sx={{ width: '100%', mb: 2 }} className="no-print">
           <Grid
@@ -230,7 +219,6 @@ function TableTemplateToolbar({
               gap: 1,
             }}
           >
-            {/* Header Filter */}
             <Grid size={{ xs: 12, md:"auto" }}>
               {columns.length > 0 && (
                 <>
@@ -296,7 +284,6 @@ function TableTemplateToolbar({
               )}
             </Grid>
 
-            {/* Search */}
             <Grid size={{xs: 12, md: "auto"}}>
               <TextField
                 variant="outlined"
@@ -323,7 +310,6 @@ function TableTemplateToolbar({
   );
 }
 
-// Main Table
 export default function TableTemplate({
   isLoading = false,
   columns,
@@ -346,6 +332,7 @@ export default function TableTemplate({
   onDownload,
   isPagination = true,
   hideToolbar = false,
+  getRowClassName,
 }) {
   const [order, setOrder] = React.useState(null);
   const [orderBy, setOrderBy] = React.useState(null);
@@ -367,7 +354,6 @@ export default function TableTemplate({
 
   const handleSelectAllClick = (event) => {
     const pageRowIds = visibleRowsMemo.map((r) => r.id);
-  
     if (event.target.checked) {
       setSelected((prev) => [...new Set([...prev, ...pageRowIds])]);
     } else {
@@ -430,7 +416,6 @@ export default function TableTemplate({
       }}
     >
       {title && (
-        // Table Toolbar
         <TableTemplateToolbar
           title={title}
           numSelected={selected.length}
@@ -466,7 +451,6 @@ export default function TableTemplate({
             width: '100%',
           }}
         >
-          {/* Table Header */}
           <TableTemplateHead
             columns={visibleColumns}
             numSelected={selected.length}
@@ -482,7 +466,6 @@ export default function TableTemplate({
             isDelete={isDelete}
           />
 
-          {/* Table Body */}
           <TableBody>
             {isLoading
               ? <TableRow>
@@ -512,13 +495,13 @@ export default function TableTemplate({
                       tabIndex={-1}
                       key={row.id || index}
                       selected={isItemSelected}
+                      className={getRowClassName ? getRowClassName(row) : ""}
                       sx={{
                         cursor: isCheckbox ? 'default' : 'pointer',
                         borderBottom: '1px solid',
                         borderColor: 'divider',
                       }}
                     >
-                      {/* Checkbox Body */}
                       {isCheckbox && (
                         <TableCell padding="checkbox">
                           <Checkbox
@@ -533,7 +516,6 @@ export default function TableTemplate({
                         </TableCell>
                       )}
 
-                      {/* Normal Body */}
                       {visibleColumns.map((col) => (
                         <TableCell
                           key={col.field}
@@ -541,11 +523,10 @@ export default function TableTemplate({
                           padding={col.disablePadding ? 'none' : 'normal'}
                           sx={{ width: col.width, maxWidth: col.width, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                         >
-                          { row[col.field] }
+                          {col.render ? col.render(row[col.field], row) : row[col.field]}
                         </TableCell>
                       ))}
 
-                      {/* Action Body */}
                       {(isUpdate || isDelete) && (
                         <TableCell align="center">
                           <Box sx={{ display: "flex", justifyContent: "center" }}>
@@ -594,7 +575,6 @@ export default function TableTemplate({
         </Table>
       </TableContainer>
 
-      {/* Pagination */}
       {isPagination && (
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
@@ -623,9 +603,9 @@ TableTemplate.propTypes = {
   tableProps: PropTypes.object,
   title: PropTypes.string,
   tableHeight: PropTypes.number,
-  isDownload: PropTypes.bool,
-  isUpload: PropTypes.bool,
   isCreate: PropTypes.bool,
+  isUpload: PropTypes.bool,
+  isDownload: PropTypes.bool,
   isUpdate: PropTypes.bool,
   isDelete: PropTypes.bool,
   onCreate: PropTypes.func,
@@ -634,4 +614,6 @@ TableTemplate.propTypes = {
   onUpload: PropTypes.func,
   onDownload: PropTypes.func,
   isPagination: PropTypes.bool,
+  hideToolbar: PropTypes.bool,
+  getRowClassName: PropTypes.func
 };
