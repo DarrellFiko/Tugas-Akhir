@@ -59,15 +59,6 @@ const studentRoutes = [
     ],
   },
   {
-    section: "Template",
-    items: [
-      { path: "/sweet-alert", element: <SweetAlertPage />, label: "Popup & Toast", icon: <NotificationsOutlinedIcon /> },
-      { path: "/chart", element: <ChartPage />, label: "Charts", icon: <InsertChartOutlinedIcon /> },
-      { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
-      { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
-    ],
-  },
-  {
     section: "dont-show",
     items: [
       { path: "/profile", element: <ProfilePage /> },
@@ -80,16 +71,24 @@ const studentRoutes = [
 
 const teacherRoutes = [
   {
-    section: "Pages",
+    section: "General",
     items: [
-      { path: "/dashboard", element: <HomePage />, label: "Dashboard", icon: <DashboardCustomizeOutlinedIcon /> },
-      { path: "/not-found", element: <NotFoundPage />, label: "Not Found", icon: <DoNotTouchOutlinedIcon /> },
+      { path: "/dashboard", element: <HomePage />, label: "Pengumuman", icon: <AnnouncementOutlinedIcon /> },
     ],
   },
   {
     section: "Components",
     items: [
       { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
+    ],
+  },
+  {
+    section: "Template",
+    items: [
+      { path: "/sweet-alert", element: <SweetAlertPage />, label: "Popup & Toast", icon: <NotificationsOutlinedIcon /> },
+      { path: "/chart", element: <ChartPage />, label: "Charts", icon: <InsertChartOutlinedIcon /> },
+      { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
+      { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
     ],
   },
   {
