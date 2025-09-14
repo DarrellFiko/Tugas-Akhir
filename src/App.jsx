@@ -143,8 +143,14 @@ export default function App() {
   const handleLogin = (data) => {
     localStorage.setItem("authToken", "dummy-token");
     localStorage.setItem("authUser", data.username);
-    localStorage.setItem("role", "student");
-    setRole("student");
+    console.log(data.username)
+    if(data.username == "siswa") {
+      localStorage.setItem("role", "student");
+      setRole("student");
+    } else if(data.username == "guru") {
+      localStorage.setItem("role", "teacher");
+      setRole("teacher");
+    }
   };
 
   // handler logout

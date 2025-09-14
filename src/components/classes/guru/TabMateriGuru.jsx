@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import TableTemplate from "../../tables/TableTemplate";
 
-export default function TabMateri() {
+export default function TabMateriGuru() {
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
@@ -88,9 +88,9 @@ export default function TabMateri() {
         isUpdate={false}
         isDelete={false}
         isUpload={false}
-        isCreate={false}
         isDownload={false}
-      />
+        onCreate={() => {console.log("hehe")}}
+      />test
 
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>Detail Materi</DialogTitle>

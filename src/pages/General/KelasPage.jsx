@@ -12,19 +12,32 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const classes = [
-  { id: 1, title: "ECC Level 4", lecturer: "Dr. Jenny Ngo, M.Sc.Ed." },
-  { id: 2, title: "Web Programming Framework", lecturer: "Evan Kusuma Susanto, S.Kom., M.Kom." },
-  { id: 3, title: "Artificial Intelligence", lecturer: "Dr. Ir. Joan Santoso, S.Kom., M.Kom." },
-  { id: 4, title: "Rekayasa Perangkat Lunak", lecturer: "Yuliana Melita Pranoto, S.Kom. M.Kom." },
-  { id: 5, title: "Software Testing", lecturer: "Reddy Alexandro Harianto, S.Kom., M.Kom." },
-  { id: 6, title: "Arsitektur dan Organisasi Komputer", lecturer: "Ir. Khinardi Gunawan" },
-  { id: 7, title: "Software Development Project", lecturer: "Grace Levina Dewi, S.Kom., M.Kom." },
-  { id: 8, title: "Kewirausahaan", lecturer: "Dr. Ir. Hj. Endang Setyati, M.T." },
+const studentClasses = [
+  { id: 1, title: "ECC Level 4", subtitle: "Dr. Jenny Ngo, M.Sc.Ed." },
+  { id: 2, title: "Web Programming Framework", subtitle: "Evan Kusuma Susanto, S.Kom., M.Kom." },
+  { id: 3, title: "Artificial Intelligence", subtitle: "Dr. Ir. Joan Santoso, S.Kom., M.Kom." },
+  { id: 4, title: "Rekayasa Perangkat Lunak", subtitle: "Yuliana Melita Pranoto, S.Kom. M.Kom." },
+  { id: 5, title: "Software Testing", subtitle: "Reddy Alexandro Harianto, S.Kom., M.Kom." },
+  { id: 6, title: "Arsitektur dan Organisasi Komputer", subtitle: "Ir. Khinardi Gunawan" },
+  { id: 7, title: "Software Development Project", subtitle: "Grace Levina Dewi, S.Kom., M.Kom." },
+  { id: 8, title: "Kewirausahaan", subtitle: "Dr. Ir. Hj. Endang Setyati, M.T." },
+];
+
+const teacherClasses = [
+  { id: 1, title: "ECC Level 4", subtitle: "X-IPA-1" },
+  { id: 2, title: "Web Programming Framework", subtitle: "X-IPA-1" },
+  { id: 3, title: "Artificial Intelligence", subtitle: "X-IPA-1" },
+  { id: 4, title: "Rekayasa Perangkat Lunak", subtitle: "X-IPA-1" },
+  { id: 5, title: "Software Testing", subtitle: "X-IPA-1" },
+  { id: 6, title: "Arsitektur dan Organisasi Komputer", subtitle: "X-IPA-1" },
+  { id: 7, title: "Software Development Project", subtitle: "X-IPA-1" },
+  { id: 8, title: "Kewirausahaan", subtitle: "X-IPA-1" },
 ];
 
 export default function KelasPage() {
   const navigate = useNavigate();
+  const role = localStorage.getItem("role")
+  const classes = role === "student" ? studentClasses : teacherClasses
 
   // Data kelas
   const kelasList = [
@@ -34,8 +47,16 @@ export default function KelasPage() {
     { id: 4, value: "X-IPS-2 Semester Genap" },
   ];
 
+  const tahunAjaranList = [
+    { id: 1, value: "2024-2025 Semester Gasal" },
+    { id: 2, value: "2024-2025 Semester Genap" },
+    { id: 3, value: "2025-2026 Semester Gasal" },
+    { id: 4, value: "2025-2026 Semester Genap" },
+  ];
+
   // default ke data terakhir
   const [selectedKelas, setSelectedKelas] = useState(kelasList[kelasList.length - 1].id);
+  const [selectedTahunAjaran, setSelectedTahunAjaran] = useState(tahunAjaranList[tahunAjaranList.length - 1].id);
 
   const handleCardClick = (kelas) => {
     console.log(kelas)
@@ -43,11 +64,20 @@ export default function KelasPage() {
     navigate(`/kelas/detail/${kelas.id}`, { state: { kelas } });
   };
 
+  // handler kelas
   const handleChangeKelas = (e) => {
     const kelasId = e.target.value;
     const kelas = kelasList.find((k) => k.id === kelasId);
     setSelectedKelas(kelasId);
     console.log("Selected Kelas -> ID:", kelas.id, "Value:", kelas.value);
+  };
+
+  // handler tahun ajaran
+  const handleChangeTahunAjaran = (e) => {
+    const thId = e.target.value;
+    const th = tahunAjaranList.find((t) => t.id === thId);
+    setSelectedTahunAjaran(thId);
+    console.log("Selected Tahun Ajaran -> ID:", th.id, "Value:", th.value);
   };
 
   return (
@@ -71,16 +101,17 @@ export default function KelasPage() {
           >
             {/* Dropdown Kelas */}
             <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-              <InputLabel id="kelas-select-label">Pilih Kelas</InputLabel>
+              <InputLabel id="kelas-select-label">
+                {role === "student" ? "Pilih Kelas" : "Pilih Tahun Ajaran"}
+              </InputLabel>
               <Select
                 labelId="kelas-select-label"
-                value={selectedKelas}
-                onChange={handleChangeKelas}
-                label="Pilih Kelas"
+                value={role === "student" ? selectedKelas : selectedTahunAjaran}
+                onChange={role === "student" ? handleChangeKelas : handleChangeTahunAjaran}
               >
-                {kelasList.map((kelas) => (
-                  <MenuItem key={kelas.id} value={kelas.id}>
-                    {kelas.value}
+                {(role === "student" ? kelasList : tahunAjaranList).map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.value}
                   </MenuItem>
                 ))}
               </Select>
@@ -116,9 +147,9 @@ export default function KelasPage() {
                   variant="body2"
                   color="text.secondary"
                   sx={{ wordBreak: "break-word", whiteSpace: "normal" }}
-                  title={c.lecturer}
+                  title={c.subtitle}
                 >
-                  {c.lecturer}
+                  {c.subtitle}
                 </Typography>
               </CardContent>
             </Card>

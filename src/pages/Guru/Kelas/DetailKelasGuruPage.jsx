@@ -13,12 +13,12 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import TabMateriSiswa from "../../../components/classes/siswa/TabMateriSiswa";
 import TableTemplate from "../../../components/tables/TableTemplate";
 import { formatDate } from "../../../utils/utils";
 import TabPengumuman from "../../../components/classes/siswa/TabPengumuman";
+import TabMateriGuru from "../../../components/classes/guru/TabMateriGuru";
 
-export default function DetailKelasSiswaPage() {
+export default function DetailKelasGuruPage() {
   const location = useLocation();
   const { kelas } = location.state || {};
   const { id } = useParams();
@@ -181,7 +181,7 @@ export default function DetailKelasSiswaPage() {
       } />
     </Tabs>
 
-    {tab === 0 && <TabMateriSiswa />}
+    {tab === 0 && <TabMateriGuru />}
 
     {tab === 1 && (
       <TableTemplate

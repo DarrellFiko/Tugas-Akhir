@@ -37,7 +37,7 @@ export default function LoginPage({ onLogin }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      username: "username",
+      username: "siswa",
       password: "password",
     },
   });
@@ -45,7 +45,7 @@ export default function LoginPage({ onLogin }) {
   // Methods
   const onSubmit = (data) => {
     if (data.username && data.password) {
-      onLogin({ data });
+      onLogin(data);
     }
   };
 

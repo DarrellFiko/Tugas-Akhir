@@ -7,14 +7,21 @@ import { handlePrint } from "../../utils/utils";
 export default function JadwalPage() {
   // States
   const printRef = useRef();
+  const role = localStorage.getItem("role")
 
-  const columns = [
+  const studentColumns = [
     { field: "jam", label: "Jam", width: "auto" },
     { field: "pelajaran", label: "Pelajaran", width: "170px", },
     { field: "pengajar", label: "Pengajar", width: "230px" },
   ];
 
-  const rows = [
+  const teacherColumns = [
+    { field: "jam", label: "Jam", width: "auto" },
+    { field: "pelajaran", label: "Pelajaran", width: "230px", },
+    { field: "kelas", label: "Kelas", width: "170px" },
+  ];
+
+  const studentRows = [
     { jam: "08:00 - 09:00", pelajaran: "Matematikaaaaaaaaaaaaaaaaaaaa", pengajar: "Darrell Fiko Alexander Darrell Fiko Alexander" },
     { jam: "08:00 - 10:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
     { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
@@ -27,6 +34,19 @@ export default function JadwalPage() {
     { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
     { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
     { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
+  ];
+
+  const teacherRows = [
+    { jam: "08:00 - 10:00", pelajaran: "Matematika", kelas: "X-IPA-1" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-1" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-2" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-2" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPS-1" },
+    { jam: "08:00 - 10:00", pelajaran: "Matematika", kelas: "X-IPS-1" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPS-2" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-2" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-3" },
+    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-3" },
   ];
 
   return <>
@@ -48,8 +68,8 @@ export default function JadwalPage() {
           <TableTemplate 
             key={"Senin"}
             title="Senin"
-            columns={ columns }
-            rows={ rows }
+            columns={ role == "student" ? studentColumns : teacherColumns }
+            rows={ role == "student" ? studentRows : teacherRows }
             initialRowsPerPage={ 999 } 
             tableHeight={ 400 }
             isCheckbox={ false }
@@ -66,7 +86,7 @@ export default function JadwalPage() {
           <TableTemplate 
             key={"Selasa"}
             title="Selasa"
-            columns={ columns }
+            columns={ role == "student" ? studentColumns : teacherColumns }
             initialRowsPerPage={ 100 } 
             tableHeight={ 400 }
             isCheckbox={ false }
@@ -83,8 +103,8 @@ export default function JadwalPage() {
           <TableTemplate
             key={"Rabu"} 
             title="Rabu"
-           columns={ columns }
-            rows={ rows }
+            columns={ role == "student" ? studentColumns : teacherColumns }
+            rows={ role == "student" ? studentRows : teacherRows }
             initialRowsPerPage={ 100 } 
             tableHeight={ 400 }
             isCheckbox={ false }

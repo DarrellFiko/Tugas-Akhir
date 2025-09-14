@@ -17,10 +17,8 @@ import UjianSiswaPage from "../pages/Siswa/Ujian/UjianSiswaPage";
 
 // Icon import
 import AnnouncementOutlinedIcon from '@mui/icons-material/AnnouncementOutlined';
-import DashboardCustomizeOutlinedIcon from '@mui/icons-material/DashboardCustomizeOutlined';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import TableChartOutlinedIcon from '@mui/icons-material/TableChartOutlined';
-import DoNotTouchOutlinedIcon from '@mui/icons-material/DoNotTouchOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
@@ -31,6 +29,7 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
+import DetailKelasGuruPage from "../pages/Guru/Kelas/DetailKelasGuruPage";
 
 const loginRoutes = [
   {
@@ -55,7 +54,6 @@ const studentRoutes = [
       { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
       { path: "/nilai", element: <NilaiSiswaPage />, label: "Nilai Akademik", icon: <SchoolOutlinedIcon /> },
       { path: "/ujian", element: <UjianSiswaPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
-      // { path: "/table", element: <TablePage />, label: "table", icon: <CalendarMonthOutlinedIcon /> },
     ],
   },
   {
@@ -77,9 +75,10 @@ const teacherRoutes = [
     ],
   },
   {
-    section: "Components",
+    section: "Akademik",
     items: [
-      { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
+      { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Mengajar", icon: <CalendarMonthOutlinedIcon /> },
+      { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
     ],
   },
   {
@@ -92,9 +91,11 @@ const teacherRoutes = [
     ],
   },
   {
-    section: "notfound",
+    section: "dont-show",
     items: [
-      { path: "*", element: <NotFoundPage /> },
+      { path: "/profile", element: <ProfilePage /> },
+      { path: "/kelas/detail/:id", element: <DetailKelasGuruPage /> },
+      // { path: "*", element: <NotFoundPage /> },
     ],
   },
 ];

@@ -5,6 +5,7 @@ import Pengumuman from "../../components/classes/Pengumuman";
 export default function HomePage() {
   const [pengumuman, setPengumuman] = useState([]);
   const [commentInputs, setCommentInputs] = useState({});
+  const role = localStorage.getItem("role")
 
   const sendComment = (id, text, setText) => {
     if (!text.trim()) return;
@@ -41,7 +42,7 @@ export default function HomePage() {
       <Typography variant="h4" sx={{ mb: 3 }}>Pengumuman</Typography>
       <Grid container spacing={2}>
         {/* Pengumuman */}
-        <Grid item size={{ xs: 12, md: 8 }}>
+        <Grid item size={{ xs: 12 }}>
           <Pengumuman
             data={pengumuman}
             commentInputs={commentInputs}
@@ -49,15 +50,6 @@ export default function HomePage() {
             sendComment={sendComment}
             itemsPerPage={10}
           />
-        </Grid>
-
-        {/* Calendar */}
-        <Grid item size={{ xs:12, md:4 }}>
-          <Card sx={{ borderRadius: 2 }}>
-            <CardContent>
-              <Typography variant="h6">Calendar</Typography>
-            </CardContent>
-          </Card>
         </Grid>
       </Grid>
     </div>
