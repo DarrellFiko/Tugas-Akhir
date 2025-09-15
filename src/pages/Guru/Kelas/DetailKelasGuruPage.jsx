@@ -5,11 +5,9 @@ import {
   Tabs,
   Tab,
   Badge,
-  IconButton,
   Button
 } from "@mui/material";
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -17,6 +15,7 @@ import TableTemplate from "../../../components/tables/TableTemplate";
 import { formatDate } from "../../../utils/utils";
 import TabPengumuman from "../../../components/classes/siswa/TabPengumuman";
 import TabMateriGuru from "../../../components/classes/guru/TabMateriGuru";
+import TabModuleGuru from "../../../components/classes/guru/TabModuleGuru";
 
 export default function DetailKelasGuruPage() {
   const location = useLocation();
@@ -91,65 +90,6 @@ export default function DetailKelasGuruPage() {
     { id: 4, hariTanggal: new Date("2025-09-25"), topik: "Diskusi Studi Kasus", absensi: true },
   ];
 
-  const columnsModule = [
-    { field: "namaModule", label: "Nama Module", width: "250px" },
-    { field: "jenisModule", label: "Jenis Module", width: "120px" },
-    { field: "sifat", label: "Sifat", width: "100px" },
-    { field: "deadline", label: "Deadline", width: "250px" },
-    { field: "status", label: "Status", width: "120px" },
-    { field: "banyakPengumpulan", label: "Banyak Pengumpulan", width: "150px" },
-    { 
-      field: "action", 
-      label: "Action", 
-      width: "100px",
-      align: "center",
-      render: (value, row) => (
-        <IconButton onClick={() => navigate(`/kelas/detail/${id}/module/${row.id}`)}>
-          <InfoOutlinedIcon color="primary" />
-        </IconButton>
-      )
-    },
-  ];
-
-  const rowsModule = [
-    {
-      id: 1,
-      namaModule: "Regresi Linier Sederhana",
-      jenisModule: "TUGAS",
-      sifat: "Online",
-      deadline: "2023-05-08 10:00:00 s/d 2023-05-15 08:00:00",
-      status: "Perorangan",
-      banyakPengumpulan: "26 / 31",
-    },
-    {
-      id: 2,
-      namaModule: "Tugas 2 Soal UTS",
-      jenisModule: "TUGAS",
-      sifat: "Online",
-      deadline: "2023-02-27 08:06:00 s/d 2023-03-06 10:30:00",
-      status: "Perorangan",
-      banyakPengumpulan: "29 / 31",
-    },
-    {
-      id: 3,
-      namaModule: "Tugas 2 Soal UTS",
-      jenisModule: "TUGAS",
-      sifat: "Online",
-      deadline: "2023-02-27 08:06:00 s/d 2023-03-06 10:30:00",
-      status: "Perorangan",
-      banyakPengumpulan: "29 / 31",
-    },
-    {
-      id: 4,
-      namaModule: "Tugas1 Personal Survey",
-      jenisModule: "TUGAS",
-      sifat: "Online",
-      deadline: "2023-02-06 07:30:00 s/d 2023-02-06 10:30:00",
-      status: "Perorangan",
-      banyakPengumpulan: "28 / 29",
-    },
-  ];
-
   return <>
     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <Typography variant="h4" sx={{ mb: 3 }}>
@@ -218,20 +158,7 @@ export default function DetailKelasGuruPage() {
     )}
 
     {tab === 3 && (
-      <TableTemplate
-        key={"modul"}
-        title={"Modul"}
-        columns={columnsModule}
-        rows={rowsModule}
-        initialRowsPerPage={10}
-        tableHeight={400}
-        isCheckbox={false}
-        isUpdate={false}
-        isDelete={false}
-        isUpload={false}
-        isCreate={false}
-        isDownload={false}
-      />
+      <TabModuleGuru />
     )}
 
     {tab === 4 && (

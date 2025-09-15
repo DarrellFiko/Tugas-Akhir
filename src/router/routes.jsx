@@ -30,6 +30,7 @@ import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
 import DetailKelasGuruPage from "../pages/Guru/Kelas/DetailKelasGuruPage";
+import DetailModuleGuruPage from "../pages/Guru/Kelas/DetailModuleGuruPage";
 
 const loginRoutes = [
   {
@@ -95,6 +96,7 @@ const teacherRoutes = [
     items: [
       { path: "/profile", element: <ProfilePage /> },
       { path: "/kelas/detail/:id", element: <DetailKelasGuruPage /> },
+      { path: "/kelas/detail/:id/module/:modulId", element: <DetailModuleGuruPage /> },
       // { path: "*", element: <NotFoundPage /> },
     ],
   },

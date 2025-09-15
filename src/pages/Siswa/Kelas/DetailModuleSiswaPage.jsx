@@ -13,7 +13,7 @@ import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
 
-export default function DetailModulePage() {
+export default function DetailModuleSiswaPage() {
   const navigate = useNavigate();
   const theme = useTheme();
 
