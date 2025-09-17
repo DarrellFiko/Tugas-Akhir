@@ -91,9 +91,9 @@ export default function TabMateriGuru() {
 
   const handleCloseCreate = async () => {
     const { namaFile, pertemuan, deskripsi, file } = formData;
-    if (namaFile || pertemuan || deskripsi || file) {
+    if ((namaFile || pertemuan || deskripsi || file) && !isEdit) {
       const confirmClose = await PopupEdit.fire({
-        title: "Cancel Edit Data?",
+        title: "Cancel Create Data?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;

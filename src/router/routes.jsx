@@ -80,17 +80,18 @@ const teacherRoutes = [
     items: [
       { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Mengajar", icon: <CalendarMonthOutlinedIcon /> },
       { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
+      { path: "/ujian", element: <UjianSiswaPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
     ],
   },
-  {
-    section: "Template",
-    items: [
-      { path: "/sweet-alert", element: <SweetAlertPage />, label: "Popup & Toast", icon: <NotificationsOutlinedIcon /> },
-      { path: "/chart", element: <ChartPage />, label: "Charts", icon: <InsertChartOutlinedIcon /> },
-      { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
-      { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
-    ],
-  },
+  // {
+  //   section: "Template",
+  //   items: [
+  //     { path: "/sweet-alert", element: <SweetAlertPage />, label: "Popup & Toast", icon: <NotificationsOutlinedIcon /> },
+  //     { path: "/chart", element: <ChartPage />, label: "Charts", icon: <InsertChartOutlinedIcon /> },
+  //     { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
+  //     { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
+  //   ],
+  // },
   {
     section: "dont-show",
     items: [

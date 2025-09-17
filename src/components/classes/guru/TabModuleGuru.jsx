@@ -15,6 +15,7 @@ import {
 import TableTemplate from "../../tables/TableTemplate";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { useNavigate } from "react-router-dom";
+import { PopupEdit } from "../../../composables/sweetalert";
 
 export default function TabModuleGuru() {
   const navigate = useNavigate();
@@ -83,12 +84,13 @@ export default function TabModuleGuru() {
     setOpenDialog(false);
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     if (isDirty) {
-      const confirmExit = window.confirm(
-        "Perubahan belum disimpan, yakin batal?"
-      );
-      if (!confirmExit) return;
+      const confirmClose = await PopupEdit.fire({
+        title: "Cancel Create Data?",
+        text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
+      });
+      if (!confirmClose.isConfirmed) return;
     }
     setFormData(initialForm);
     setIsDirty(false);

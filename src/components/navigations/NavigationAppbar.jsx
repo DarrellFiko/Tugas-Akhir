@@ -43,7 +43,7 @@ export default function NavigationAppbar({ isMobile, handleSideBar, onToggleSide
               <MenuIcon />
             </IconButton>
           )}
-          <Typography variant="h6">Website</Typography>
+          <Typography variant="h6">E-Class</Typography>
         </Box>
 
         <Box sx={{ display: "flex", alignItems: "center" }}>

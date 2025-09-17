@@ -13,7 +13,8 @@ import {
   Pagination,
   Card,
   CardContent,
-  CircularProgress
+  CircularProgress,
+  Button
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -21,6 +22,9 @@ import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import SearchIcon from "@mui/icons-material/Search";
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import useIsMobile from "../../plugins/useIsMobile";
 
 export default function Pengumuman({
   title = "Pengumuman",
@@ -29,8 +33,15 @@ export default function Pengumuman({
   commentInputs,
   setCommentInputs,
   sendComment,
-  itemsPerPage = 10
+  itemsPerPage = 10,
+  isCreate = false,
+  isEdit = false,
+  isDelete = false,
+  onCreate = () => {},
+  onEdit = () => {},
+  onDelete = () => {}
 }) {
+  const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const commentRefs = useRef({});
@@ -64,11 +75,20 @@ export default function Pengumuman({
         <CardContent>
           <Grid container alignItems="center" justifyContent="space-between">
             <Grid>
-              <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
+              <Typography sx={{ fontSize: 18, fontWeight: 600, mb: isMobile ? 1 : 0 }}>
                 {title}
               </Typography>
             </Grid>
             <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              {isCreate && (
+                <Button
+                  variant="outlined"
+                  color="info"
+                  onClick={onCreate}
+                >
+                  Create
+                </Button>
+              )}
               <TextField
                 size="small"
                 variant="outlined"
@@ -128,17 +148,71 @@ export default function Pengumuman({
               </AccordionSummary>
 
               <AccordionDetails>
-                <Grid container sx={{ alignItems: "start" }}>
-                  <Grid item size={{ xs: 9 }}>
+                <Grid
+                  container
+                  sx={{
+                    alignItems: "flex-start",
+                    justifyContent: "space-between",
+                    flexDirection: { xs: "column-reverse", sm: "row" },  
+                  }}
+                >
+                  {/* Detail */}
+                  <Grid item size={{ xs: 12, sm: 10 }}>
                     <Typography variant="body2" color="text.secondary">
                       {item.detail}
                     </Typography>
                   </Grid>
-                  <Grid item size={{ xs: 3 }} sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+
+                  {/* Icon */}
+                  <Grid
+                    item
+                    size={{ xs: 12, sm: "auto" }}
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      mb: { xs: 2, sm: 0 },
+                    }}
+                  >
+                    {isEdit && (
+                      <Tooltip title="Edit File Pengumuman">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            backgroundColor: "warning.main",
+                            color: "white",
+                            "&:hover": { backgroundColor: "warning.main" },
+                          }}
+                          onClick={onEdit}
+                        >
+                          <EditOutlinedIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
+                    {isDelete && (
+                      <Tooltip title="Hapus File Pengumuman">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            backgroundColor: "error.main",
+                            color: "white",
+                            "&:hover": { backgroundColor: "error.main" },
+                          }}
+                          onClick={onDelete}
+                        >
+                          <DeleteOutlineIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+
                     <Tooltip title="Lihat File Pengumuman">
                       <IconButton
                         size="small"
-                        sx={{ backgroundColor: "primary.main", color: "white" }}
+                        sx={{
+                          backgroundColor: "primary.main",
+                          color: "white",
+                          "&:hover": { backgroundColor: "primary.main" },
+                        }}
                         onClick={() => console.log("View ID:", item.id)}
                       >
                         <VisibilityOutlinedIcon />
@@ -148,7 +222,11 @@ export default function Pengumuman({
                     <Tooltip title="Download File Pengumuman">
                       <IconButton
                         size="small"
-                        sx={{ backgroundColor: "primary.main", color: "white" }}
+                        sx={{
+                          backgroundColor: "primary.main",
+                          color: "white",
+                          "&:hover": { backgroundColor: "primary.main" },
+                        }}
                         onClick={() => console.log("Download ID:", item.id)}
                       >
                         <DownloadOutlinedIcon />

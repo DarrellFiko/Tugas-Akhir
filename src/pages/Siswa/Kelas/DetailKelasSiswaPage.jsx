@@ -16,7 +16,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TabMateriSiswa from "../../../components/classes/siswa/TabMateriSiswa";
 import TableTemplate from "../../../components/tables/TableTemplate";
 import { formatDate } from "../../../utils/utils";
-import TabPengumuman from "../../../components/classes/siswa/TabPengumuman";
+import TabPengumuman from "../../../components/classes/TabPengumuman";
 
 export default function DetailKelasSiswaPage() {
   const location = useLocation();

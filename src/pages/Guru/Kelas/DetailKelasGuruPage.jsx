@@ -13,7 +13,7 @@ import ArrowBackOutlinedIcon from '@mui/icons-material/ArrowBackOutlined';
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TableTemplate from "../../../components/tables/TableTemplate";
 import { formatDate } from "../../../utils/utils";
-import TabPengumuman from "../../../components/classes/siswa/TabPengumuman";
+import TabPengumuman from "../../../components/classes/TabPengumuman";
 import TabMateriGuru from "../../../components/classes/guru/TabMateriGuru";
 import TabModuleGuru from "../../../components/classes/guru/TabModuleGuru";
 
@@ -114,6 +114,7 @@ export default function DetailKelasGuruPage() {
       <Tab label="Daftar Siswa" />
       <Tab label="Presensi" />
       <Tab label="Module" />
+      <Tab label="Penilaian" />
       <Tab label={
         <Badge color="error" badgeContent={notifCount}>
           Pengumuman
@@ -121,8 +122,10 @@ export default function DetailKelasGuruPage() {
       } />
     </Tabs>
 
+    {/* Materi */}
     {tab === 0 && <TabMateriGuru />}
 
+    {/* Daftar Siswa */}
     {tab === 1 && (
       <TableTemplate
         key={"siswa"}
@@ -140,6 +143,7 @@ export default function DetailKelasGuruPage() {
       />
     )}
 
+    {/* Presensi */}
     {tab === 2 && (
       <TableTemplate
         key={"presensi"}
@@ -149,19 +153,22 @@ export default function DetailKelasGuruPage() {
         initialRowsPerPage={10}
         tableHeight={400}
         isCheckbox={false}
-        isUpdate={false}
         isDelete={false}
         isUpload={false}
-        isCreate={false}
         isDownload={false}
+        onCreate={() => {}}
       />
     )}
 
+    {/* Module */}
     {tab === 3 && (
       <TabModuleGuru />
     )}
 
-    {tab === 4 && (
+    {/* Penilaian */}
+    
+    {/* Pengumuman */}
+    {tab === 5 && (
       <TabPengumuman />
     )}
   </>
