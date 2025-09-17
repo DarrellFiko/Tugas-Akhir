@@ -153,10 +153,11 @@ export default function DetailKelasGuruPage() {
         initialRowsPerPage={10}
         tableHeight={400}
         isCheckbox={false}
-        isDelete={false}
         isUpload={false}
         isDownload={false}
         onCreate={() => {}}
+        onUpdate={() => {console.log("Update")}}
+        onDelete={() => {console.log("Delete")}}
       />
     )}
 

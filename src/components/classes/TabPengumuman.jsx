@@ -8,6 +8,7 @@ import {
   TextField,
   Button,
   FormHelperText,
+  Typography,
 } from "@mui/material";
 import { PopupEdit } from "../../composables/sweetalert";
 
@@ -16,6 +17,8 @@ export default function TabPengumuman() {
   const [pengumuman, setPengumuman] = useState([]);
   const [commentInputs, setCommentInputs] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editData, setEditData] = useState(null);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newFile, setNewFile] = useState(null);
@@ -32,24 +35,23 @@ export default function TabPengumuman() {
   useEffect(() => {
     setLoading(true);
     const data = [];
-    for (let i = 1; i <= 95; i++) {
+    for (let i = 1; i <= 10; i++) {
       const hasComments = Math.random() > 0.5;
-
       const comments = hasComments
-        ? Array.from({ length: 12 }, (_, idx) => ({
+        ? Array.from({ length: 15 }, (_, idx) => ({
             from: idx % 2 === 0 ? "Fiko" : "No Name",
             text: `Komentar ${String.fromCharCode(
               65 + idx
-            )} untuk pengumuman aaaaaaaaaaaaaaaa aaaaaaaaaaaaaa aaaaaaaaaaa aaa aaa ${i}`,
+            )} untuk pengumuman ${i}`,
           }))
         : [];
 
       data.push({
         id: i,
         title: `Pengumuman ${i}`,
-        detail: `Ini detail pengumuman yang ke-${i}`,
+        description: `Ini description pengumuman yang ke-${i}`,
         comments,
-        file: Math.random() > 0.5,
+        file: `file-${i}.pdf`,
         from: "admin",
       });
     }
@@ -76,13 +78,47 @@ export default function TabPengumuman() {
     const newData = {
       id: pengumuman.length + 1,
       title: newTitle,
-      detail: newDesc,
+      description: newDesc,
       comments: [],
       file: newFile.name,
       from: "teacher",
     };
 
+    console.log("Create Data:", newData);   // <<=== log data
+
     setPengumuman([newData, ...pengumuman]);
+    resetForm();
+    setOpenDialog(false);
+  };
+
+  const handleUpdate = () => {
+    let hasError = false;
+    const newErrors = { title: false, file: false };
+
+    if (!newTitle.trim()) {
+      newErrors.title = true;
+      hasError = true;
+    }
+    if (!newFile && !editData?.file) {
+      newErrors.file = true;
+      hasError = true;
+    }
+
+    setErrors(newErrors);
+    if (hasError) return;
+
+    const updatedData = pengumuman.map((item) =>
+      item.id === editData.id
+        ? {
+            ...item,
+            title: newTitle,
+            description: newDesc,
+            file: newFile ? newFile.name : editData.file,
+          }
+        : item
+    );
+
+    setPengumuman(updatedData);
     resetForm();
     setOpenDialog(false);
   };
@@ -92,18 +128,35 @@ export default function TabPengumuman() {
     setNewDesc("");
     setNewFile(null);
     setErrors({ title: false, file: false });
+    setEditMode(false);
+    setEditData(null);
   };
 
   const handleCancel = async () => {
-    if (newTitle || newDesc || newFile) {
+    if ((newTitle || newDesc || newFile) && !editMode) {
       const confirmClose = await PopupEdit.fire({
-        title: "Cancel Create Data?",
+        title: "Cancel Create?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;
     }
     resetForm();
     setOpenDialog(false);
+  };
+
+  const openCreateDialog = () => {
+    resetForm();
+    setEditMode(false);
+    setOpenDialog(true);
+  };
+
+  const openUpdateDialog = (data) => {
+    setEditMode(true);
+    setEditData(data);
+    setNewTitle(data.title || "");
+    setNewDesc(data.description || "");
+    setNewFile(null);
+    setOpenDialog(true);
   };
 
   return (
@@ -116,16 +169,18 @@ export default function TabPengumuman() {
         sendComment={sendComment}
         itemsPerPage={10}
         isCreate={role == "teacher"}
-        isEdit={role == "teacher"}
+        isUpdate={role == "teacher"}
         isDelete={role == "teacher"}
-        onCreate={role == "teacher" ? () => setOpenDialog(true) : () => {}}
-        onEdit={role == "teacher" ? () => setOpenDialog(true) : () => {}}
-        onDelete={role == "teacher" ? () => setOpenDialog(true) : () => {}}
+        onCreate={role == "teacher" ? openCreateDialog : () => {}}
+        onUpdate={role == "teacher" ? (item) => openUpdateDialog(item) : () => {}}
+        onDelete={role == "teacher" ? (id) => console.log("Delete ID:", id) : () => {}}
       />
 
-      {/* Dialog Create Pengumuman */}
+
       <Dialog open={openDialog} onClose={handleCancel} fullWidth>
-        <DialogTitle>Buat Pengumuman Baru</DialogTitle>
+        <DialogTitle>
+          {editMode ? "Update Pengumuman" : "Buat Pengumuman Baru"}
+        </DialogTitle>
         <DialogContent dividers>
           <TextField
             label="Judul"
@@ -147,6 +202,18 @@ export default function TabPengumuman() {
             onChange={(e) => setNewDesc(e.target.value)}
           />
           <div style={{ marginTop: "16px" }}>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Upload File
+            </Typography>
+            {editMode && editData?.file && !newFile && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mb: 1 }}
+              >
+                File sudah ada: {editData.file || "File lama"}
+              </Typography>
+            )}
             <input
               type="file"
               onChange={(e) => setNewFile(e.target.files[0])}
@@ -158,8 +225,11 @@ export default function TabPengumuman() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleCreate} variant="contained">
-            Simpan
+          <Button
+            onClick={editMode ? handleUpdate : handleCreate}
+            variant="contained"
+          >
+            {editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>
       </Dialog>

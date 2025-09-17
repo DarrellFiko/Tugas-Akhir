@@ -28,7 +28,7 @@ export default function HomePage() {
       data.push({
         id: i,
         title: `Pengumuman ${i}`,
-        detail: `Ini detail pengumuman yang ke-${i}`,
+        description: `Ini detail pengumuman yang ke-${i}`,
         comments,
         file: Math.random() > 0.5,
         from: "admin",

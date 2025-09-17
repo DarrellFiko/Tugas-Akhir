@@ -35,10 +35,10 @@ export default function Pengumuman({
   sendComment,
   itemsPerPage = 10,
   isCreate = false,
-  isEdit = false,
+  isUpdate = false,
   isDelete = false,
   onCreate = () => {},
-  onEdit = () => {},
+  onUpdate = () => {},
   onDelete = () => {}
 }) {
   const isMobile = useIsMobile();
@@ -157,9 +157,9 @@ export default function Pengumuman({
                   }}
                 >
                   {/* Detail */}
-                  <Grid item size={{ xs: 12, sm: 10 }}>
+                  <Grid item size={{ xs: 12, sm: 9 }}>
                     <Typography variant="body2" color="text.secondary">
-                      {item.detail}
+                      {item.description}
                     </Typography>
                   </Grid>
 
@@ -173,7 +173,7 @@ export default function Pengumuman({
                       mb: { xs: 2, sm: 0 },
                     }}
                   >
-                    {isEdit && (
+                    {isUpdate && (
                       <Tooltip title="Edit File Pengumuman">
                         <IconButton
                           size="small"
@@ -182,7 +182,7 @@ export default function Pengumuman({
                             color: "white",
                             "&:hover": { backgroundColor: "warning.main" },
                           }}
-                          onClick={onEdit}
+                          onClick={() => onUpdate(item)}
                         >
                           <EditOutlinedIcon />
                         </IconButton>
@@ -198,12 +198,13 @@ export default function Pengumuman({
                             color: "white",
                             "&:hover": { backgroundColor: "error.main" },
                           }}
-                          onClick={onDelete}
+                          onClick={() => onDelete(item.id)}
                         >
                           <DeleteOutlineIcon />
                         </IconButton>
                       </Tooltip>
                     )}
+
 
                     <Tooltip title="Lihat File Pengumuman">
                       <IconButton
