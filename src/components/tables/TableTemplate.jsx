@@ -534,7 +534,7 @@ export default function TableTemplate({
                               <IconButton
                                 color="warning"
                                 size="small"
-                                onClick={() => onUpdate && onUpdate(row.id)}
+                                onClick={() => onUpdate && onUpdate(row)}
                               >
                                 <EditOutlinedIcon />
                               </IconButton>

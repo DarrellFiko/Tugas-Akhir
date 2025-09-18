@@ -9,41 +9,86 @@ export const formatDate = (date, format = "dddd, DD MMMM YYYY", language = "id")
   return moment(dt).locale(language, true).format(format);
 };
 
-// Upload Excel file and validate headers
-export const handleUploadFile = async (file, headers, onSuccess, onError) => {
-  try {
-    let itemsData = [];
-    let headersData = [];
+// Fungsi parsing file Excel/CSV → columns & rows
+export const handleUploadFile = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-    const datas = await readXlsFile(file);
-    headersData = datas[0];
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
 
-    itemsData = datas.slice(1).map((row) => {
-      const obj = {};
-      datas[0].forEach((key, i) => {
-        obj[key] = row[i];
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+      if (!jsonData || jsonData.length === 0) {
+        reject(new Error("File kosong atau format salah"));
+        return;
+      }
+
+      // ambil header dari object keys
+      const headers = Object.keys(jsonData[0]);
+
+      // buat columns
+      const columns = headers.map((header) => ({
+        field: header.toLowerCase().replace(/\s+/g, "_"), // field normalisasi
+        label: header,
+        width: "150px",
+      }));
+
+      // buat rows
+      const rows = jsonData.map((row, index) => {
+        const newRow = { id: index + 1 };
+        headers.forEach((h) => {
+          newRow[h.toLowerCase().replace(/\s+/g, "_")] = row[h];
+        });
+        return newRow;
       });
-      return obj;
-    });
 
-    const headersValue = headers.map((header) => header.value);
-    const headersEqual =
-      headersData.length === headersValue.length &&
-      headersData
-        .slice()
-        .sort()
-        .every((v, i) => v === headersValue.slice().sort()[i]);
+      resolve({ columns, rows });
+    };
 
-    if (headersEqual) {
-      onSuccess && onSuccess(itemsData);
-    } else {
-      onError &&
-        onError("Headers are not equal! Please check your file before upload.");
-    }
-  } catch (err) {
-    onError && onError("Failed to read the file.");
-  }
+    reader.onerror = (err) => reject(err);
+    reader.readAsArrayBuffer(file);
+  });
 };
+
+// // Upload Excel file and validate headers
+// export const handleUploadFile = async (file, headers, onSuccess, onError) => {
+//   try {
+//     let itemsData = [];
+//     let headersData = [];
+
+//     const datas = await readXlsFile(file);
+//     headersData = datas[0];
+
+//     itemsData = datas.slice(1).map((row) => {
+//       const obj = {};
+//       datas[0].forEach((key, i) => {
+//         obj[key] = row[i];
+//       });
+//       return obj;
+//     });
+
+//     const headersValue = headers.map((header) => header.value);
+//     const headersEqual =
+//       headersData.length === headersValue.length &&
+//       headersData
+//         .slice()
+//         .sort()
+//         .every((v, i) => v === headersValue.slice().sort()[i]);
+
+//     if (headersEqual) {
+//       onSuccess && onSuccess(itemsData);
+//     } else {
+//       onError &&
+//         onError("Headers are not equal! Please check your file before upload.");
+//     }
+//   } catch (err) {
+//     onError && onError("Failed to read the file.");
+//   }
+// };
 
 // Download data as Excel
 export const handleDownloadFile = (items, fileName = "download") => {

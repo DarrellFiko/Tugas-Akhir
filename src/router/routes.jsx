@@ -31,6 +31,7 @@ import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
 import DetailKelasGuruPage from "../pages/Guru/Kelas/DetailKelasGuruPage";
 import DetailModuleGuruPage from "../pages/Guru/Kelas/DetailModuleGuruPage";
+import DetailPresensiGuruPage from "../pages/Guru/Kelas/DetailPresensiGuruPage";
 
 const loginRoutes = [
   {
@@ -98,6 +99,7 @@ const teacherRoutes = [
       { path: "/profile", element: <ProfilePage /> },
       { path: "/kelas/detail/:id", element: <DetailKelasGuruPage /> },
       { path: "/kelas/detail/:id/module/:modulId", element: <DetailModuleGuruPage /> },
+      { path: "/kelas/detail/:id/presensi/:presensiId", element: <DetailPresensiGuruPage /> },
       // { path: "*", element: <NotFoundPage /> },
     ],
   },

@@ -14,12 +14,13 @@ import {
 } from "@mui/material";
 import TableTemplate from "../../tables/TableTemplate";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PopupEdit } from "../../../composables/sweetalert";
 
 export default function TabModuleGuru() {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { id } = useParams();
 
   const initialForm = {
     namaModule: "",
@@ -116,7 +117,7 @@ export default function TabModuleGuru() {
       align: "center",
       render: (value, row) => (
         <IconButton
-          onClick={() => navigate(`/kelas/detail/${row.id}/module/${row.id}`)}
+          onClick={() => navigate(`/kelas/detail/${id}/module/${row.id}`)}
         >
           <InfoOutlinedIcon color="primary" />
         </IconButton>
