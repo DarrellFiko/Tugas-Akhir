@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -15,32 +15,34 @@ import {
 import { PopupEdit, ToastSuccess } from "../../composables/sweetalert";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
+// Import service
+import { getProfile } from "../../services/authService.js";
+
 export default function ProfilePage() {
   const [editMode, setEditMode] = useState(false);
   const [avatar, setAvatar] = useState("/broken-image.jpg");
   const [openPreview, setOpenPreview] = useState(false);
+  const [profile, setProfile] = useState(null); // start as null
 
-  const [profile, setProfile] = useState({
-    name: "DARRELL FIKO ALEXANDER",
-    nim: "221116947",
-    jurusan: "S1-INFORMATIKA",
-    totalSKS: 138,
-    ipk: 3.73,
-    alamat: "PONDOK MASPION C-15 RT.003 RW.007 KEL.PEPELEGI KEC.WARU",
-    email: "darrellfiko2003@gmail.com",
-    emailIsts: "darrell.f21@mhs.istts.ac.id",
-    telepon: "081392261419",
-    tglLahir: "SIDOARJO, 04 Juli 2003",
-    agama: "KATHOLIK",
-    gender: "Laki-laki",
-    statusNikah: "Belum Menikah",
-    ortuNama: "ONGKO WARSITO",
-    ortuAlamat: "SIDOARJO",
-    ortuTelepon: "087770008975",
-    dosenWali: "Yuliana Melita Pranoto, S.Kom. M.Kom.",
-    major: "-",
-    status: "Aktif",
-  });
+  // Fetch profile data
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getProfile();
+        const user = res.user;
+
+        // Mapping status & gender
+        user.statusText = user.status === 1 ? "Aktif" : "Non-Aktif";
+        user.genderText = user.gender === 0 ? "Laki-laki" : "Perempuan";
+
+        setProfile(user);
+        if (user.profile_picture) setAvatar(user.profile_picture);
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+    };
+    fetchProfile();
+  }, []);
 
   const handleChange = (field, value) => {
     setProfile({ ...profile, [field]: value });
@@ -57,7 +59,6 @@ export default function ProfilePage() {
     setEditMode(!editMode);
   };
 
-  // Upload handler
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -66,49 +67,54 @@ export default function ProfilePage() {
     }
   };
 
-  const renderField = (label, field, readonly = false) => (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row" },
-        justifyContent: { xs: "flex-start", sm: "space-between" },
-        alignItems: { xs: "flex-start", sm: "start" },
-        mb: 1.5,
-      }}
-    >
-      <Typography
-        variant="body2"
-        fontWeight="bold"
-        sx={{ pr: { sm: 2 }, minWidth: { sm: "120px" } }}
+  const renderField = (label, field, disabled = true) => {
+    if (!profile) return null;
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          justifyContent: { xs: "flex-start", sm: "space-between" },
+          alignItems: { xs: "flex-start", sm: "start" },
+          mb: 1.5,
+        }}
       >
-        {label}
-      </Typography>
-      {editMode ? (
-        <TextField
-          size="small"
-          fullWidth
-          value={profile[field]}
-          onChange={(e) => handleChange(field, e.target.value)}
-          sx={{ mt: { xs: 0.5, sm: 0 }, flex: 1 }}
-          InputProps={{
-            readOnly: readonly,
-          }}
-        />
-      ) : (
         <Typography
           variant="body2"
-          sx={{
-            mt: { xs: 0.5, sm: 0 },
-            flex: 1,
-            textAlign: { xs: "left", sm: "right" },
-            wordBreak: "break-word",
-          }}
+          fontWeight="bold"
+          sx={{ pr: { sm: 2 }, minWidth: { sm: "140px" } }}
         >
-          {profile[field]}
+          {label}
         </Typography>
-      )}
-    </Box>
-  );
+        {editMode ? (
+          <TextField
+            size="small"
+            fullWidth
+            value={profile[field] || ""}
+            onChange={(e) => handleChange(field, e.target.value)}
+            sx={{ mt: { xs: 0.5, sm: 0 }, flex: 1 }}
+            InputProps={{
+              disabled: disabled,
+            }}
+          />
+        ) : (
+          <Typography
+            variant="body2"
+            sx={{
+              mt: { xs: 0.5, sm: 0 },
+              flex: 1,
+              textAlign: { xs: "left", sm: "right" },
+              wordBreak: "break-word",
+            }}
+          >
+            {profile[field]}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
+  if (!profile) return <Typography>Loading profile...</Typography>;
 
   return (
     <Box sx={{ p: { xs: 1.5, md: 2 } }}>
@@ -126,7 +132,7 @@ export default function ProfilePage() {
           <Avatar
             src={avatar}
             sx={{ width: 100, height: 100, mx: "auto", mb: 2, cursor: "pointer" }}
-            onClick={() => !editMode && setOpenPreview(true)} // only open preview when not edit
+            onClick={() => !editMode && setOpenPreview(true)}
           />
           {editMode && (
             <>
@@ -156,21 +162,8 @@ export default function ProfilePage() {
           )}
         </Box>
 
-        <Typography variant="h6">{profile.name}</Typography>
-        <Typography variant="body2">{profile.nim}</Typography>
-        <Grid container size={{ xs: 12 }} justifyContent="center" sx={{ mt: 1 }}>
-          <Grid item size={{ xs: "auto" }}>
-            <Typography variant="body2">{profile.jurusan}</Typography>
-          </Grid>
-          <Grid item size={{ xs: "auto" }} sx={{ px: 2 }}>
-            <Typography variant="body2">
-              Total SKS: {profile.totalSKS}
-            </Typography>
-          </Grid>
-          <Grid item size={{ xs: "auto" }}>
-            <Typography variant="body2">IPK: {profile.ipk}</Typography>
-          </Grid>
-        </Grid>
+        <Typography variant="h6">{profile.nama}</Typography>
+        <Typography variant="body2">{profile.nis || profile.username}</Typography>
         <Button
           variant="contained"
           color={editMode ? "success" : "warning"}
@@ -197,38 +190,40 @@ export default function ProfilePage() {
               Biodata
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            {renderField("Alamat", "alamat")}
+            {renderField("Username", "username")}
+            {renderField("Nama", "nama")}
             {renderField("Email", "email")}
-            {renderField("Email ISTTS", "emailIsts")}
-            {renderField("Telepon/HP", "telepon")}
-            {renderField("Tanggal lahir", "tglLahir")}
+            {renderField("Alamat", "alamat")}
+            {renderField("Tanggal Lahir", "tgl_lahir")}
+            {renderField("Tempat Lahir", "tempat_lahir")}
             {renderField("Agama", "agama")}
-            {renderField("Jenis kelamin", "gender")}
-            {renderField("Status nikah", "statusNikah")}
+            {renderField("Telepon/HP", "telp")}
+            {renderField("Jenis Kelamin", "genderText")}
           </Paper>
         </Grid>
 
-        {/* Orang Tua + Status Akademis */}
+        {/* Orang Tua + Akademis */}
         <Grid item size={{ xs: 12, md: 6 }}>
           <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
             <Paper sx={{ p: 2, mb: 2 }}>
               <Typography variant="h6" gutterBottom>
-                Orang tua
+                Orang Tua
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              {renderField("Nama", "ortuNama", true)}
-              {renderField("Alamat", "ortuAlamat", true)}
-              {renderField("Telepon/HP", "ortuTelepon", true)}
+              {renderField("Nama Ayah     ", "nama_ayah")}
+              {renderField("Nama Ibu      ", "nama_ibu")}
+              {renderField("HP Orang Tua", "telp_ortu")}
             </Paper>
 
             <Paper sx={{ p: 2, flexGrow: 1 }}>
               <Typography variant="h6" gutterBottom>
-                Status akademis
+                Akademis
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              {renderField("Dosen wali", "dosenWali")}
-              {renderField("Major", "major")}
-              {renderField("Status", "status")}
+              {renderField("NIS", "nis")}
+              {renderField("NISN", "nisn")}
+              {renderField("Role", "role")}
+              {renderField("Status", "statusText")}
             </Paper>
           </Box>
         </Grid>

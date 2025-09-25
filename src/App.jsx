@@ -27,6 +27,9 @@ import NavigationSidebar from "./components/navigations/NavigationSidebar";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import LoginPage from "./pages/General/LoginPage.jsx";
 
+// Import Services
+import * as userService from "./services/authService.js"; 
+
 function AppContent({
   isDark,
   setIsDark,
@@ -36,6 +39,10 @@ function AppContent({
   onLogin,
   onLogout,
 }) {
+  
+  const nama = localStorage.getItem("authUser");
+  const profilePicture = localStorage.getItem("profilePicture");
+
   const isMobile = useIsMobile();
   const location = useLocation();
 
@@ -86,7 +93,8 @@ function AppContent({
         isSidebar={isSidebar}
         handleSidebar={setIsSidebar}
         routes={routes}
-        name="Darrell Fiko"
+        nama={nama}
+        profilePicture={profilePicture}
       />
 
       <Box
@@ -140,24 +148,35 @@ export default function App() {
   const routes = getRoutes(role);
 
   // handler login
-  const handleLogin = (data) => {
-    localStorage.setItem("authToken", "dummy-token");
-    localStorage.setItem("authUser", data.username);
-    console.log(data.username)
-    if(data.username == "siswa") {
-      localStorage.setItem("role", "student");
-      setRole("student");
-    } else if(data.username == "guru") {
-      localStorage.setItem("role", "teacher");
-      setRole("teacher");
+  const handleLogin = async (data) => {
+    try {
+      const response = await userService.login({
+        username: data.username,
+        password: data.password,
+      });
+
+      const token = response.token;
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("authUser", response.nama);
+      localStorage.setItem("profilePicture", response.profile_picture);
+      localStorage.setItem("role", response.role);
+
+      let userRole = response.role; 
+      setRole(userRole);
+    } catch (err) {
+      console.error("Login failed:", err);
+      // Optionally show a popup error
     }
   };
 
   // handler logout
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await userService.logout()
+       
     localStorage.removeItem("authToken");
     localStorage.removeItem("authUser");
     localStorage.removeItem("role");
+    localStorage.removeItem("profilePicture");
     setRole(null);
   };
 

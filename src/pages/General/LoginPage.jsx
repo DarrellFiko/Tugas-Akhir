@@ -37,8 +37,8 @@ export default function LoginPage({ onLogin }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      username: "siswa",
-      password: "password",
+      username: "siswa01",
+      password: "123",
     },
   });
 
@@ -152,10 +152,10 @@ export default function LoginPage({ onLogin }) {
                     placeholder="Password"
                     {...register("password", {
                       required: "Password is required",
-                      minLength: {
-                        value: 6,
-                        message: "Password must be at least 6 characters",
-                      },
+                      // minLength: {
+                      //   value: 6,
+                      //   message: "Password must be at least 6 characters",
+                      // },
                     })}
                     error={!!errors.password}
                     helperText={errors.password?.message}

@@ -1,16 +1,16 @@
-// Base endpoints
+// src/services/endpoints.js
 export const ENDPOINTS = {
-  BARANG: {
-    GET_ALL: "/barang",
-    LOAD: "/loadBarang",
-    CREATE: "/barang",
-    DELETE: (id) => `/barang/${id}`,
-  },
-
   USER: {
-    LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
-    PROFILE: "/user/profile",
+    LOGIN: "/users/login",
+    LOGOUT: "/users/logout",
+    REGISTER: "/users/register",
+    BULK_REGISTER: "/users/bulk-register",
+    GET_ALL: "/users",
+    GET_BY_ID: (id) => `/users/${id}`,
+    GET_PROFILE: "/users/profile",
+    UPDATE: (id) => `/users/${id}`,
+    REQUEST_OTP: "/users/request-otp",
+    RESET_PASSWORD: "/users/reset-password",
   },
 
   // Example
@@ -19,5 +19,11 @@ export const ENDPOINTS = {
     CREATE: "/orders",
     DELETE: (id) => `/orders/${id}`,
   },
+
+  BARANG: {
+    GET_ALL: "/barang",
+    LOAD: "/loadBarang",
+    CREATE: "/barang",
+    DELETE: (id) => `/barang/${id}`,
+  },
 };
-  

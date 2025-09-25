@@ -68,7 +68,8 @@ export default function NavigationSidebar({
   isSidebar = false,
   handleSidebar,
   routes = [],
-  name = ""
+  nama = "",
+  profilePicture = ""
 }) {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -145,7 +146,7 @@ export default function NavigationSidebar({
       <Paper sx={{ position: 'sticky', top: 0, zIndex: 1, bgcolor: theme.palette.background.paper, borderRadius: 0 }}>
         <DrawerHeader sx={{ justifyContent: isMobile ? "center" : "start", pl: isMobile ? 1.5 : 2, borderBottom: theme => `1px solid ${theme.palette.divider}` }}>
           <Avatar 
-            src="/broken-image.jpg" 
+            src={ profilePicture || "/broken-image.jpg" }
             sx={{ width: 35, height: 35, bgcolor: "primary.main", cursor: "pointer" }} 
             onClick={() => {
               navigate("/profile");
@@ -160,7 +161,7 @@ export default function NavigationSidebar({
                   navigate("/profile");
                 }}  
               >
-                {name}
+                {nama}
               </Box>
               <IconButton size="small" onClick={handlePinSidebar} sx={{ color: theme.palette.text.primary }}>
                 <PushPinOutlinedIcon

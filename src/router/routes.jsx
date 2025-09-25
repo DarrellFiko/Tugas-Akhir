@@ -14,6 +14,15 @@ import BackendPage from "../pages/BackendPage";
 // Siswa
 import NilaiSiswaPage from "../pages/Siswa/NilaiSiswaPage";
 import UjianSiswaPage from "../pages/Siswa/Ujian/UjianSiswaPage";
+import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
+import DetailKelasSiswaPage from "../pages/Siswa/Kelas/DetailKelasSiswaPage";
+
+// Guru
+import DetailKelasGuruPage from "../pages/Guru/Kelas/DetailKelasGuruPage";
+import DetailModuleGuruPage from "../pages/Guru/Kelas/DetailModuleGuruPage";
+import DetailPresensiGuruPage from "../pages/Guru/Kelas/DetailPresensiGuruPage";
+import UjianGuruPage from "../pages/Guru/Ujian/UjianGuruPage";
+import DetailUjianGuruPage from "../pages/Guru/Ujian/DetailUjianGuruPage";
 
 // Icon import
 import AnnouncementOutlinedIcon from '@mui/icons-material/AnnouncementOutlined';
@@ -23,15 +32,10 @@ import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
-import DetailKelasSiswaPage from "../pages/Siswa/Kelas/DetailKelasSiswaPage";
-
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
-import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
-import DetailKelasGuruPage from "../pages/Guru/Kelas/DetailKelasGuruPage";
-import DetailModuleGuruPage from "../pages/Guru/Kelas/DetailModuleGuruPage";
-import DetailPresensiGuruPage from "../pages/Guru/Kelas/DetailPresensiGuruPage";
+import FormUjianGuruPage from "../pages/Guru/Ujian/FormUjianGuruPage";
 
 const loginRoutes = [
   {
@@ -81,7 +85,7 @@ const teacherRoutes = [
     items: [
       { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Mengajar", icon: <CalendarMonthOutlinedIcon /> },
       { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
-      { path: "/ujian", element: <UjianSiswaPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
+      { path: "/ujian", element: <UjianGuruPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
     ],
   },
   // {
@@ -100,6 +104,8 @@ const teacherRoutes = [
       { path: "/kelas/detail/:id", element: <DetailKelasGuruPage /> },
       { path: "/kelas/detail/:id/module/:modulId", element: <DetailModuleGuruPage /> },
       { path: "/kelas/detail/:id/presensi/:presensiId", element: <DetailPresensiGuruPage /> },
+      { path: "/ujian/detail/:id", element: <DetailUjianGuruPage /> },
+      { path: "/ujian/detail/:id/create", element: <FormUjianGuruPage /> },
       // { path: "*", element: <NotFoundPage /> },
     ],
   },
@@ -107,10 +113,12 @@ const teacherRoutes = [
 
 // Function to get routes by role
 export function getRoutes(role) {
-  switch (role) {
-    case "student":
+  if (!role) return [...loginRoutes]; // handle undefined/null role
+
+  switch (role.toLowerCase()) {
+    case "siswa":
       return [...studentRoutes];
-    case "teacher":
+    case "guru":
       return [...teacherRoutes];
     default:
       return [...loginRoutes];

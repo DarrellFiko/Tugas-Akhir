@@ -7,6 +7,18 @@ const getAPI = axios.create({
   timeout: 600000,
 });
 
+// Add request interceptor to automatically attach token if exists
+getAPI.interceptors.request.use(
+  (config) => {
+    const authToken = localStorage.getItem("authToken"); // get token from localStorage
+    if (authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Add response interceptor
 getAPI.interceptors.response.use(
   (response) => response, // success just return
@@ -16,13 +28,8 @@ getAPI.interceptors.response.use(
 
       if (status === 401) {
         // Unauthorized -> force logout
-        localStorage.removeItem("token");
+        localStorage.removeItem("authToken");
         window.location.href = "/login"; // redirect to login
-      } else if (status === 404) {
-        PopupError.fire({
-          title: "Not Found",
-          html: "The requested resource could not be found.",
-        });
       } else if (status === 500) {
         PopupError.fire({
           title: "Server Error",
