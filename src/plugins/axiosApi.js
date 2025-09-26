@@ -29,6 +29,9 @@ getAPI.interceptors.response.use(
       if (status === 401) {
         // Unauthorized -> force logout
         localStorage.removeItem("authToken");
+        localStorage.removeItem("authUser");
+        localStorage.removeItem("role");
+        localStorage.removeItem("profilePicture");
         window.location.href = "/login"; // redirect to login
       } else if (status === 500) {
         PopupError.fire({

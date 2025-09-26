@@ -183,7 +183,7 @@ export default function NavigationSidebar({
                 if (isMobile) handleSidebar(false);
               }}  
             >
-              {name}
+              {nama}
             </Box>
           )}
         </DrawerHeader>
