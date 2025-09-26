@@ -273,11 +273,11 @@ export default function ProfilePage() {
             color={editMode ? "success" : "warning"}
             onClick={handleToggleEdit}
           >
-            {editMode ? "Save" : "Edit"}
+            {editMode ? "Save Profile" : "Edit Profile"}
           </Button>
           <Button
             variant="contained"
-            color="success"
+            color="warning"
             onClick={() => {
               setStepPassword(1);
               setOpenPasswordDialog(true);
