@@ -66,3 +66,14 @@ export const resetPassword = async (body) => {
   const res = await getAPI.post(ENDPOINTS.USER.RESET_PASSWORD, body);
   return res.data;
 };
+
+export const requestOtpForgotPassword = async (body) => {
+  const res = await getAPI.post(ENDPOINTS.USER.REQUEST_OTP_FORGOT_PASSWORD, body);
+  return res.data;
+};
+
+// Change password dengan username/email + otp_code
+export const changePasswordWithOtp = async (body) => {
+  const res = await getAPI.post(ENDPOINTS.USER.CHANGE_PASSWORD, body);
+  return res.data;
+};

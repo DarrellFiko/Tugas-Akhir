@@ -11,6 +11,8 @@ export const ENDPOINTS = {
     UPDATE: (id) => `/users/${id}`,
     REQUEST_OTP: "/users/request-otp",
     RESET_PASSWORD: "/users/reset-password",
+    REQUEST_OTP_FORGOT_PASSWORD: "/users/forgot-password/request-otp",
+    CHANGE_PASSWORD: "/users/forgot-password/change",
   },
 
   // Example

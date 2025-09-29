@@ -306,7 +306,11 @@ export default function ProfilePage() {
       {/* Change Password Dialog */}
       <Dialog
         open={openPasswordDialog}
-        onClose={handleClosePasswordDialog}
+        onClose={(e, reason) => {
+          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+            handleClosePasswordDialog();
+          }
+        }}
         fullWidth
         maxWidth="sm"
       >

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+// src/pages/auth/LoginPage.jsx
+import { useEffect, useState, useRef } from "react";
 import {
   Box,
   Grid,
@@ -9,6 +10,10 @@ import {
   IconButton,
   InputAdornment,
   Link,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,13 +21,19 @@ import {
   VisibilityOff,
   LockOutlined,
 } from "@mui/icons-material";
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 
 import logoCarolus from "../../assets/images/logoCarolus.png";
 import logoTarakanita from "../../assets/images/logoTarakanita.png";
 import bgLogin from "../../assets/images/bgLogin.jpeg";
+
+import {
+  requestOtpForgotPassword,
+  changePasswordWithOtp,
+} from "../../services/authService";
+import { ToastError, ToastSuccess } from "../../composables/sweetalert";
 
 export default function LoginPage({ onLogin }) {
   const navigate = useNavigate();
@@ -42,10 +53,67 @@ export default function LoginPage({ onLogin }) {
     },
   });
 
+  // Forgot Password states
+  const [openForgotDialog, setOpenForgotDialog] = useState(false);
+  const [fpUsername, setFpUsername] = useState("");
+  const [fpOtp, setFpOtp] = useState(Array(6).fill(""));
+  const [fpStep, setFpStep] = useState(1); // 1 = username/email, 2 = OTP
+  const [loading, setLoading] = useState(false);
+  const fpOtpRefs = useRef([]);
+
   // Methods
   const onSubmit = (data) => {
     if (data.username && data.password) {
       onLogin(data);
+    }
+  };
+
+  const handleCloseForgotDialog = () => {
+    setOpenForgotDialog(false);
+    setFpUsername("");
+    setFpOtp(Array(6).fill(""));
+    setFpStep(1);
+    setLoading(false);
+  };
+
+  const handleRequestFpOtp = async () => {
+    if (!fpUsername) {
+      ToastError.fire({ title: "Username atau email harus diisi!" });
+      return;
+    }
+    try {
+      setLoading(true);
+      await requestOtpForgotPassword({ username: fpUsername });
+      ToastSuccess.fire({ title: "OTP dikirim ke email Anda!" });
+      setFpStep(2);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendFpOtp = async () => {
+    if (fpOtp.some((d) => d === "")) {
+      ToastError.fire({ title: "OTP harus 6 digit!" });
+      return;
+    }
+    try {
+      setLoading(true);
+      const body = {
+        username: fpUsername,
+        otp_code: fpOtp.join(""),
+      };
+      await changePasswordWithOtp(body);
+      ToastSuccess.fire({
+        title:
+          "Password baru sudah dikirim ke email Anda. Silakan login kembali.",
+      });
+      handleCloseForgotDialog();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -79,7 +147,7 @@ export default function LoginPage({ onLogin }) {
       >
         <Grid container justifyContent="center" gap={3}>
           {/* Left side (Form) */}
-          <Grid  xs={12} md={6} sx={{ my: 3 }}>
+          <Grid xs={12} md={6} sx={{ my: 3 }}>
             <motion.div
               initial={{ opacity: 0, x: -80 }}
               animate={{ opacity: 1, x: 0 }}
@@ -107,7 +175,6 @@ export default function LoginPage({ onLogin }) {
                   Enter your username and password to login
                 </Typography>
 
-                {/* Form start */}
                 <form onSubmit={handleSubmit(onSubmit)}>
                   {/* Username */}
                   <Typography variant="subtitle2" color="text.secondary">
@@ -152,10 +219,6 @@ export default function LoginPage({ onLogin }) {
                     placeholder="Password"
                     {...register("password", {
                       required: "Password is required",
-                      // minLength: {
-                      //   value: 6,
-                      //   message: "Password must be at least 6 characters",
-                      // },
                     })}
                     error={!!errors.password}
                     helperText={errors.password?.message}
@@ -175,16 +238,7 @@ export default function LoginPage({ onLogin }) {
                           </IconButton>
                         </InputAdornment>
                       ),
-                      inputProps: {
-                        autoComplete: "new-password",
-                      },
-                    }}
-                    sx={{
-                      "& input[type=password]::-ms-reveal": { display: "none" },
-                      "& input[type=password]::-ms-clear": { display: "none" },
-                      "& input[type=password]::-webkit-credentials-auto-fill-button": {
-                        display: "none",
-                      },
+                      inputProps: { autoComplete: "new-password" },
                     }}
                   />
 
@@ -195,6 +249,10 @@ export default function LoginPage({ onLogin }) {
                       underline="hover"
                       variant="caption"
                       color="primary"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setOpenForgotDialog(true);
+                      }}
                     >
                       Forgot password?
                     </Link>
@@ -211,7 +269,6 @@ export default function LoginPage({ onLogin }) {
                     Login
                   </Button>
                 </form>
-                {/* Form end */}
               </Card>
             </motion.div>
           </Grid>
@@ -241,6 +298,100 @@ export default function LoginPage({ onLogin }) {
           </Grid>
         </Grid>
       </Grid>
+
+      {/* Forgot Password Dialog */}
+      <Dialog
+        open={openForgotDialog}
+        onClose={(e, reason) => {
+          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
+            handleCloseForgotDialog();
+          }
+        }}
+        fullWidth
+        maxWidth="sm"
+      >
+        {fpStep === 1 ? (
+          <>
+            <DialogTitle>Lupa Password</DialogTitle>
+            <DialogContent dividers>
+              <TextField
+                fullWidth
+                label="Username atau Email"
+                margin="normal"
+                value={fpUsername}
+                onChange={(e) => setFpUsername(e.target.value)}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseForgotDialog} color="primary">
+                Batal
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleRequestFpOtp}
+                loading={loading}
+              >
+                Send OTP
+              </Button>
+            </DialogActions>
+          </>
+        ) : (
+          <>
+            <DialogTitle>Verifikasi OTP</DialogTitle>
+            <DialogContent dividers>
+              <Typography variant="body2" gutterBottom>
+                Masukkan 6 digit kode OTP
+              </Typography>
+              <Box sx={{ display: "flex", justifyContent: "center", gap: 1, mt: 1 }}>
+                {fpOtpRefs.current === undefined && (fpOtpRefs.current = Array(6).fill(null))}
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <TextField
+                    key={i}
+                    id={`fp-otp-${i}`}
+                    value={fpOtp[i] || ""}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/[^0-9]/g, "");
+                      if (!val) return;
+                      const newOtp = [...fpOtp];
+                      newOtp[i] = val[0];
+                      setFpOtp(newOtp);
+                      if (i < 5 && fpOtpRefs.current[i + 1]) fpOtpRefs.current[i + 1].focus();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Backspace") {
+                        const newOtp = [...fpOtp];
+                        if (newOtp[i]) {
+                          newOtp[i] = "";
+                          setFpOtp(newOtp);
+                        } else if (i > 0 && fpOtpRefs.current[i - 1]) {
+                          fpOtpRefs.current[i - 1].focus();
+                        }
+                      }
+                    }}
+                    inputRef={(el) => (fpOtpRefs.current[i] = el)}
+                    inputProps={{ maxLength: 1, style: { textAlign: "center", fontSize: "20px" } }}
+                    sx={{ width: 45 }}
+                  />
+                ))}
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setFpStep(1)} color="warning">
+                Back
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSendFpOtp}
+                loading={loading}
+              >
+                Send
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </Grid>
   );
 }
