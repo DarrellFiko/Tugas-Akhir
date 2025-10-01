@@ -23,6 +23,10 @@ import DetailModuleGuruPage from "../pages/Guru/Kelas/DetailModuleGuruPage";
 import DetailPresensiGuruPage from "../pages/Guru/Kelas/DetailPresensiGuruPage";
 import UjianGuruPage from "../pages/Guru/Ujian/UjianGuruPage";
 import DetailUjianGuruPage from "../pages/Guru/Ujian/DetailUjianGuruPage";
+import FormUjianGuruPage from "../pages/Guru/Ujian/FormUjianGuruPage";
+
+// Admin
+import RegisterPage from "../pages/Admin/RegisterPage";
 
 // Icon import
 import AnnouncementOutlinedIcon from '@mui/icons-material/AnnouncementOutlined';
@@ -35,7 +39,7 @@ import BorderColorOutlinedIcon from '@mui/icons-material/BorderColorOutlined';
 import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined";
 import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
-import FormUjianGuruPage from "../pages/Guru/Ujian/FormUjianGuruPage";
+import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 
 const loginRoutes = [
   {
@@ -88,15 +92,6 @@ const teacherRoutes = [
       { path: "/ujian", element: <UjianGuruPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
     ],
   },
-  // {
-  //   section: "Template",
-  //   items: [
-  //     { path: "/sweet-alert", element: <SweetAlertPage />, label: "Popup & Toast", icon: <NotificationsOutlinedIcon /> },
-  //     { path: "/chart", element: <ChartPage />, label: "Charts", icon: <InsertChartOutlinedIcon /> },
-  //     { path: "/table", element: <TablePage />, label: "Table", icon: <TableChartOutlinedIcon /> },
-  //     { path: "/backend", element: <BackendPage />, label: "Connect Backend", icon: <StorageOutlinedIcon /> },
-  //   ],
-  // },
   {
     section: "dont-show",
     items: [
@@ -111,6 +106,34 @@ const teacherRoutes = [
   },
 ];
 
+const adminRoutes = [
+  {
+    section: "General",
+    items: [
+      { path: "/dashboard", element: <HomePage />, label: "Pengumuman", icon: <AnnouncementOutlinedIcon /> },
+      { path: "/register", element: <RegisterPage />, label: "Register", icon: <PersonAddAltOutlinedIcon /> },
+    ],
+  },
+  // {
+  //   section: "Akademik",
+  //   items: [
+  //     { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Pelajaran", icon: <CalendarMonthOutlinedIcon /> },
+  //     { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
+  //     { path: "/nilai", element: <NilaiSiswaPage />, label: "Nilai Akademik", icon: <SchoolOutlinedIcon /> },
+  //     { path: "/ujian", element: <UjianSiswaPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
+  //   ],
+  // },
+  // {
+  //   section: "dont-show",
+  //   items: [
+  //     { path: "/profile", element: <ProfilePage /> },
+  //     { path: "/kelas/detail/:id", element: <DetailKelasSiswaPage /> },
+  //     { path: "/kelas/detail/:id/module/:modulId", element: <DetailModuleSiswaPage /> },
+  //     // { path: "*", element: <NotFoundPage /> },
+  //   ],
+  // },
+];
+
 // Function to get routes by role
 export function getRoutes(role) {
   if (!role) return [...loginRoutes]; // handle undefined/null role
@@ -120,6 +143,8 @@ export function getRoutes(role) {
       return [...studentRoutes];
     case "guru":
       return [...teacherRoutes];
+    case "admin":
+      return [...adminRoutes];
     default:
       return [...loginRoutes];
   }

@@ -1,12 +1,17 @@
 import readXlsFile from "read-excel-file";
 import * as XLSX from "xlsx";
-import moment from "moment";
-import 'moment/locale/id';
-// import 'moment/locale/en-gb';
+import moment from "moment/min/moment-with-locales";
+moment.locale("id");
 
+// import 'moment/locale/en-gb';
 export const formatDate = (date, format = "dddd, DD MMMM YYYY", language = "id") => {
   const dt = date instanceof Date ? date : new Date(date);
-  return moment(dt).locale(language, true).format(format);
+  return moment(dt).locale(language).format(format);
+};
+
+export const formatRelativeTime = (date) => {
+  if (!date) return "";
+  return moment(date).locale("id").fromNow();
 };
 
 // Fungsi parsing file Excel/CSV → columns & rows

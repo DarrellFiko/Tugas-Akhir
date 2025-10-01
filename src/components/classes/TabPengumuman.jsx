@@ -135,7 +135,7 @@ export default function TabPengumuman() {
   const handleCancel = async () => {
     if ((newTitle || newDesc || newFile) && !editMode) {
       const confirmClose = await PopupEdit.fire({
-        title: "Cancel Create?",
+        title: "Batalkan?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;

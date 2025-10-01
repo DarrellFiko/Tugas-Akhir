@@ -2,6 +2,7 @@
 import { getAPI } from "../plugins/axiosApi";
 import { ENDPOINTS } from "./endpoint";
 
+// ====================== AUTH ======================
 export const login = async (body) => {
   const res = await getAPI.post(ENDPOINTS.USER.LOGIN, body);
   return res.data;
@@ -9,7 +10,7 @@ export const login = async (body) => {
 
 export const getProfile = async () => {
   const res = await getAPI.get(ENDPOINTS.USER.GET_PROFILE);
-  console.log(res.data)
+  console.log(res.data);
   return res.data;
 };
 
@@ -18,6 +19,7 @@ export const logout = async () => {
   return res.data;
 };
 
+// ====================== REGISTER ======================
 export const registerUser = async (body) => {
   const formData = new FormData();
   for (let key in body) {
@@ -35,6 +37,7 @@ export const bulkRegister = async (body) => {
   return res.data;
 };
 
+// ====================== USERS ======================
 export const getAllUsers = async () => {
   const res = await getAPI.get(ENDPOINTS.USER.GET_ALL);
   return res.data;
@@ -57,6 +60,12 @@ export const updateUser = async (id_user, body) => {
   return res.data;
 };
 
+export const deleteUser = async (id_user) => {
+  const res = await getAPI.delete(ENDPOINTS.USER.DELETE(id_user));
+  return res.data;
+};
+
+// ====================== PASSWORD ======================
 export const requestOtp = async () => {
   const res = await getAPI.post(ENDPOINTS.USER.REQUEST_OTP);
   return res.data;
@@ -72,7 +81,6 @@ export const requestOtpForgotPassword = async (body) => {
   return res.data;
 };
 
-// Change password dengan username/email + otp_code
 export const changePasswordWithOtp = async (body) => {
   const res = await getAPI.post(ENDPOINTS.USER.CHANGE_PASSWORD, body);
   return res.data;

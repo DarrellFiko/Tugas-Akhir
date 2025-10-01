@@ -156,12 +156,13 @@ export default function App() {
       });
 
       const token = response.token;
+      const userRole = response.role ? response.role.toLowerCase() : "";
+
       localStorage.setItem("authToken", token);
       localStorage.setItem("authUser", response.nama);
       localStorage.setItem("profilePicture", response.profile_picture);
-      localStorage.setItem("role", response.role);
+      localStorage.setItem("role", userRole);
 
-      let userRole = response.role; 
       setRole(userRole);
     } catch (err) {
       console.error("Login failed:", err);

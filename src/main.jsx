@@ -3,7 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
-import logo from "./assets/images/logoTarakanita.png"; // import favicon
+import logo from "./assets/images/logoTarakanita.png";  
 
 // Dynamically set favicon
 const setFavicon = (iconUrl) => {

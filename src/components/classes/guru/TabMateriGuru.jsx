@@ -93,7 +93,7 @@ export default function TabMateriGuru() {
     const { namaFile, pertemuan, deskripsi, file } = formData;
     if ((namaFile || pertemuan || deskripsi || file) && !isEdit) {
       const confirmClose = await PopupEdit.fire({
-        title: "Cancel Create Data?",
+        title: "Batalkan?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;

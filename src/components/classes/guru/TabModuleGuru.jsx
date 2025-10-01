@@ -88,7 +88,7 @@ export default function TabModuleGuru() {
   const handleClose = async () => {
     if (isDirty) {
       const confirmClose = await PopupEdit.fire({
-        title: "Cancel Create Data?",
+        title: "Batalkan?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;

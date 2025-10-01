@@ -130,7 +130,7 @@ export default function DetailPresensiGuruPage() {
   const handleBack = async () => {
     if (isChanged()) {
       const confirmClose = await PopupEdit.fire({
-        title: "Cancel Create Data?",
+        title: "Batalkan?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;

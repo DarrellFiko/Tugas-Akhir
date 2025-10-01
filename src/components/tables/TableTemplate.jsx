@@ -260,6 +260,7 @@ function TableTemplateToolbar({
                             multiple
                             options={columns}
                             value={visibleColumns}
+                            isOptionEqualToValue={(option, value) => option.field === value.field}
                             onChange={(e, value) => onVisibleColumnsChange(value)}
                             getOptionLabel={(option) => option.label}
                             renderTags={(value) =>
@@ -543,7 +544,7 @@ export default function TableTemplate({
                               <IconButton
                                 color="error"
                                 size="small"
-                                onClick={() => onDelete && onDelete(row.id)}
+                                onClick={() => onDelete && onDelete(row)}
                               >
                                 <DeleteOutlineOutlinedIcon />
                               </IconButton>

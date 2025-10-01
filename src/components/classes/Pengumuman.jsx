@@ -13,18 +13,21 @@ import {
   Pagination,
   Card,
   CardContent,
-  CircularProgress,
-  Button
+  Button,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SendOutlinedIcon from "@mui/icons-material/SendOutlined";
-import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import useIsMobile from "../../plugins/useIsMobile";
+import { formatRelativeTime } from "../../utils/utils";
+import EmojiPickerInput from "../inputs/EmojiPickerInput";
 
 export default function Pengumuman({
   title = "Pengumuman",
@@ -39,18 +42,35 @@ export default function Pengumuman({
   isDelete = false,
   onCreate = () => {},
   onUpdate = () => {},
-  onDelete = () => {}
+  onDelete = () => {},
+  onDownload = () => {},
+  onUpdateComment = () => {},
+  onDeleteComment = () => {},
 }) {
   const isMobile = useIsMobile();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [expandedId, setExpandedId] = useState(null);
+  const [stableData, setStableData] = useState(data); // simpan data lama
   const commentRefs = useRef({});
+  const [editingComment, setEditingComment] = useState(null);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [selectedComment, setSelectedComment] = useState(null);
+
+  const id_user = localStorage.getItem("id");
+
+  // update stableData hanya saat ada data baru
+  useEffect(() => {
+    if (data && data.length > 0) {
+      setStableData(data);
+    }
+  }, [data]);
 
   const filteredData = useMemo(() => {
-    return data.filter((item) =>
-      item.title.toLowerCase().includes(search.toLowerCase())
+    return stableData.filter((item) =>
+      item.judul.toLowerCase().includes(search.toLowerCase())
     );
-  }, [data, search]);
+  }, [stableData, search]);
 
   const paginationLength = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -59,33 +79,46 @@ export default function Pengumuman({
     return filteredData.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredData, page, itemsPerPage]);
 
-  // Scroll komentar otomatis ke bawah
   useEffect(() => {
     paginatedData.forEach((item) => {
-      const ref = commentRefs.current[item.id];
+      const ref = commentRefs.current[item.id_pengumuman];
       if (ref) {
         ref.scrollTop = ref.scrollHeight;
       }
     });
-  }, [paginatedData, data]);
+  }, [paginatedData, stableData]);
+
+  useEffect(() => {
+    if (expandedId && !stableData.some((d) => d.id_pengumuman === expandedId)) {
+      setExpandedId(null);
+    }
+  }, [stableData, expandedId]);
 
   return (
-    <Box sx={{ minHeight: "60vh" }}>
+    <Box sx={{ minHeight: "60vh", position: "relative" }}>
       <Card elevation={3} sx={{ borderRadius: 2 }}>
         <CardContent>
           <Grid container alignItems="center" justifyContent="space-between">
-            <Grid>
-              <Typography sx={{ fontSize: 18, fontWeight: 600, mb: isMobile ? 1 : 0 }}>
+            <Grid item xs={12} sm={6}>
+              <Typography
+                sx={{ fontSize: 18, fontWeight: 600, mb: isMobile ? 1 : 0 }}
+              >
                 {title}
               </Typography>
             </Grid>
-            <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                justifyContent: { xs: "flex-start", sm: "flex-end" },
+              }}
+            >
               {isCreate && (
-                <Button
-                  variant="outlined"
-                  color="info"
-                  onClick={onCreate}
-                >
+                <Button variant="outlined" color="info" onClick={onCreate}>
                   Create
                 </Button>
               )}
@@ -112,210 +145,304 @@ export default function Pengumuman({
           </Grid>
         </CardContent>
 
-        {/* Loading State */}
-        {loading && (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
-            <CircularProgress />
-          </Box>
-        )}
-
-        {/* No Data */}
+        {/* tampilkan empty state hanya jika tidak loading & data kosong */}
         {!loading && filteredData.length === 0 && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
             <Typography variant="body1" color="text.secondary">
-              No Data
+              Belum Ada Pengumuman
             </Typography>
           </Box>
         )}
 
-        {/* Accordion List */}
-        {!loading && filteredData.length > 0 &&
-          paginatedData.map((item) => (
-            <Accordion
-              key={item.id}
-              disableGutters
-              square
-              sx={{ borderBottom: "1px solid", borderColor: "divider" }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls={`panel-${item.id}-content`}
-                id={`panel-${item.id}-header`}
-              >
-                <Typography sx={{ fontSize: 17, fontWeight: 500 }}>
-                  {item.title}
-                </Typography>
-              </AccordionSummary>
-
-              <AccordionDetails>
-                <Grid
-                  container
-                  sx={{
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    flexDirection: { xs: "column-reverse", sm: "row" },  
-                  }}
+        <Box sx={{ minHeight: "55vh" }}>
+          {filteredData.length > 0 &&
+            paginatedData.map((item) => {
+              const isExpanded = expandedId === item.id_pengumuman;
+              return (
+                <Accordion
+                  key={item.id_pengumuman}
+                  disableGutters
+                  square
+                  expanded={isExpanded}
+                  onChange={() =>
+                    setExpandedId(isExpanded ? null : item.id_pengumuman)
+                  }
+                  sx={{ borderTop: "1px solid", borderColor: "divider" }}
                 >
-                  {/* Detail */}
-                  <Grid item size={{ xs: 12, sm: 9 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      {item.description}
-                    </Typography>
-                  </Grid>
-
-                  {/* Icon */}
-                  <Grid
-                    item
-                    size={{ xs: 12, sm: "auto" }}
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      mb: { xs: 2, sm: 0 },
-                    }}
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls={`panel-${item.id_pengumuman}-content`}
+                    id={`panel-${item.id_pengumuman}-header`}
                   >
-                    {isUpdate && (
-                      <Tooltip title="Edit File Pengumuman">
-                        <IconButton
-                          size="small"
-                          sx={{
-                            backgroundColor: "warning.main",
-                            color: "white",
-                            "&:hover": { backgroundColor: "warning.main" },
-                          }}
-                          onClick={() => onUpdate(item)}
-                        >
-                          <EditOutlinedIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
+                    <Typography sx={{ fontSize: 17, fontWeight: 500 }}>
+                      {item.judul}
+                    </Typography>
+                  </AccordionSummary>
 
-                    {isDelete && (
-                      <Tooltip title="Hapus File Pengumuman">
-                        <IconButton
-                          size="small"
-                          sx={{
-                            backgroundColor: "error.main",
-                            color: "white",
-                            "&:hover": { backgroundColor: "error.main" },
-                          }}
-                          onClick={() => onDelete(item.id)}
-                        >
-                          <DeleteOutlineIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-
-
-                    <Tooltip title="Lihat File Pengumuman">
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: "primary.main",
-                          color: "white",
-                          "&:hover": { backgroundColor: "primary.main" },
-                        }}
-                        onClick={() => console.log("View ID:", item.id)}
-                      >
-                        <VisibilityOutlinedIcon />
-                      </IconButton>
-                    </Tooltip>
-
-                    <Tooltip title="Download File Pengumuman">
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: "primary.main",
-                          color: "white",
-                          "&:hover": { backgroundColor: "primary.main" },
-                        }}
-                        onClick={() => console.log("Download ID:", item.id)}
-                      >
-                        <DownloadOutlinedIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Grid>
-                </Grid>
-
-                {/* Comments */}
-                <Box sx={{ border: "solid 1px", borderRadius: 2, mt: 2, p: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Komentar
-                  </Typography>
-
-                  <hr />
-
-                  {item.comments.length > 0 ? (
-                    <Box
-                      ref={(el) => (commentRefs.current[item.id] = el)}
+                  <AccordionDetails>
+                    <Grid
+                      container
+                      spacing={2}
                       sx={{
-                        maxHeight: "300px",
-                        overflowY: "auto",
-                        display: "flex",
-                        flexDirection: "column",
-                        px: 2
+                        alignItems: "flex-start",
+                        justifyContent: "space-between",
+                        flexDirection: { xs: "column-reverse", sm: "row" },
                       }}
                     >
-                      {item.comments.map((comment, index) => (
-                        <Box key={index} sx={{ display: "flex", gap: 1, my: 1, alignItems: "flex-start" }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ width: "80px", fontWeight: 500 }}>
-                            {comment.from}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">:</Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {comment.text}
-                          </Typography>
+                      <Grid item xs={12} sm={9}>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.isi}
+                        </Typography>
+                      </Grid>
+
+                      <Grid
+                        item
+                        xs={12}
+                        sm={3}
+                        sx={{ display: "flex", gap: 1, mb: { xs: 2, sm: 0 } }}
+                      >
+                        {isUpdate && (
+                          <Tooltip title="Edit File Pengumuman">
+                            <IconButton
+                              size="small"
+                              sx={{
+                                backgroundColor: "warning.main",
+                                color: "white",
+                                "&:hover": { backgroundColor: "warning.main" },
+                              }}
+                              onClick={() => onUpdate(item)}
+                            >
+                              <EditOutlinedIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+
+                        {isDelete && (
+                          <Tooltip title="Hapus File Pengumuman">
+                            <IconButton
+                              size="small"
+                              sx={{
+                                backgroundColor: "error.main",
+                                color: "white",
+                                "&:hover": { backgroundColor: "error.main" },
+                              }}
+                              onClick={() => onDelete(item.id_pengumuman)}
+                            >
+                              <DeleteOutlineIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+
+                        {item.file_url && (
+                          <>
+                            <Tooltip title="Lihat File Pengumuman">
+                              <IconButton
+                                size="small"
+                                sx={{
+                                  backgroundColor: "primary.main",
+                                  color: "white",
+                                  "&:hover": {
+                                    backgroundColor: "primary.main",
+                                  },
+                                }}
+                                onClick={() =>
+                                  window.open(item.file_url, "_blank")
+                                }
+                              >
+                                <VisibilityOutlinedIcon />
+                              </IconButton>
+                            </Tooltip>
+
+                            <Tooltip title="Download File Pengumuman">
+                              <IconButton
+                                size="small"
+                                sx={{
+                                  backgroundColor: "primary.main",
+                                  color: "white",
+                                  "&:hover": {
+                                    backgroundColor: "primary.main",
+                                  },
+                                }}
+                                onClick={() => onDownload(item.id_pengumuman)}
+                              >
+                                <DownloadOutlinedIcon />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        )}
+                      </Grid>
+                    </Grid>
+
+                    <Box
+                      sx={{
+                        border: "solid 1px",
+                        borderRadius: 2,
+                        mt: 2,
+                        p: 2,
+                      }}
+                    >
+                      <Typography variant="body2" color="text.secondary">
+                        Komentar
+                      </Typography>
+                      <hr />
+
+                      {item?.komentar?.length > 0 ? (
+                        <Box
+                          ref={(el) =>
+                            (commentRefs.current[item.id_pengumuman] = el)
+                          }
+                          sx={{
+                            maxHeight: "300px",
+                            overflowY: "auto",
+                            display: "flex",
+                            flexDirection: "column",
+                            px: 2,
+                          }}
+                        >
+                          {item.komentar.map((comment, index) => {
+                            const isEditing =
+                              editingComment?.id_komentar ===
+                                comment.id_komentar &&
+                              editingComment?.id_pengumuman ===
+                                item.id_pengumuman;
+
+                            return (
+                              <Box
+                                key={index}
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  my: 1,
+                                }}
+                              >
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    gap: 1,
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                  }}
+                                >
+                                  <Box sx={{ display: "flex", gap: 1 }}>
+                                    <Typography
+                                      variant="body2"
+                                      sx={{
+                                        fontWeight: 600,
+                                        fontSize: "0.9rem",
+                                      }}
+                                    >
+                                      {comment.created_by}
+                                    </Typography>
+
+                                    {isEditing ? (
+                                      <>
+                                        <TextField
+                                          size="small"
+                                          value={editingComment.text}
+                                          onChange={(e) =>
+                                            setEditingComment((prev) => ({
+                                              ...prev,
+                                              text: e.target.value,
+                                            }))
+                                          }
+                                          sx={{ flex: 1 }}
+                                        />
+                                        <Button
+                                          size="small"
+                                          color="success"
+                                          onClick={() => {
+                                            onUpdateComment(
+                                              comment.id_komentar,
+                                              editingComment.text
+                                            );
+                                            setEditingComment(null);
+                                          }}
+                                        >
+                                          Save
+                                        </Button>
+                                        <Button
+                                          size="small"
+                                          color="inherit"
+                                          onClick={() => setEditingComment(null)}
+                                        >
+                                          Cancel
+                                        </Button>
+                                      </>
+                                    ) : (
+                                      <Typography
+                                        variant="body2"
+                                        color="text.secondary"
+                                      >
+                                        {comment.komentar}
+                                      </Typography>
+                                    )}
+                                  </Box>
+
+                                  {comment.canAction && !isEditing && (
+                                    <IconButton
+                                      size="small"
+                                      onClick={(e) => {
+                                        setMenuAnchor(e.currentTarget);
+                                        setSelectedComment({
+                                          id_pengumuman: item.id_pengumuman,
+                                          ...comment,
+                                        });
+                                      }}
+                                    >
+                                      <MoreVertIcon fontSize="small" />
+                                    </IconButton>
+                                  )}
+                                </Box>
+
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ ml: 0.5, mt: 0.2 }}
+                                >
+                                  {formatRelativeTime(comment.updated_at)}
+                                </Typography>
+                              </Box>
+                            );
+                          })}
                         </Box>
-                      ))}
+                      ) : (
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 2 }}
+                        >
+                          Tidak Ada Komentar...
+                        </Typography>
+                      )}
+
+                      <EmojiPickerInput
+                        value={commentInputs[item.id_pengumuman] || ""}
+                        onChange={(val) =>
+                          setCommentInputs((prev) => ({
+                            ...prev,
+                            [item.id_pengumuman]: val,
+                          }))
+                        }
+                        onSend={() =>
+                          sendComment(
+                            item.id_pengumuman,
+                            commentInputs[item.id_pengumuman],
+                            (val) =>
+                              setCommentInputs((prev) => ({
+                                ...prev,
+                                [item.id_pengumuman]: val,
+                              }))
+                          )
+                        }
+                      />
                     </Box>
-                  ) : (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                      Tidak Ada Komentar...
-                    </Typography>
-                  )}
+                  </AccordionDetails>
+                </Accordion>
+              );
+            })}
+        </Box>
 
-                  <TextField
-                    fullWidth
-                    size="small"
-                    margin="dense"
-                    variant="outlined"
-                    placeholder="Tulis Komentar..."
-                    value={commentInputs[item.id] || ""}
-                    onChange={(e) =>
-                      setCommentInputs((prev) => ({ ...prev, [item.id]: e.target.value }))
-                    }
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        sendComment(item.id, commentInputs[item.id], (val) =>
-                          setCommentInputs((prev) => ({ ...prev, [item.id]: val }))
-                        );
-                      }
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() =>
-                              sendComment(item.id, commentInputs[item.id], (val) =>
-                                setCommentInputs((prev) => ({ ...prev, [item.id]: val }))
-                              )
-                            }
-                          >
-                            <SendOutlinedIcon />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Box>
-              </AccordionDetails>
-            </Accordion>
-          ))}
-
-        {/* Pagination */}
-        {!loading && filteredData.length > 0 && (
+        {filteredData.length > 0 && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
             <Pagination
               count={paginationLength}
@@ -326,6 +453,34 @@ export default function Pengumuman({
           </Box>
         )}
       </Card>
+
+      {/* Menu titik tiga */}
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={() => setMenuAnchor(null)}
+      >
+        <MenuItem
+          onClick={() => {
+            setEditingComment({
+              id_komentar: selectedComment.id_komentar,
+              id_pengumuman: selectedComment.id_pengumuman,
+              text: selectedComment.komentar,
+            });
+            setMenuAnchor(null);
+          }}
+        >
+          <EditOutlinedIcon fontSize="small" sx={{ mr: 1 }} /> Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onDeleteComment(selectedComment.id_komentar);
+            setMenuAnchor(null);
+          }}
+        >
+          <DeleteOutlineIcon fontSize="small" sx={{ mr: 1 }} /> Delete
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }
