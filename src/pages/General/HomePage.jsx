@@ -9,6 +9,7 @@ import {
   FormHelperText,
   Typography,
 } from "@mui/material";
+import { useForm } from "react-hook-form";
 import Pengumuman from "../../components/classes/Pengumuman";
 import { PopupEdit, ToastError, ToastSuccess } from "../../composables/sweetalert";
 import {
@@ -27,21 +28,30 @@ export default function HomePage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDesc, setNewDesc] = useState("");
-  const [newFile, setNewFile] = useState(null);
-  const [errors, setErrors] = useState({ title: false, file: false });
-
-  // Track accordion yang terbuka biar tidak flicker
   const [expanded, setExpanded] = useState(false);
 
   const role = localStorage.getItem("role");
+
+  // ============ Hook Form ============
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      judul: "",
+      isi: "",
+      file: null,
+    },
+  });
 
   const fetchPengumuman = async () => {
     setLoading(true);
     try {
       const res = await getAllPengumuman();
-
       setPengumuman((prev) => {
         const mapPrev = new Map(prev.map((p) => [p.id_pengumuman, p]));
         const newData = res.data || [];
@@ -61,11 +71,7 @@ export default function HomePage() {
   const sendComment = async (id_pengumuman, text, setText) => {
     if (!text.trim()) return;
     try {
-      await createKomentar({
-        id_pengumuman,
-        komentar: text,
-      });
-
+      await createKomentar({ id_pengumuman, komentar: text });
       setText("");
       await fetchPengumuman();
     } catch (error) {
@@ -73,7 +79,7 @@ export default function HomePage() {
     }
   };
 
-  // ================== UPDATE KOMENTAR  ==================
+  // ================== UPDATE KOMENTAR ==================
   const handleUpdateComment = async (id_komentar, text) => {
     if (!text.trim()) return;
     try {
@@ -98,79 +104,39 @@ export default function HomePage() {
     }
   };
 
-  // ================== CREATE ==================
-  const handleCreate = async () => {
-    let hasError = false;
-    const newErrors = { title: false, file: false };
-
-    if (!newTitle.trim()) {
-      newErrors.title = true;
-      hasError = true;
-    }
-    if (!newFile) {
-      newErrors.file = true;
-      hasError = true;
-    } else if (newFile.type !== "application/pdf") {
-      ToastError.fire({ title: "Hanya file PDF yang diperbolehkan!" });
-      newErrors.file = true;
-      hasError = true;
-    }
-
-    setErrors(newErrors);
-    if (hasError) return;
-
+  // ================== SAVE (CREATE/UPDATE) ==================
+  const onSubmit = async (data) => {
     try {
+      // Validasi file (hanya pdf)
+      if (!editMode && !data.file) {
+        ToastError.fire({ title: "File wajib diupload" });
+        return;
+      }
+      if (data.file && data.file.type !== "application/pdf") {
+        ToastError.fire({ title: "Hanya file PDF yang diperbolehkan!" });
+        return;
+      }
+
       const formData = new FormData();
-      formData.append("judul", newTitle);
-      formData.append("isi", newDesc);
-      formData.append("file", newFile);
+      formData.append("judul", data.judul);
+      formData.append("isi", data.isi);
+      if (data.file) formData.append("file", data.file);
 
-      await createPengumuman(formData);
+      if (editMode) {
+        await updatePengumuman(editData.id_pengumuman, formData);
+        ToastSuccess.fire({ title: "Berhasil Mengubah Pengumuman" });
+      } else {
+        await createPengumuman(formData);
+        ToastSuccess.fire({ title: "Berhasil Membuat Pengumuman" });
+      }
+
       await fetchPengumuman();
-      ToastSuccess.fire({ title: "Berhasil Membuat Pengumuman" });
-
-      resetForm();
+      reset();
       setOpenDialog(false);
+      setEditMode(false);
+      setEditData(null);
     } catch (err) {
-      console.error("Gagal membuat pengumuman:", err);
-    }
-  };
-
-  // ================== UPDATE ==================
-  const handleUpdate = async () => {
-    let hasError = false;
-    const newErrors = { title: false, file: false };
-
-    if (!newTitle.trim()) {
-      newErrors.title = true;
-      hasError = true;
-    }
-    if (!newFile && !editData?.file) {
-      newErrors.file = true;
-      hasError = true;
-    } else if (newFile && newFile.type !== "application/pdf") {
-      ToastError.fire({ title: "Hanya file PDF yang diperbolehkan!" });
-      newErrors.file = true;
-      hasError = true;
-    }
-
-    setErrors(newErrors);
-    if (hasError) return;
-
-    try {
-      const formData = new FormData();
-      formData.append("judul", newTitle);
-      formData.append("isi", newDesc);
-      if (newFile) formData.append("file", newFile);
-
-      await updatePengumuman(editData.id_pengumuman, formData);
-      await fetchPengumuman();
-      ToastSuccess.fire({ title: "Berhasil Mengubah Pengumuman" });
-
-      resetForm();
-      setOpenDialog(false);
-    } catch (err) {
-      console.error("Gagal update pengumuman:", err);
+      console.error("Gagal simpan pengumuman:", err);
     }
   };
 
@@ -195,30 +161,24 @@ export default function HomePage() {
     }
   };
 
-  // ================== FORM RESET ==================
-  const resetForm = () => {
-    setNewTitle("");
-    setNewDesc("");
-    setNewFile(null);
-    setErrors({ title: false, file: false });
-    setEditMode(false);
-    setEditData(null);
-  };
-
+  // ================== DIALOG HANDLER ==================
   const handleCancel = async () => {
-    if ((newTitle || newDesc || newFile) && !editMode) {
+    const formValues = watch();
+    if ((formValues.judul || formValues.isi || formValues.file) && !editMode) {
       const confirmClose = await PopupEdit.fire({
         title: "Batalkan?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;
     }
-    resetForm();
+    reset();
     setOpenDialog(false);
+    setEditMode(false);
+    setEditData(null);
   };
 
   const openCreateDialog = () => {
-    resetForm();
+    reset();
     setEditMode(false);
     setOpenDialog(true);
   };
@@ -226,13 +186,14 @@ export default function HomePage() {
   const openUpdateDialog = (data) => {
     setEditMode(true);
     setEditData(data);
-    setNewTitle(data.judul || "");
-    setNewDesc(data.isi || "");
-    setNewFile(null);
+    reset({
+      judul: data.judul || "",
+      isi: data.isi || "",
+      file: null,
+    });
     setOpenDialog(true);
   };
 
-  // ================== USE EFFECT ==================
   useEffect(() => {
     fetchPengumuman();
     const interval = setInterval(() => {
@@ -254,8 +215,8 @@ export default function HomePage() {
         commentInputs={commentInputs}
         setCommentInputs={setCommentInputs}
         sendComment={sendComment}
-        onUpdateComment={(id_komentar, text) => handleUpdateComment(id_komentar, text)}
-        onDeleteComment={(id_komentar) => handleDeleteComment(id_komentar)}
+        onUpdateComment={handleUpdateComment}
+        onDeleteComment={handleDeleteComment}
         expanded={expanded}
         setExpanded={setExpanded}
         itemsPerPage={10}
@@ -263,11 +224,12 @@ export default function HomePage() {
         isUpdate={role === "admin"}
         isDelete={role === "admin"}
         onCreate={openCreateDialog}
-        onUpdate={(item) => openUpdateDialog(item)}
-        onDelete={(id) => handleDelete(id)}
-        onDownload={(id) => handleDownload(id)}
+        onUpdate={openUpdateDialog}
+        onDelete={handleDelete}
+        onDownload={handleDownload}
       />
 
+      {/* ===== DIALOG FORM ===== */}
       <Dialog open={openDialog} onClose={handleCancel} fullWidth>
         <DialogTitle>
           {editMode ? "Update Pengumuman" : "Buat Pengumuman Baru"}
@@ -278,10 +240,9 @@ export default function HomePage() {
             fullWidth
             required
             margin="normal"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            error={errors.title}
-            helperText={errors.title ? "Judul wajib diisi" : ""}
+            {...register("judul", { required: "Judul wajib diisi" })}
+            error={!!errors.judul}
+            helperText={errors.judul?.message}
           />
           <TextField
             label="Deskripsi"
@@ -289,14 +250,13 @@ export default function HomePage() {
             multiline
             rows={4}
             margin="normal"
-            value={newDesc}
-            onChange={(e) => setNewDesc(e.target.value)}
+            {...register("isi")}
           />
           <div style={{ marginTop: "16px" }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
               Upload File (PDF)
             </Typography>
-            {editMode && editData?.file && !newFile && (
+            {editMode && editData?.file && !watch("file") && (
               <Typography
                 variant="caption"
                 color="text.secondary"
@@ -308,19 +268,19 @@ export default function HomePage() {
             <input
               type="file"
               accept="application/pdf"
-              onChange={(e) => setNewFile(e.target.files[0])}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                setValue("file", file);
+              }}
             />
             {errors.file && (
-              <FormHelperText error>File wajib diupload</FormHelperText>
+              <FormHelperText error>{errors.file.message}</FormHelperText>
             )}
           </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Batal</Button>
-          <Button
-            onClick={editMode ? handleUpdate : handleCreate}
-            variant="contained"
-          >
+          <Button onClick={handleSubmit(onSubmit)} variant="contained">
             {editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>

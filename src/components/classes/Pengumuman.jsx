@@ -16,6 +16,7 @@ import {
   Button,
   Menu,
   MenuItem,
+  CircularProgress,
 } from "@mui/material";
 
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -145,8 +146,13 @@ export default function Pengumuman({
           </Grid>
         </CardContent>
 
-        {/* tampilkan empty state hanya jika tidak loading & data kosong */}
-        {!loading && filteredData.length === 0 && (
+        {loading && (
+          <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
+            <CircularProgress />
+          </Box>
+        )}
+
+        {(!loading && filteredData.length === 0) && (
           <Box sx={{ display: "flex", justifyContent: "center", py: 5 }}>
             <Typography variant="body1" color="text.secondary">
               Belum Ada Pengumuman

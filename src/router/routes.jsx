@@ -27,6 +27,10 @@ import FormUjianGuruPage from "../pages/Guru/Ujian/FormUjianGuruPage";
 
 // Admin
 import RegisterPage from "../pages/Admin/RegisterPage";
+import MasterJadwalPage from "../pages/Admin/MasterJadwalPage";
+import MasterKelasPage from "../pages/Admin/MasterKelasPage";
+import MasterTahunAjaranPage from "../pages/Admin/MasterTahunAjaranPage";
+import MasterPelajaranPage from "../pages/Admin/MasterPelajaranPage";
 
 // Icon import
 import AnnouncementOutlinedIcon from '@mui/icons-material/AnnouncementOutlined';
@@ -40,6 +44,7 @@ import NotificationsOutlinedIcon from "@mui/icons-material/NotificationsOutlined
 import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
+import SensorDoorOutlinedIcon from '@mui/icons-material/SensorDoorOutlined';
 
 const loginRoutes = [
   {
@@ -114,15 +119,15 @@ const adminRoutes = [
       { path: "/register", element: <RegisterPage />, label: "Register", icon: <PersonAddAltOutlinedIcon /> },
     ],
   },
-  // {
-  //   section: "Akademik",
-  //   items: [
-  //     { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Pelajaran", icon: <CalendarMonthOutlinedIcon /> },
-  //     { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
-  //     { path: "/nilai", element: <NilaiSiswaPage />, label: "Nilai Akademik", icon: <SchoolOutlinedIcon /> },
-  //     { path: "/ujian", element: <UjianSiswaPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
-  //   ],
-  // },
+  {
+    section: "Akademik",
+    items: [
+      { path: "/tahun-ajaran", element: <MasterTahunAjaranPage />, label: "Tahun Ajaran", icon: <SchoolOutlinedIcon /> },
+      { path: "/kelas", element: <MasterKelasPage />, label: "Kelas", icon: <SensorDoorOutlinedIcon /> },
+      { path: "/pelajaran", element: <MasterPelajaranPage />, label: "Pelajaran", icon: <MenuBookOutlinedIcon /> },
+      { path: "/jadwal", element: <MasterJadwalPage />, label: "Jadwal Belajar", icon: <CalendarMonthOutlinedIcon /> },
+    ],
+  },
   // {
   //   section: "dont-show",
   //   items: [

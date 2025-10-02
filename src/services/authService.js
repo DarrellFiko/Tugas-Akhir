@@ -48,6 +48,15 @@ export const getUserById = async (id_user) => {
   return res.data;
 };
 
+export const getSimpleUsers = async (role = null) => {
+  const url = role
+    ? `${ENDPOINTS.USER.GET_SIMPLE}?role=${role}`
+    : ENDPOINTS.USER.GET_SIMPLE;
+
+  const res = await getAPI.get(url);
+  return res.data;
+};
+
 export const updateUser = async (id_user, body) => {
   const formData = new FormData();
   for (let key in body) {

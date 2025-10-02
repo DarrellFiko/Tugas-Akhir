@@ -12,6 +12,7 @@ import {
   Button,
   FormHelperText,
 } from "@mui/material";
+import { useForm, Controller } from "react-hook-form"; // <-- tambahkan Controller
 import TableTemplate from "../../components/tables/TableTemplate";
 import { handleDownloadFile, handleUploadFile } from "../../utils/utils";
 import {
@@ -34,28 +35,37 @@ export default function RegisterPage() {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
 
-  const [formData, setFormData] = useState({
-    username: "",
-    nama: "",
-    email: "",
-    password: "",
-    role: "",
-    nis: "",
-    nisn: "",
-    gender: "",
-    tgl_lahir: "",
-    tempat_lahir: "",
-    agama: "",
-    alamat: "",
-    nama_ayah: "",
-    nama_ibu: "",
-    telp: "",
-    telp_ortu: "",
-    profile_picture: null,
+  // ============ Hook Form ============
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    control, // <-- ambil control
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      username: "",
+      nama: "",
+      email: "",
+      password: "",
+      role: "",
+      nis: "",
+      nisn: "",
+      gender: "",
+      tgl_lahir: "",
+      tempat_lahir: "",
+      agama: "",
+      alamat: "",
+      nama_ayah: "",
+      nama_ibu: "",
+      telp: "",
+      telp_ortu: "",
+      profile_picture: null,
+    },
   });
-  const [errors, setErrors] = useState({});
 
-  // ====== Upload Dialog ======
   const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadError, setUploadError] = useState("");
@@ -65,9 +75,27 @@ export default function RegisterPage() {
     { field: "nama", label: "Nama", width: 200, sortable: true },
     { field: "email", label: "Email", width: 250 },
     { field: "role", label: "Role", width: 120 },
-    { field: "nis", label: "NIS", width: 120 },
-    { field: "nisn", label: "NISN", width: 120 },
-    { field: "gender", label: "Gender", width: 120 },
+    {
+      field: "nis",
+      label: "NIS",
+      width: 120,
+      render: (value) => (value === null || value === "null" ? "-" : value),
+    },
+    {
+      field: "nisn",
+      label: "NISN",
+      width: 120,
+      render: (value) => (value === null || value === "null" ? "-" : value),
+    },
+    {
+      field: "gender",
+      label: "Gender",
+      width: 120,
+      render: (value) => {
+        if (value === null || value === "") return "-";
+        return value == 0 ? "Perempuan" : "Laki-Laki";
+      },
+    },
     { field: "tgl_lahir", label: "Tanggal Lahir", width: 150 },
     { field: "tempat_lahir", label: "Tempat Lahir", width: 150 },
     { field: "agama", label: "Agama", width: 120 },
@@ -99,36 +127,31 @@ export default function RegisterPage() {
     fetchUsers();
   }, []);
 
-  // ================== RESET FORM ==================
-  const resetForm = () => {
-    setFormData({
-      username: "",
-      nama: "",
-      email: "",
-      password: "",
-      role: "",
-      nis: "",
-      nisn: "",
-      gender: "",
-      tgl_lahir: "",
-      tempat_lahir: "",
-      agama: "",
-      alamat: "",
-      nama_ayah: "",
-      nama_ibu: "",
-      telp: "",
-      telp_ortu: "",
-      profile_picture: null,
-    });
-    setErrors({});
-    setEditMode(false);
-    setEditData(null);
+  // ================== HANDLE DIALOG ==================
+  const defaultFormValues = {
+    username: "",
+    nama: "",
+    email: "",
+    password: "",
+    role: "",
+    nis: "",
+    nisn: "",
+    gender: "",
+    tgl_lahir: "",
+    tempat_lahir: "",
+    agama: "",
+    alamat: "",
+    nama_ayah: "",
+    nama_ibu: "",
+    telp: "",
+    telp_ortu: "",
+    profile_picture: null,
   };
 
-  // ================== HANDLE DIALOG ==================
   const openCreateDialog = () => {
-    resetForm();
+    reset(defaultFormValues);
     setEditMode(false);
+    setEditData(null);
     setOpenDialog(true);
   };
 
@@ -136,17 +159,31 @@ export default function RegisterPage() {
     setEditMode(true);
     setEditData(row);
     const { created_at, updated_at, deleted_at, ...cleanRow } = row;
-    setFormData({ ...cleanRow, password: "", profile_picture: null });
-    setErrors({});
+
+    reset({
+      ...cleanRow,
+      gender:
+        cleanRow.gender !== null && cleanRow.gender !== undefined
+          ? String(cleanRow.gender)
+          : "",
+      role:
+        cleanRow.role !== null && cleanRow.role !== undefined
+          ? String(cleanRow.role)
+          : "",
+      password: "",
+      profile_picture: null,
+    });
+
     setOpenDialog(true);
   };
 
   const handleCancel = async () => {
+    const formValues = watch();
     if (
-      (formData.username ||
-        formData.nama ||
-        formData.email ||
-        formData.password) &&
+      (formValues.username ||
+        formValues.nama ||
+        formValues.email ||
+        formValues.password) &&
       !editMode
     ) {
       const confirmClose = await PopupEdit.fire({
@@ -155,30 +192,22 @@ export default function RegisterPage() {
       });
       if (!confirmClose.isConfirmed) return;
     }
-    resetForm();
+    reset();
     setOpenDialog(false);
   };
 
-  // ================== VALIDASI ==================
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.username.trim())
-      newErrors.username = "Username wajib diisi";
-    if (!formData.nama.trim()) newErrors.nama = "Nama wajib diisi";
-    if (!formData.email.trim()) newErrors.email = "Email wajib diisi";
-    if (!editMode && !formData.password.trim())
-      newErrors.password = "Password wajib diisi";
-    if (!formData.role) newErrors.role = "Role wajib dipilih";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   // ================== SAVE ==================
-  const handleSave = async () => {
-    if (!validateForm()) return;
-
+  const onSubmit = async (data) => {
     try {
-      const { created_at, updated_at, deleted_at, ...cleanData } = formData;
+      const { created_at, updated_at, deleted_at, ...cleanData } = data;
+
+      if (cleanData.gender !== "") {
+        cleanData.gender = parseInt(cleanData.gender, 10);
+      }
+
+      if (!cleanData.profile_picture) {
+        delete cleanData.profile_picture;
+      }
 
       if (editMode) {
         await updateUser(editData.id_user, cleanData);
@@ -187,7 +216,8 @@ export default function RegisterPage() {
         await registerUser(cleanData);
         ToastSuccess.fire({ title: "User berhasil dibuat" });
       }
-      resetForm();
+
+      reset();
       setOpenDialog(false);
       fetchUsers();
     } catch (err) {
@@ -283,12 +313,9 @@ export default function RegisterPage() {
             fullWidth
             required
             margin="normal"
-            value={formData.username}
-            onChange={(e) =>
-              setFormData({ ...formData, username: e.target.value })
-            }
+            {...register("username", { required: "Username wajib diisi" })}
             error={!!errors.username}
-            helperText={errors.username}
+            helperText={errors.username?.message}
           />
           {/* Nama */}
           <TextField
@@ -296,10 +323,9 @@ export default function RegisterPage() {
             fullWidth
             required
             margin="normal"
-            value={formData.nama}
-            onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+            {...register("nama", { required: "Nama wajib diisi" })}
             error={!!errors.nama}
-            helperText={errors.nama}
+            helperText={errors.nama?.message}
           />
           {/* Email */}
           <TextField
@@ -307,12 +333,9 @@ export default function RegisterPage() {
             fullWidth
             required
             margin="normal"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
+            {...register("email", { required: "Email wajib diisi" })}
             error={!!errors.email}
-            helperText={errors.email}
+            helperText={errors.email?.message}
           />
           {/* Password hanya saat create */}
           {!editMode && (
@@ -322,60 +345,62 @@ export default function RegisterPage() {
               fullWidth
               required
               margin="normal"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
+              {...register("password", { required: "Password wajib diisi" })}
               error={!!errors.password}
-              helperText={errors.password}
+              helperText={errors.password?.message}
             />
           )}
-          {/* Role */}
-          <TextField
-            label="Role"
-            fullWidth
-            required
-            margin="normal"
-            select
-            value={formData.role}
-            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            error={!!errors.role}
-            helperText={errors.role}
-          >
-            <MenuItem value="Admin">Admin</MenuItem>
-            <MenuItem value="Guru">Guru</MenuItem>
-            <MenuItem value="Siswa">Siswa</MenuItem>
-          </TextField>
-          {/* NIS */}
-          <TextField
-            label="NIS"
-            fullWidth
-            margin="normal"
-            value={formData.nis}
-            onChange={(e) => setFormData({ ...formData, nis: e.target.value })}
+          {/* Role pakai Controller */}
+          <Controller
+            name="role"
+            control={control}
+            rules={{ required: "Role wajib dipilih" }}
+            render={({ field }) => (
+              <TextField
+                label="Role"
+                fullWidth
+                required
+                margin="normal"
+                select
+                {...field}
+                error={!!errors.role}
+                helperText={errors.role?.message}
+              >
+                <MenuItem value="Admin">Admin</MenuItem>
+                <MenuItem value="Guru">Guru</MenuItem>
+                <MenuItem value="Siswa">Siswa</MenuItem>
+              </TextField>
+            )}
           />
+          {/* NIS */}
+          <TextField label="NIS" fullWidth margin="normal" {...register("nis")} />
           {/* NISN */}
           <TextField
             label="NISN"
             fullWidth
             margin="normal"
-            value={formData.nisn}
-            onChange={(e) => setFormData({ ...formData, nisn: e.target.value })}
+            {...register("nisn")}
           />
-          {/* Gender */}
-          <TextField
-            label="Gender"
-            fullWidth
-            margin="normal"
-            select
-            value={formData.gender}
-            onChange={(e) =>
-              setFormData({ ...formData, gender: e.target.value })
-            }
-          >
-            <MenuItem value="Laki-laki">Laki-laki</MenuItem>
-            <MenuItem value="Perempuan">Perempuan</MenuItem>
-          </TextField>
+          {/* Gender pakai Controller */}
+          <Controller
+            name="gender"
+            control={control}
+            rules={{ required: "Gender wajib dipilih" }}
+            render={({ field }) => (
+              <TextField
+                label="Gender"
+                fullWidth
+                margin="normal"
+                select
+                {...field}
+                error={!!errors.gender}
+                helperText={errors.gender?.message}
+              >
+                <MenuItem value="1">Laki-laki</MenuItem>
+                <MenuItem value="0">Perempuan</MenuItem>
+              </TextField>
+            )}
+          />
           {/* Tanggal Lahir */}
           <TextField
             label="Tanggal Lahir"
@@ -383,30 +408,21 @@ export default function RegisterPage() {
             fullWidth
             margin="normal"
             InputLabelProps={{ shrink: true }}
-            value={formData.tgl_lahir}
-            onChange={(e) =>
-              setFormData({ ...formData, tgl_lahir: e.target.value })
-            }
+            {...register("tgl_lahir")}
           />
           {/* Tempat Lahir */}
           <TextField
             label="Tempat Lahir"
             fullWidth
             margin="normal"
-            value={formData.tempat_lahir}
-            onChange={(e) =>
-              setFormData({ ...formData, tempat_lahir: e.target.value })
-            }
+            {...register("tempat_lahir")}
           />
           {/* Agama */}
           <TextField
             label="Agama"
             fullWidth
             margin="normal"
-            value={formData.agama}
-            onChange={(e) =>
-              setFormData({ ...formData, agama: e.target.value })
-            }
+            {...register("agama")}
           />
           {/* Alamat */}
           <TextField
@@ -415,89 +431,77 @@ export default function RegisterPage() {
             margin="normal"
             multiline
             minRows={2}
-            value={formData.alamat}
-            onChange={(e) =>
-              setFormData({ ...formData, alamat: e.target.value })
-            }
+            {...register("alamat")}
           />
           {/* Nama Ayah */}
           <TextField
             label="Nama Ayah"
             fullWidth
             margin="normal"
-            value={formData.nama_ayah}
-            onChange={(e) =>
-              setFormData({ ...formData, nama_ayah: e.target.value })
-            }
+            {...register("nama_ayah")}
           />
           {/* Nama Ibu */}
           <TextField
             label="Nama Ibu"
             fullWidth
             margin="normal"
-            value={formData.nama_ibu}
-            onChange={(e) =>
-              setFormData({ ...formData, nama_ibu: e.target.value })
-            }
+            {...register("nama_ibu")}
           />
           {/* Telp */}
           <TextField
             label="Telp"
             fullWidth
             margin="normal"
-            value={formData.telp}
-            onChange={(e) =>
-              setFormData({ ...formData, telp: e.target.value })
-            }
+            {...register("telp")}
           />
           {/* Telp Ortu */}
           <TextField
             label="Telp Ortu"
             fullWidth
             margin="normal"
-            value={formData.telp_ortu}
-            onChange={(e) =>
-              setFormData({ ...formData, telp_ortu: e.target.value })
-            }
+            {...register("telp_ortu")}
           />
           {/* Upload Foto Profil */}
           <div style={{ marginTop: "16px" }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
               Upload Foto Profil
             </Typography>
-            {editMode && editData?.profile_picture && !formData.profile_picture && (
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: "block", mb: 1 }}
-              >
-                File sudah ada: {editData.profile_picture || "File lama"}
-              </Typography>
-            )}
+            {editMode &&
+              editData?.profile_picture &&
+              !watch("profile_picture") && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mb: 1 }}
+                >
+                  File sudah ada: {editData.profile_picture || "File lama"}
+                </Typography>
+              )}
             <input
               type="file"
               accept="image/*"
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file && !file.type.startsWith("image/")) {
-                  ToastError.fire({ title: "File harus berupa gambar (jpg, png, dll)" });
+                  ToastError.fire({
+                    title: "File harus berupa gambar (jpg, png, dll)",
+                  });
                   e.target.value = "";
                   return;
                 }
-                setFormData({
-                  ...formData,
-                  profile_picture: file,
-                });
+                setValue("profile_picture", file);
               }}
             />
             {errors.profile_picture && (
-              <FormHelperText error>Foto profil wajib diupload</FormHelperText>
+              <FormHelperText error>
+                Foto profil wajib diupload
+              </FormHelperText>
             )}
           </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSave} variant="contained">
+          <Button onClick={handleSubmit(onSubmit)} variant="contained">
             {editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>
@@ -515,7 +519,6 @@ export default function RegisterPage() {
           <Typography variant="body2" sx={{ mb: 1 }}>
             Silakan upload file Excel (.xlsx / .xls) untuk bulk register user.
           </Typography>
-          {/* Upload File Excel */}
           <div style={{ marginTop: "16px" }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
               Upload File Excel

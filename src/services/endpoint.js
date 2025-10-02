@@ -5,6 +5,7 @@ export const ENDPOINTS = {
     REGISTER: "/users/register",
     BULK_REGISTER: "/users/bulk-register",
     GET_ALL: "/users",
+    GET_SIMPLE: "/users/simple",
     GET_BY_ID: (id) => `/users/${id}`,
     GET_PROFILE: "/users/profile",
     UPDATE: (id) => `/users/${id}`,
@@ -28,5 +29,30 @@ export const ENDPOINTS = {
     CREATE: "/komentar",
     UPDATE: (id_komentar) => `/komentar/${id_komentar}`,
     DELETE: (id_komentar) => `/komentar/${id_komentar}`,
+  },
+
+  TAHUN_AJARAN: {
+    CREATE: "/tahun-ajaran",
+    BULK_CREATE: "/tahun-ajaran/bulk",
+    GET_ALL: "/tahun-ajaran",
+    GET_BY_ID: (id_tahun_ajaran) => `/tahun-ajaran/${id_tahun_ajaran}`,
+    UPDATE: (id_tahun_ajaran) => `/tahun-ajaran/${id_tahun_ajaran}`,
+    DELETE: (id_tahun_ajaran) => `/tahun-ajaran/${id_tahun_ajaran}`,
+  },
+
+  KELAS: {
+    CREATE: "/kelas",
+    GET_ALL: "/kelas",
+    GET_BY_ID: (id_kelas) => `/kelas/${id_kelas}`,
+    UPDATE: (id_kelas) => `/kelas/${id_kelas}`,
+    DELETE: (id_kelas) => `/kelas/${id_kelas}`,
+  },
+
+  PELAJARAN: {
+    CREATE: "/pelajaran",
+    GET_ALL: "/pelajaran",
+    GET_BY_ID: (id_pelajaran) => `/pelajaran/${id_pelajaran}`,
+    UPDATE: (id_pelajaran) => `/pelajaran/${id_pelajaran}`,
+    DELETE: (id_pelajaran) => `/pelajaran/${id_pelajaran}`,
   },
 };
