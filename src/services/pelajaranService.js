@@ -13,6 +13,11 @@ export const getAllPelajaran = async () => {
   return res.data;
 };
 
+// ================== GET SIMPLE PELAJARAN ==================
+export const getSimplePelajaran = async (params = {}) => {
+  return await getAPI(ENDPOINTS.PELAJARAN.GET_SIMPLE, { params });
+};
+
 // ================== GET BY ID ==================
 export const getPelajaranById = async (id_pelajaran) => {
   const res = await getAPI.get(ENDPOINTS.PELAJARAN.GET_BY_ID(id_pelajaran));

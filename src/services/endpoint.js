@@ -35,6 +35,7 @@ export const ENDPOINTS = {
     CREATE: "/tahun-ajaran",
     BULK_CREATE: "/tahun-ajaran/bulk",
     GET_ALL: "/tahun-ajaran",
+    GET_SIMPLE: "/tahun-ajaran/simple",
     GET_BY_ID: (id_tahun_ajaran) => `/tahun-ajaran/${id_tahun_ajaran}`,
     UPDATE: (id_tahun_ajaran) => `/tahun-ajaran/${id_tahun_ajaran}`,
     DELETE: (id_tahun_ajaran) => `/tahun-ajaran/${id_tahun_ajaran}`,
@@ -43,6 +44,7 @@ export const ENDPOINTS = {
   KELAS: {
     CREATE: "/kelas",
     GET_ALL: "/kelas",
+    GET_SIMPLE: "/kelas/simple",
     GET_BY_ID: (id_kelas) => `/kelas/${id_kelas}`,
     UPDATE: (id_kelas) => `/kelas/${id_kelas}`,
     DELETE: (id_kelas) => `/kelas/${id_kelas}`,
@@ -51,8 +53,17 @@ export const ENDPOINTS = {
   PELAJARAN: {
     CREATE: "/pelajaran",
     GET_ALL: "/pelajaran",
+    GET_SIMPLE: "/pelajaran/simple",
     GET_BY_ID: (id_pelajaran) => `/pelajaran/${id_pelajaran}`,
     UPDATE: (id_pelajaran) => `/pelajaran/${id_pelajaran}`,
     DELETE: (id_pelajaran) => `/pelajaran/${id_pelajaran}`,
+  },
+
+  KELAS_TAHUN_AJARAN: {
+    CREATE: "/kelas-tahun-ajaran",
+    GET_ALL: "/kelas-tahun-ajaran",
+    GET_BY_ID: (id) => `/kelas-tahun-ajaran/${id}`,
+    UPDATE: (id) => `/kelas-tahun-ajaran/${id}`,
+    DELETE: (id) => `/kelas-tahun-ajaran/${id}`,
   },
 };

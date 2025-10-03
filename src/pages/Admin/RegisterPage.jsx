@@ -120,7 +120,6 @@ export default function RegisterPage() {
       setRows(res.users || []);
     } catch (err) {
       console.error("Gagal fetch users:", err);
-      ToastError.fire({ title: "Gagal mengambil data users" });
     }
   };
   useEffect(() => {

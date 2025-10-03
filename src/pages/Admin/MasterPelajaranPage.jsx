@@ -58,7 +58,6 @@ export default function MasterPelajaranPage() {
       setRows(res.data);
     } catch (err) {
       console.error("Gagal fetch pelajaran:", err);
-      ToastError.fire({ title: "Gagal mengambil data Pelajaran" });
     }
   };
 

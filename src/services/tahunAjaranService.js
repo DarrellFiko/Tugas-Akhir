@@ -19,6 +19,11 @@ export const getAllTahunAjaran = async () => {
   return res.data;
 };
 
+// ================== GET SIMPLE TAHUN AJARAN ==================
+export const getSimpleTahunAjaran = async (params = {}) => {
+  return await getAPI(ENDPOINTS.TAHUN_AJARAN.GET_SIMPLE, { params });
+};
+
 // ================== GET BY ID ==================
 export const getTahunAjaranById = async (id_tahun_ajaran) => {
   const res = await getAPI.get(ENDPOINTS.TAHUN_AJARAN.GET_BY_ID(id_tahun_ajaran));

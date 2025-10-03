@@ -85,7 +85,6 @@ export default function MasterTahunAjaranPage() {
       setRows(res.tahunAjaran || res);
     } catch (err) {
       console.error("Gagal fetch tahun ajaran:", err);
-      ToastError.fire({ title: "Gagal mengambil data Tahun Ajaran" });
     }
   };
 

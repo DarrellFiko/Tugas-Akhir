@@ -66,7 +66,6 @@ export default function MasterKelasPage() {
       setRows(res.data);
     } catch (err) {
       console.error("Gagal fetch kelas:", err);
-      ToastError.fire({ title: "Gagal mengambil data Kelas" });
     }
   };
 
@@ -76,7 +75,6 @@ export default function MasterKelasPage() {
       setWaliKelasList(res.users || res);
     } catch (err) {
       console.error("Gagal fetch users:", err);
-      ToastError.fire({ title: "Gagal mengambil data Wali Kelas" });
     }
   };
 

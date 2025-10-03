@@ -13,6 +13,11 @@ export const getAllKelas = async () => {
   return res.data;
 };
 
+// ================== GET SIMPLE KELAS ==================
+export const getSimpleKelas = async (params = {}) => {
+  return await getAPI(ENDPOINTS.KELAS.GET_SIMPLE, { params });
+};
+
 // ================== GET BY ID ==================
 export const getKelasById = async (id_kelas) => {
   const res = await getAPI.get(ENDPOINTS.KELAS.GET_BY_ID(id_kelas));
