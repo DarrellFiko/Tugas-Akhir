@@ -66,4 +66,13 @@ export const ENDPOINTS = {
     UPDATE: (id) => `/kelas-tahun-ajaran/${id}`,
     DELETE: (id) => `/kelas-tahun-ajaran/${id}`,
   },
+
+  JADWAL_PELAJARAN: {
+    CREATE: "/jadwal-pelajaran",
+    GET_ALL: "/jadwal-pelajaran",
+    GET_SIMPLE: "/jadwal-pelajaran/simple",
+    GET_BY_ID: (id) => `/jadwal-pelajaran/${id}`,
+    UPDATE: (id) => `/jadwal-pelajaran/${id}`,
+    DELETE: (id) => `/jadwal-pelajaran/${id}`,
+  },
 };

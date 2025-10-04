@@ -31,6 +31,7 @@ import MasterJadwalPage from "../pages/Admin/MasterJadwalPage";
 import MasterKelasPage from "../pages/Admin/MasterKelasPage";
 import MasterTahunAjaranPage from "../pages/Admin/MasterTahunAjaranPage";
 import MasterPelajaranPage from "../pages/Admin/MasterPelajaranPage";
+import MasterPeriodePelajaranPage from "../pages/Admin/MasterPeriodePelajaranPage";
 
 // Icon import
 import AnnouncementOutlinedIcon from '@mui/icons-material/AnnouncementOutlined';
@@ -45,6 +46,7 @@ import InsertChartOutlinedIcon from '@mui/icons-material/InsertChartOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import SensorDoorOutlinedIcon from '@mui/icons-material/SensorDoorOutlined';
+import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
 
 const loginRoutes = [
   {
@@ -125,6 +127,7 @@ const adminRoutes = [
       { path: "/tahun-ajaran", element: <MasterTahunAjaranPage />, label: "Tahun Ajaran", icon: <SchoolOutlinedIcon /> },
       { path: "/kelas", element: <MasterKelasPage />, label: "Kelas", icon: <SensorDoorOutlinedIcon /> },
       { path: "/pelajaran", element: <MasterPelajaranPage />, label: "Pelajaran", icon: <MenuBookOutlinedIcon /> },
+      { path: "/periode-pelajaran", element: <MasterPeriodePelajaranPage />, label: "Periode Pelajaran", icon: <EventNoteOutlinedIcon /> },
       { path: "/jadwal", element: <MasterJadwalPage />, label: "Jadwal Belajar", icon: <CalendarMonthOutlinedIcon /> },
     ],
   },
