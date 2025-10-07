@@ -229,14 +229,26 @@ export default function RegisterPage() {
     const confirm = await PopupDelete.fire();
     if (confirm.isConfirmed) {
       try {
-        await deleteUser(data.id_user);
-        ToastSuccess.fire({ title: "User berhasil dihapus" });
+        if (Array.isArray(data)) {
+          const ids = data.map((item) =>
+            typeof item === "object" ? item.id_user : item
+          );
+          await Promise.all(ids.map((id) => deleteUser(id)));
+          ToastSuccess.fire({ title: `${ids.length} user berhasil dihapus` });
+        }
+        else {
+          await deleteUser(data.id_user);
+          ToastSuccess.fire({ title: "User berhasil dihapus" });
+        }
+
         fetchUsers();
       } catch (err) {
         console.error("Delete gagal:", err);
+        ToastError.fire({ title: "Gagal menghapus user" });
       }
     }
   };
+
 
   // ================== UPLOAD ==================
   const handleUploadConfirm = async () => {
@@ -288,10 +300,13 @@ export default function RegisterPage() {
           columns={columns}
           rows={rows}
           initialRowsPerPage={10}
+          keyProperty="id_user"
+          isCheckbox
           isDownload
           isUpload
           isUpdate
           isDelete
+          tableHeight={500}
           onCreate={openCreateDialog}
           onUpdate={openUpdateDialog}
           onDelete={handleDelete}

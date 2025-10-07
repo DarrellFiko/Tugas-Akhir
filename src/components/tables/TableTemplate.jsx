@@ -334,6 +334,7 @@ export default function TableTemplate({
   isPagination = true,
   hideToolbar = false,
   getRowClassName,
+  keyProperty = "id",
 }) {
   const [order, setOrder] = React.useState(null);
   const [orderBy, setOrderBy] = React.useState(null);
@@ -354,7 +355,7 @@ export default function TableTemplate({
   };
 
   const handleSelectAllClick = (event) => {
-    const pageRowIds = visibleRowsMemo.map((r) => r.id);
+    const pageRowIds = visibleRowsMemo.map((r) => r[keyProperty]);
     if (event.target.checked) {
       setSelected((prev) => [...new Set([...prev, ...pageRowIds])]);
     } else {
@@ -485,7 +486,8 @@ export default function TableTemplate({
                 </TableRow>
               : (!isLoading && visibleRowsMemo.length > 0) ? (
                 visibleRowsMemo.map((row, index) => {
-                  const isItemSelected = selected.indexOf(row.id) !== -1;
+                  const rowKey = row[keyProperty];
+                  const isItemSelected = selected.indexOf(rowKey) !== -1;
                   const labelId = `table-checkbox-${index}`;
 
                   return (
@@ -494,7 +496,7 @@ export default function TableTemplate({
                       role={isCheckbox ? 'checkbox' : 'row'}
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.id || index}
+                      key={rowKey || index}
                       selected={isItemSelected}
                       className={getRowClassName ? getRowClassName(row) : ""}
                       sx={{
@@ -511,7 +513,7 @@ export default function TableTemplate({
                             inputProps={{ 'aria-labelledby': labelId }}
                             onClick={(event) => {
                               event.stopPropagation();
-                              handleClick(event, row.id);
+                              handleClick(event, rowKey);
                             }}
                           />
                         </TableCell>
@@ -616,5 +618,6 @@ TableTemplate.propTypes = {
   onDownload: PropTypes.func,
   isPagination: PropTypes.bool,
   hideToolbar: PropTypes.bool,
-  getRowClassName: PropTypes.func
+  getRowClassName: PropTypes.func,
+  keyProperty: PropTypes.string,
 };

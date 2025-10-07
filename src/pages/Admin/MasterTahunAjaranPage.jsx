@@ -8,10 +8,9 @@ import {
   DialogActions,
   TextField,
   Button,
-  MenuItem,
   useTheme,
 } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 import TableTemplate from "../../components/tables/TableTemplate";
 import {
@@ -37,7 +36,6 @@ export default function MasterTahunAjaranPage() {
 
   const defaultFormValues = {
     nama: "",
-    semester: "",
     start_date: "",
     end_date: "",
   };
@@ -47,8 +45,6 @@ export default function MasterTahunAjaranPage() {
     handleSubmit,
     watch,
     reset,
-    setValue,
-    control,
     formState: { errors },
   } = useForm({
     defaultValues: defaultFormValues,
@@ -61,7 +57,6 @@ export default function MasterTahunAjaranPage() {
 
   const columns = [
     { field: "nama", label: "Nama", width: 200, sortable: true },
-    { field: "semester", label: "Semester", width: 150, sortable: true },
     {
       field: "start_date",
       label: "Tanggal Mulai",
@@ -114,7 +109,6 @@ export default function MasterTahunAjaranPage() {
       end_date: cleanRow.end_date
         ? new Date(cleanRow.end_date).toISOString().split("T")[0]
         : "",
-      semester: cleanRow.semester || "",
     };
 
     reset(formattedRow);
@@ -208,28 +202,6 @@ export default function MasterTahunAjaranPage() {
             {...register("nama", { required: "Nama wajib diisi" })}
             error={!!errors.nama}
             helperText={errors.nama?.message}
-          />
-
-          {/* Semester pakai Controller supaya default value muncul */}
-          <Controller
-            name="semester"
-            control={control}
-            rules={{ required: "Semester wajib dipilih" }}
-            render={({ field }) => (
-              <TextField
-                label="Semester"
-                fullWidth
-                required
-                margin="normal"
-                select
-                {...field}
-                error={!!errors.semester}
-                helperText={errors.semester?.message}
-              >
-                <MenuItem value="Ganjil">Ganjil</MenuItem>
-                <MenuItem value="Genap">Genap</MenuItem>
-              </TextField>
-            )}
           />
 
           <TextField
