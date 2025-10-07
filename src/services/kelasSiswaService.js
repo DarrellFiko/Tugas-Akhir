@@ -19,26 +19,41 @@ export const getKelasSiswaById = async (id) => {
   return res.data;
 };
 
-// ================== UPLOAD RAPOR ==================
-export const uploadRapor = async (id, tipe, file) => {
-  const formData = new FormData();
-  formData.append("rapor", file);
+// // ================== UPLOAD RAPOR ==================
+// export const uploadRapor = async (id, tipe, file) => {
+//   const formData = new FormData();
+//   formData.append("rapor", file);
 
-  const res = await getAPI.put(
-    ENDPOINTS.KELAS_SISWA.UPLOAD_RAPOR(id, tipe),
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+//   const res = await getAPI.put(
+//     ENDPOINTS.KELAS_SISWA.UPLOAD_RAPOR(id, tipe),
+//     formData,
+//     {
+//       headers: {
+//         "Content-Type": "multipart/form-data",
+//       },
+//     }
+//   );
 
-  return res.data;
-};
+//   return res.data;
+// };
 
 // ================== DELETE ==================
 export const deleteKelasSiswa = async (id) => {
   const res = await getAPI.delete(ENDPOINTS.KELAS_SISWA.DELETE(id));
+  return res.data;
+};
+
+// ================== UPLOAD RAPOR ==================
+export const uploadRaporKelasSiswa = async (id, tipe, formData) => {
+  const res = await getAPI.put(ENDPOINTS.KELAS_SISWA.UPLOAD_RAPOR(id, tipe),
+    formData,
+    { headers: { "Content-Type": "multipart/form-data" } }
+  );
+  return res.data;
+};
+
+// ================== DELETE RAPOR ==================
+export const deleteRaporKelasSiswa = async (id, tipe) => {
+  const res = await getAPI.delete(ENDPOINTS.KELAS_SISWA.DELETE_RAPOR(id, tipe));
   return res.data;
 };

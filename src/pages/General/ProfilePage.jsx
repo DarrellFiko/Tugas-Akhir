@@ -123,7 +123,7 @@ export default function ProfilePage() {
   const fetchProfile = async () => {
     try {
       const res = await getProfile();
-      const user = res.user;
+      const user = res.data;
 
       user.statusText = user.status === 1 ? "Aktif" : "Non-Aktif";
       user.genderText = user.gender === 0 ? "Laki-laki" : "Perempuan";

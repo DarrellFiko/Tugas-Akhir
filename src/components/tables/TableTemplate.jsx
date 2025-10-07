@@ -526,7 +526,7 @@ export default function TableTemplate({
                           padding={col.disablePadding ? 'none' : 'normal'}
                           sx={{ width: col.width, maxWidth: col.width, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                         >
-                          {col.render ? col.render(row[col.field], row) : row[col.field]}
+                          {col.render ? col.render(row[col.field] ?? null, row) : (row[col.field] ?? "-")}
                         </TableCell>
                       ))}
 

@@ -32,6 +32,7 @@ import MasterKelasPage from "../pages/Admin/MasterKelasPage";
 import MasterTahunAjaranPage from "../pages/Admin/MasterTahunAjaranPage";
 import MasterPelajaranPage from "../pages/Admin/MasterPelajaranPage";
 import MasterPeriodePelajaranPage from "../pages/Admin/MasterPeriodePelajaranPage";
+import MasterKelasSiswaPage from "../pages/Admin/MasterKelasSiswaPage";
 
 // Icon import
 import AnnouncementOutlinedIcon from '@mui/icons-material/AnnouncementOutlined';
@@ -47,6 +48,7 @@ import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import SensorDoorOutlinedIcon from '@mui/icons-material/SensorDoorOutlined';
 import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
+import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
 
 const loginRoutes = [
   {
@@ -129,17 +131,16 @@ const adminRoutes = [
       { path: "/pelajaran", element: <MasterPelajaranPage />, label: "Pelajaran", icon: <MenuBookOutlinedIcon /> },
       { path: "/periode-pelajaran", element: <MasterPeriodePelajaranPage />, label: "Periode Pelajaran", icon: <EventNoteOutlinedIcon /> },
       { path: "/jadwal", element: <MasterJadwalPage />, label: "Jadwal Belajar", icon: <CalendarMonthOutlinedIcon /> },
+      { path: "/kelas-siswa", element: <MasterKelasSiswaPage />, label: "Kelas Siswa", icon: <LaptopChromebookOutlinedIcon /> },
     ],
   },
-  // {
-  //   section: "dont-show",
-  //   items: [
-  //     { path: "/profile", element: <ProfilePage /> },
-  //     { path: "/kelas/detail/:id", element: <DetailKelasSiswaPage /> },
-  //     { path: "/kelas/detail/:id/module/:modulId", element: <DetailModuleSiswaPage /> },
-  //     // { path: "*", element: <NotFoundPage /> },
-  //   ],
-  // },
+  {
+    section: "dont-show",
+    items: [
+      { path: "/profile", element: <ProfilePage /> },
+      // { path: "*", element: <NotFoundPage /> },
+    ],
+  },
 ];
 
 // Function to get routes by role

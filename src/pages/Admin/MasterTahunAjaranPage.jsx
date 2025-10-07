@@ -77,7 +77,7 @@ export default function MasterTahunAjaranPage() {
   const fetchData = async () => {
     try {
       const res = await getAllTahunAjaran();
-      setRows(res.tahunAjaran || res);
+      setRows(res.data || res);
     } catch (err) {
       console.error("Gagal fetch tahun ajaran:", err);
     }

@@ -72,7 +72,7 @@ export default function MasterKelasPage() {
   const fetchWaliKelas = async () => {
     try {
       const res = await getSimpleUsers("guru");
-      setWaliKelasList(res.users || res);
+      setWaliKelasList(res.data || res);
     } catch (err) {
       console.error("Gagal fetch users:", err);
     }

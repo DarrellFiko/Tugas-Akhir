@@ -107,7 +107,7 @@ export default function MasterPeriodePelajaranPage() {
       setPelajaranList(Array.isArray(pelajaranRes.data?.data) ? pelajaranRes.data.data : []);
 
       const guruRes = await getSimpleUsers("guru");
-      setGuruList(Array.isArray(guruRes.users) ? guruRes.users : []);
+      setGuruList(Array.isArray(guruRes.data) ? guruRes.data : []);
     } catch (err) {
       console.error("Gagal fetch options:", err);
     }

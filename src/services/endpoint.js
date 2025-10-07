@@ -81,6 +81,7 @@ export const ENDPOINTS = {
     GET_ALL: "/kelas-siswa",
     GET_BY_ID: (id) => `/kelas-siswa/${id}`,
     UPLOAD_RAPOR: (id, tipe) => `/kelas-siswa/upload-rapor/${id}/${tipe}`,
+    DELETE_RAPOR: (id, tipe) => `/kelas-siswa/delete-rapor/${id}/${tipe}`,
     DELETE: (id) => `/kelas-siswa/${id}`,
   },
 };

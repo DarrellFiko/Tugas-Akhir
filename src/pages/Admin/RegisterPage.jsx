@@ -117,7 +117,7 @@ export default function RegisterPage() {
   const fetchUsers = async () => {
     try {
       const res = await getAllUsers();
-      setRows(res.users || []);
+      setRows(res.data || []);
     } catch (err) {
       console.error("Gagal fetch users:", err);
     }
