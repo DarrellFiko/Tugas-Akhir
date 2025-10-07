@@ -195,7 +195,7 @@ export default function MasterJadwalPage() {
       </Backdrop>
 
       <Typography variant="h4" sx={{ mb: 1 }}>
-        Jadwal Belajar
+        Managemen Jadwal Belajar
       </Typography>
       <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
         Halaman ini digunakan untuk mengatur jadwal pelajaran tiap kelas dalam periode tertentu.

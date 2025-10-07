@@ -207,7 +207,7 @@ export default function MasterPeriodePelajaranPage() {
   return (
     <>
       <Typography variant="h4" sx={{ mb: 1 }}>
-        Mata Pelajaran Periode
+        Managemen Periode Pelajaran
       </Typography>
       <Typography variant="body2" sx={{ mb: 3, color: "text.secondary" }}>
         Halaman ini digunakan untuk menentukan pelajaran apa saja yang diampu
