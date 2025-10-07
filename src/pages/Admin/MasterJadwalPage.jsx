@@ -1,4 +1,3 @@
-// src/pages/master/MasterJadwalPage.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -10,12 +9,16 @@ import {
   TextField,
   Button,
   Autocomplete,
+  CircularProgress,
+  Backdrop,
+  useTheme,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 
 import TableTemplate from "../../components/tables/TableTemplate";
 import {
   ToastSuccess,
+  ToastError,
   PopupDelete,
   PopupEdit,
 } from "../../composables/sweetalert";
@@ -30,11 +33,12 @@ import { getAllKelasTahunAjaran } from "../../services/kelasTahunAjaranService";
 
 export default function MasterJadwalPage() {
   const [rows, setRows] = useState([]);
-  const [ktaList, setKtaList] = useState([]); // kelas_tahun_ajaran
-
+  const [ktaList, setKtaList] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const theme = useTheme();
 
   const defaultFormValues = {
     id_kelas_tahun_ajaran: null,
@@ -59,58 +63,53 @@ export default function MasterJadwalPage() {
       label: "Tahun Ajaran",
       width: 200,
       render: (row) => row?.nama || "-",
+      sortable: true,
     },
     {
       field: "Kelas",
       label: "Kelas",
       width: 200,
       render: (row) => row?.nama_kelas || "-",
+      sortable: true,
     },
     {
       field: "Pelajaran",
       label: "Pelajaran",
       width: 200,
       render: (row) => row?.nama_pelajaran || "-",
+      sortable: true,
     },
     {
       field: "GuruPengampu",
       label: "Guru Pengampu",
       width: 250,
       render: (row) => row.nama || "-",
+      sortable: true,
     },
-    {
-      field: "hari",
-      label: "Hari",
-      width: 150,
-    },
-    {
-      field: "jam_mulai",
-      label: "Jam Mulai",
-      width: 150,
-    },
-    {
-      field: "jam_selesai",
-      label: "Jam Selesai",
-      width: 150,
-    },
+    { field: "hari", label: "Hari", width: 150, sortable: true },
+    { field: "jam_mulai", label: "Jam Mulai", width: 150, sortable: true },
+    { field: "jam_selesai", label: "Jam Selesai", width: 150, sortable: true },
   ];
 
-  // =============== FETCH DATA ===============
   const fetchData = async () => {
+    setLoading(true);
     try {
       const res = await getAllJadwal();
       setRows(res.data || []);
     } catch (err) {
-      console.error("Gagal fetch jadwal:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchOptions = async () => {
+    setLoading(true);
     try {
       const res = await getAllKelasTahunAjaran();
       setKtaList(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("Gagal fetch kelas-tahun-ajaran:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,7 +118,6 @@ export default function MasterJadwalPage() {
     fetchOptions();
   }, []);
 
-  // =============== HANDLE DIALOG ===============
   const openCreateDialog = () => {
     reset(defaultFormValues);
     setEditMode(false);
@@ -130,14 +128,12 @@ export default function MasterJadwalPage() {
   const openUpdateDialog = (row) => {
     setEditMode(true);
     setEditData(row);
-
     reset({
       id_kelas_tahun_ajaran: row.id_kelas_tahun_ajaran,
       hari: row.hari,
       jam_mulai: row.jam_mulai,
       jam_selesai: row.jam_selesai,
     });
-
     setOpenDialog(true);
   };
 
@@ -158,8 +154,8 @@ export default function MasterJadwalPage() {
     setOpenDialog(false);
   };
 
-  // =============== SAVE ===============
   const onSubmit = async (data) => {
+    setLoading(true);
     try {
       if (editMode) {
         await updateJadwal(editData.id_jadwal, data);
@@ -172,26 +168,32 @@ export default function MasterJadwalPage() {
       setOpenDialog(false);
       fetchData();
     } catch (err) {
-      console.error("Save gagal:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // =============== DELETE ===============
   const handleDelete = async (data) => {
     const confirm = await PopupDelete.fire();
     if (confirm.isConfirmed) {
+      setLoading(true);
       try {
         await deleteJadwal(data.id_jadwal);
         ToastSuccess.fire({ title: "Jadwal berhasil dihapus" });
         fetchData();
       } catch (err) {
-        console.error("Delete gagal:", err);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   return (
     <>
+      <Backdrop open={loading} sx={{ zIndex: 2000 }}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       <Typography variant="h4" sx={{ mb: 1 }}>
         Jadwal Belajar
       </Typography>
@@ -215,13 +217,9 @@ export default function MasterJadwalPage() {
         />
       </Box>
 
-      {/* ===== Dialog Form ===== */}
       <Dialog open={openDialog} onClose={handleCancel} fullWidth maxWidth="sm">
-        <DialogTitle>
-          {editMode ? "Update Jadwal" : "Tambah Jadwal"}
-        </DialogTitle>
+        <DialogTitle>{editMode ? "Update Jadwal" : "Tambah Jadwal"}</DialogTitle>
         <DialogContent dividers>
-          {/* Kelas Tahun Ajaran */}
           <Controller
             name="id_kelas_tahun_ajaran"
             control={control}
@@ -234,11 +232,7 @@ export default function MasterJadwalPage() {
                     ? `${option.Pelajaran?.nama_pelajaran || "-"} - ${option.Kelas?.nama_kelas || "-"} (${option.TahunAjaran?.nama || "-"})`
                     : ""
                 }
-                value={
-                  ktaList.find(
-                    (k) => k.id_kelas_tahun_ajaran === field.value
-                  ) || null
-                }
+                value={ktaList.find((k) => k.id_kelas_tahun_ajaran === field.value) || null}
                 onChange={(_, newValue) =>
                   field.onChange(newValue ? newValue.id_kelas_tahun_ajaran : null)
                 }
@@ -256,7 +250,6 @@ export default function MasterJadwalPage() {
             )}
           />
 
-          {/* Hari */}
           <Controller
             name="hari"
             control={control}
@@ -280,7 +273,6 @@ export default function MasterJadwalPage() {
             )}
           />
 
-          {/* Jam Mulai */}
           <Controller
             name="jam_mulai"
             control={control}
@@ -305,12 +297,11 @@ export default function MasterJadwalPage() {
                 error={!!errors.jam_mulai}
                 helperText={errors.jam_mulai?.message}
                 InputLabelProps={{ shrink: true }}
-                onClick={(e) => e.target.showPicker?.()}
+                inputProps={{ style: { colorScheme: theme.palette.mode } }}
               />
             )}
           />
 
-          {/* Jam Selesai */}
           <Controller
             name="jam_selesai"
             control={control}
@@ -335,7 +326,7 @@ export default function MasterJadwalPage() {
                 error={!!errors.jam_selesai}
                 helperText={errors.jam_selesai?.message}
                 InputLabelProps={{ shrink: true }}
-                onClick={(e) => e.target.showPicker?.()}
+                inputProps={{ style: { colorScheme: theme.palette.mode } }}
               />
             )}
           />

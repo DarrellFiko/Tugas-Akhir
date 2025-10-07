@@ -9,6 +9,7 @@ import {
   TextField,
   Button,
   useTheme,
+  CircularProgress,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 
@@ -29,6 +30,9 @@ import { formatDate } from "../../utils/utils";
 
 export default function MasterTahunAjaranPage() {
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -60,34 +64,34 @@ export default function MasterTahunAjaranPage() {
     {
       field: "start_date",
       label: "Tanggal Mulai",
-      width: 180,
+      width: 250,
       sortable: true,
       render: (value) => <div>{formatDate(value, "DD-MMMM-yyyy")}</div>,
     },
     {
       field: "end_date",
       label: "Tanggal Selesai",
-      width: 180,
+      width: 250,
       sortable: true,
       render: (value) => <div>{formatDate(value, "DD-MMMM-yyyy")}</div>,
     },
   ];
 
-  // ================== FETCH DATA ==================
   const fetchData = async () => {
+    setLoading(true);
     try {
       const res = await getAllTahunAjaran();
       setRows(res.data || res);
     } catch (err) {
       console.error("Gagal fetch tahun ajaran:", err);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // ================== HANDLE DIALOG ==================
   const openCreateDialog = () => {
     reset(defaultFormValues);
     setEditMode(false);
@@ -117,7 +121,6 @@ export default function MasterTahunAjaranPage() {
 
   const handleCancel = async () => {
     if (!editMode) {
-      // Check if ada perubahan dari default
       const hasChanges = Object.keys(defaultFormValues).some(
         (key) => watchAllFields[key] !== defaultFormValues[key]
       );
@@ -133,8 +136,8 @@ export default function MasterTahunAjaranPage() {
     setOpenDialog(false);
   };
 
-  // ================== SAVE ==================
   const onSubmit = async (data) => {
+    setSubmitLoading(true);
     try {
       const { created_at, updated_at, deleted_at, ...cleanData } = data;
       if (editMode) {
@@ -150,12 +153,13 @@ export default function MasterTahunAjaranPage() {
     } catch (err) {
       console.error("Save gagal:", err);
     }
+    setSubmitLoading(false);
   };
 
-  // ================== DELETE ==================
   const handleDelete = async (data) => {
     const confirm = await PopupDelete.fire();
     if (confirm.isConfirmed) {
+      setDeleteLoading(true);
       try {
         await deleteTahunAjaran(data.id_tahun_ajaran);
         ToastSuccess.fire({ title: "Tahun Ajaran berhasil dihapus" });
@@ -163,6 +167,7 @@ export default function MasterTahunAjaranPage() {
       } catch (err) {
         console.error("Delete gagal:", err);
       }
+      setDeleteLoading(false);
     }
   };
 
@@ -174,6 +179,7 @@ export default function MasterTahunAjaranPage() {
 
       <Box sx={{ width: "100%" }}>
         <TableTemplate
+          isLoading={loading || deleteLoading}
           title="Daftar Tahun Ajaran"
           columns={columns}
           rows={rows}
@@ -188,7 +194,6 @@ export default function MasterTahunAjaranPage() {
         />
       </Box>
 
-      {/* ===== Dialog Form ===== */}
       <Dialog open={openDialog} onClose={handleCancel} fullWidth maxWidth="sm">
         <DialogTitle>
           {editMode ? "Update Tahun Ajaran" : "Tambah Tahun Ajaran"}
@@ -243,9 +248,22 @@ export default function MasterTahunAjaranPage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
-            {editMode ? "Update" : "Simpan"}
+          <Button onClick={handleCancel} disabled={submitLoading}>
+            Batal
+          </Button>
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            variant="contained"
+            disabled={submitLoading}
+            startIcon={
+              submitLoading ? <CircularProgress size={18} color="inherit" /> : null
+            }
+          >
+            {submitLoading
+              ? "Menyimpan..."
+              : editMode
+              ? "Update"
+              : "Simpan"}
           </Button>
         </DialogActions>
       </Dialog>

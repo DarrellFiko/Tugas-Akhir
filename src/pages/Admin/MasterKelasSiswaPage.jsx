@@ -10,6 +10,8 @@ import {
   TextField,
   Autocomplete,
   IconButton,
+  CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -47,6 +49,7 @@ export default function MasterKelasSiswaPage() {
   const [selectedRaporType, setSelectedRaporType] = useState(null);
   const [selectedRow, setSelectedRow] = useState(null);
   const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const defaultFormValues = {
     id_kelas: null,
@@ -65,13 +68,14 @@ export default function MasterKelasSiswaPage() {
   });
 
   const columns = [
-    { field: "kelas", label: "Kelas", width: 200 },
-    { field: "tahunAjaran", label: "Tahun Ajaran", width: 200 },
+    { field: "kelas", label: "Kelas", width: 200, sortable: true, },
+    { field: "tahunAjaran", label: "Tahun Ajaran", width: 200, sortable: true, },
     {
       field: "siswa",
       label: "Siswa",
       width: 250,
       render: (value, row) => row.siswa?.nama || "-",
+      sortable: true,
     },
     {
       field: "rapor_ganjil",
@@ -161,8 +165,8 @@ export default function MasterKelasSiswaPage() {
     },
   ];
 
-  // ================== FETCH ==================
   const fetchData = async () => {
+    setLoading(true);
     try {
       const res = await getAllKelasSiswa();
       const formatted = res.data.map((item) => ({
@@ -176,22 +180,26 @@ export default function MasterKelasSiswaPage() {
       setRows(formatted);
     } catch (err) {
       console.error("Gagal fetch kelas siswa:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchDropdowns = async () => {
+    setLoading(true);
     try {
       const [kelas, tahunAjaran, siswa] = await Promise.all([
         getAllKelas(),
         getAllTahunAjaran(),
         getSimpleUsers("siswa"),
       ]);
-
       setKelasList(kelas.data || []);
       setTahunAjaranList(tahunAjaran.data || []);
       setSiswaList(siswa.data || []);
     } catch (err) {
       console.error("Gagal fetch dropdown:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -200,7 +208,6 @@ export default function MasterKelasSiswaPage() {
     fetchDropdowns();
   }, []);
 
-  // ================== HANDLE RAPOR ==================
   const handleOpenUpload = (row, type) => {
     setSelectedRow(row);
     setSelectedRaporType(type);
@@ -220,18 +227,18 @@ export default function MasterKelasSiswaPage() {
     if (!selectedRow?.id_kelas_siswa)
       return ToastError.fire({ title: "Gagal: ID kelas siswa tidak ditemukan" });
 
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("rapor", file);
-
       await uploadRaporKelasSiswa(selectedRow.id_kelas_siswa, selectedRaporType, formData);
-
       ToastSuccess.fire({ title: "Rapor berhasil diupload" });
       handleCloseUploadDialog();
       fetchData();
     } catch (err) {
       console.error("Upload gagal:", err);
-      ToastError.fire({ title: "Gagal upload rapor" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -245,20 +252,20 @@ export default function MasterKelasSiswaPage() {
       title: `Hapus rapor ${tipe}?`,
       text: "File akan dihapus secara permanen.",
     });
-
     if (!confirm.isConfirmed) return;
 
+    setLoading(true);
     try {
       await deleteRaporKelasSiswa(row.id_kelas_siswa, tipe);
       ToastSuccess.fire({ title: `Rapor ${tipe} berhasil dihapus` });
       fetchData();
     } catch (err) {
       console.error("Gagal hapus rapor:", err);
-      ToastError.fire({ title: "Gagal menghapus rapor" });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ================== EXISTING HANDLERS (CREATE, DELETE, ETC) ==================
   const openCreateDialog = () => {
     reset(defaultFormValues);
     setOpenDialog(true);
@@ -280,6 +287,7 @@ export default function MasterKelasSiswaPage() {
   };
 
   const onSubmit = async (data) => {
+    setLoading(true);
     try {
       await createKelasSiswa(data);
       ToastSuccess.fire({ title: "Kelas siswa berhasil ditambahkan" });
@@ -287,26 +295,33 @@ export default function MasterKelasSiswaPage() {
       fetchData();
     } catch (err) {
       console.error("Gagal simpan:", err);
-      ToastError.fire({ title: "Gagal menyimpan data" });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (row) => {
     const confirm = await PopupDelete.fire();
     if (confirm.isConfirmed) {
+      setLoading(true);
       try {
         await deleteKelasSiswa(row.id_kelas_siswa);
         ToastSuccess.fire({ title: "Data berhasil dihapus" });
         fetchData();
       } catch (err) {
         console.error("Delete gagal:", err);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
-  // ================== RENDER ==================
   return (
     <>
+      <Backdrop open={loading} sx={{ zIndex: 2000, color: "#fff" }}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       <Typography variant="h4" sx={{ mb: 3 }}>
         Manajemen Kelas Siswa
       </Typography>
@@ -326,7 +341,6 @@ export default function MasterKelasSiswaPage() {
         />
       </Box>
 
-      {/* ===== Dialog Tambah ===== */}
       <Dialog open={openDialog} onClose={handleCancel} fullWidth maxWidth="sm">
         <DialogTitle>Tambah Kelas Siswa</DialogTitle>
         <DialogContent dividers>
@@ -406,7 +420,6 @@ export default function MasterKelasSiswaPage() {
         </DialogActions>
       </Dialog>
 
-      {/* ===== Dialog Upload Rapor ===== */}
       <Dialog
         open={openUploadDialog}
         onClose={handleCloseUploadDialog}

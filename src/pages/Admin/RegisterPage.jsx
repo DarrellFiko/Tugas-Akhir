@@ -1,4 +1,3 @@
-// src/pages/RegisterPage.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -11,8 +10,10 @@ import {
   MenuItem,
   Button,
   FormHelperText,
+  CircularProgress,
+  useTheme,
 } from "@mui/material";
-import { useForm, Controller } from "react-hook-form"; // <-- tambahkan Controller
+import { useForm, Controller } from "react-hook-form";
 import TableTemplate from "../../components/tables/TableTemplate";
 import { handleDownloadFile, handleUploadFile } from "../../utils/utils";
 import {
@@ -30,10 +31,16 @@ import {
 } from "../../services/authService";
 
 export default function RegisterPage() {
+  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [openImageDialog, setOpenImageDialog] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const theme = useTheme();
 
   // ============ Hook Form ============
   const {
@@ -42,7 +49,7 @@ export default function RegisterPage() {
     reset,
     setValue,
     watch,
-    control, // <-- ambil control
+    control,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -73,19 +80,21 @@ export default function RegisterPage() {
   const columns = [
     { field: "username", label: "Username", width: 150, sortable: true },
     { field: "nama", label: "Nama", width: 200, sortable: true },
-    { field: "email", label: "Email", width: 250 },
-    { field: "role", label: "Role", width: 120 },
+    { field: "email", label: "Email", width: 250, sortable: true },
+    { field: "role", label: "Role", width: 120, sortable: true },
     {
       field: "nis",
       label: "NIS",
       width: 120,
       render: (value) => (value === null || value === "null" ? "-" : value),
+      sortable: true,
     },
     {
       field: "nisn",
       label: "NISN",
       width: 120,
       render: (value) => (value === null || value === "null" ? "-" : value),
+      sortable: true,
     },
     {
       field: "gender",
@@ -95,32 +104,60 @@ export default function RegisterPage() {
         if (value === null || value === "") return "-";
         return value == 0 ? "Perempuan" : "Laki-Laki";
       },
+      sortable: true,
     },
-    { field: "tgl_lahir", label: "Tanggal Lahir", width: 150 },
-    { field: "tempat_lahir", label: "Tempat Lahir", width: 150 },
-    { field: "agama", label: "Agama", width: 120 },
-    { field: "alamat", label: "Alamat", width: 200 },
-    { field: "nama_ayah", label: "Nama Ayah", width: 200 },
-    { field: "nama_ibu", label: "Nama Ibu", width: 200 },
-    { field: "telp", label: "Telp", width: 150 },
-    { field: "telp_ortu", label: "Telp Ortu", width: 150 },
+    { field: "tgl_lahir", label: "Tanggal Lahir", width: 150, sortable: true },
+    { field: "tempat_lahir", label: "Tempat Lahir", width: 150, sortable: true },
+    { field: "agama", label: "Agama", width: 120, sortable: true },
+    { field: "alamat", label: "Alamat", width: 200, sortable: true },
+    { field: "nama_ayah", label: "Nama Ayah", width: 200, sortable: true },
+    { field: "nama_ibu", label: "Nama Ibu", width: 200, sortable: true },
+    { field: "telp", label: "Telp", width: 150, sortable: true },
+    { field: "telp_ortu", label: "Telp Ortu", width: 150, sortable: true },
     {
       field: "status",
       label: "Status",
       width: 120,
       render: (value) => (value === 1 ? "Aktif" : "Tidak Aktif"),
+      sortable: true,
     },
-    { field: "profile_picture", label: "Foto Profil", width: 150 },
+    { 
+      field: "profile_picture", 
+      label: "Foto Profil", 
+      width: 150,
+      render: (value) =>
+        value ? (
+          <img
+            src={value}
+            alt="profile"
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              cursor: "pointer",
+              objectFit: "cover",
+            }}
+            onClick={() => {
+              setPreviewImage(value);
+              setOpenImageDialog(true);
+            }}
+          />
+        ) : (
+          "-"
+        ),
+    },
   ];
 
   // ================== FETCH USERS ==================
   const fetchUsers = async () => {
+    setLoading(true);
     try {
       const res = await getAllUsers();
       setRows(res.data || []);
     } catch (err) {
       console.error("Gagal fetch users:", err);
     }
+    setLoading(false);
   };
   useEffect(() => {
     fetchUsers();
@@ -197,6 +234,7 @@ export default function RegisterPage() {
 
   // ================== SAVE ==================
   const onSubmit = async (data) => {
+    setSubmitLoading(true);
     try {
       const { created_at, updated_at, deleted_at, ...cleanData } = data;
 
@@ -222,12 +260,14 @@ export default function RegisterPage() {
     } catch (err) {
       console.error("Save gagal:", err);
     }
+    setSubmitLoading(false);
   };
 
   // ================== DELETE ==================
   const handleDelete = async (data) => {
     const confirm = await PopupDelete.fire();
     if (confirm.isConfirmed) {
+      setSubmitLoading(true);
       try {
         if (Array.isArray(data)) {
           const ids = data.map((item) =>
@@ -235,8 +275,7 @@ export default function RegisterPage() {
           );
           await Promise.all(ids.map((id) => deleteUser(id)));
           ToastSuccess.fire({ title: `${ids.length} user berhasil dihapus` });
-        }
-        else {
+        } else {
           await deleteUser(data.id_user);
           ToastSuccess.fire({ title: "User berhasil dihapus" });
         }
@@ -244,11 +283,10 @@ export default function RegisterPage() {
         fetchUsers();
       } catch (err) {
         console.error("Delete gagal:", err);
-        ToastError.fire({ title: "Gagal menghapus user" });
       }
+      setSubmitLoading(false);
     }
   };
-
 
   // ================== UPLOAD ==================
   const handleUploadConfirm = async () => {
@@ -263,6 +301,7 @@ export default function RegisterPage() {
       setUploadError("File harus berformat Excel (.xlsx atau .xls)");
       return;
     }
+    setUploadLoading(true);
     try {
       const itemsData = await handleUploadFile(uploadFile, columns);
       const res = await bulkRegister({ users: itemsData.rows });
@@ -274,6 +313,7 @@ export default function RegisterPage() {
     } catch (err) {
       console.error("Bulk register gagal:", err);
     }
+    setUploadLoading(false);
   };
 
   // ================== DOWNLOAD ==================
@@ -296,6 +336,7 @@ export default function RegisterPage() {
 
       <Box sx={{ width: "100%" }}>
         <TableTemplate
+          isLoading={loading}
           title="Daftar User"
           columns={columns}
           rows={rows}
@@ -514,9 +555,24 @@ export default function RegisterPage() {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
-            {editMode ? "Update" : "Simpan"}
+          <Button onClick={handleCancel} disabled={submitLoading}>
+            Batal
+          </Button>
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            variant="contained"
+            disabled={submitLoading}
+            startIcon={
+              submitLoading ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : null
+            }
+          >
+            {submitLoading
+              ? "Menyimpan..."
+              : editMode
+              ? "Update"
+              : "Simpan"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -573,12 +629,52 @@ export default function RegisterPage() {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenUploadDialog(false)}>Batal</Button>
-          <Button onClick={handleUploadConfirm} variant="contained">
-            Upload
+          <Button
+            onClick={() => setOpenUploadDialog(false)}
+            disabled={uploadLoading}
+          >
+            Batal
+          </Button>
+          <Button
+            onClick={handleUploadConfirm}
+            variant="contained"
+            disabled={uploadLoading}
+            startIcon={
+              uploadLoading ? (
+                <CircularProgress size={18} color="inherit" />
+              ) : null
+            }
+          >
+            {uploadLoading ? "Mengupload..." : "Upload"}
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog
+        open={openImageDialog}
+        onClose={() => setOpenImageDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Preview Foto Profil</DialogTitle>
+        <DialogContent sx={{ textAlign: "center" }}>
+          <img
+            src={previewImage}
+            alt="preview"
+            style={{ width: "100%", borderRadius: "12px" }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <style>
+        {`
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: ${theme.palette.mode === "dark" ? "invert(1)" : "invert(0)"};
+          }
+          input[type="date"] {
+            color-scheme: ${theme.palette.mode};
+          }
+        `}
+      </style>
     </div>
   );
 }

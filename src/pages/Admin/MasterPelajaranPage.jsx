@@ -8,6 +8,7 @@ import {
   DialogActions,
   TextField,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 
@@ -27,6 +28,9 @@ import {
 
 export default function MasterPelajaranPage() {
   const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -51,21 +55,21 @@ export default function MasterPelajaranPage() {
     { field: "kode_pelajaran", label: "Kode Pelajaran", width: 200, sortable: true },
   ];
 
-  // ================== FETCH DATA ==================
   const fetchData = async () => {
+    setLoading(true);
     try {
       const res = await getAllPelajaran();
       setRows(res.data);
     } catch (err) {
       console.error("Gagal fetch pelajaran:", err);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  // ================== HANDLE DIALOG ==================
   const openCreateDialog = () => {
     reset(defaultFormValues);
     setEditMode(false);
@@ -103,8 +107,8 @@ export default function MasterPelajaranPage() {
     setOpenDialog(false);
   };
 
-  // ================== SAVE ==================
   const onSubmit = async (data) => {
+    setSubmitLoading(true);
     try {
       const { created_at, updated_at, deleted_at, ...cleanData } = data;
 
@@ -120,22 +124,22 @@ export default function MasterPelajaranPage() {
       fetchData();
     } catch (err) {
       console.error("Save gagal:", err);
-      ToastError.fire({ title: "Gagal menyimpan data Pelajaran" });
     }
+    setSubmitLoading(false);
   };
 
-  // ================== DELETE ==================
   const handleDelete = async (data) => {
     const confirm = await PopupDelete.fire();
     if (confirm.isConfirmed) {
+      setDeleteLoading(true);
       try {
         await deletePelajaran(data.id_pelajaran);
         ToastSuccess.fire({ title: "Pelajaran berhasil dihapus" });
         fetchData();
       } catch (err) {
         console.error("Delete gagal:", err);
-        ToastError.fire({ title: "Gagal menghapus data Pelajaran" });
       }
+      setDeleteLoading(false);
     }
   };
 
@@ -147,6 +151,7 @@ export default function MasterPelajaranPage() {
 
       <Box sx={{ width: "100%" }}>
         <TableTemplate
+          isLoading={loading || deleteLoading}
           title="Daftar Pelajaran"
           columns={columns}
           rows={rows}
@@ -161,7 +166,6 @@ export default function MasterPelajaranPage() {
         />
       </Box>
 
-      {/* ===== Dialog Form ===== */}
       <Dialog open={openDialog} onClose={handleCancel} fullWidth maxWidth="sm">
         <DialogTitle>
           {editMode ? "Update Pelajaran" : "Tambah Pelajaran"}
@@ -187,9 +191,18 @@ export default function MasterPelajaranPage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
-            {editMode ? "Update" : "Simpan"}
+          <Button onClick={handleCancel} disabled={submitLoading}>
+            Batal
+          </Button>
+          <Button
+            onClick={handleSubmit(onSubmit)}
+            variant="contained"
+            disabled={submitLoading}
+            startIcon={
+              submitLoading ? <CircularProgress size={18} color="inherit" /> : null
+            }
+          >
+            {submitLoading ? "Menyimpan..." : editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>
       </Dialog>
