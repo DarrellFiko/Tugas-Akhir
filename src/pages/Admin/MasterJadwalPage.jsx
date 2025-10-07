@@ -297,7 +297,11 @@ export default function MasterJadwalPage() {
                 error={!!errors.jam_mulai}
                 helperText={errors.jam_mulai?.message}
                 InputLabelProps={{ shrink: true }}
-                inputProps={{ style: { colorScheme: theme.palette.mode } }}
+                inputProps={{
+                  style: { colorScheme: theme.palette.mode },
+                }}
+                onFocus={(e) => e.target.showPicker()}
+                onClick={(e) => e.target.showPicker()}
               />
             )}
           />
@@ -326,7 +330,11 @@ export default function MasterJadwalPage() {
                 error={!!errors.jam_selesai}
                 helperText={errors.jam_selesai?.message}
                 InputLabelProps={{ shrink: true }}
-                inputProps={{ style: { colorScheme: theme.palette.mode } }}
+                inputProps={{
+                  style: { colorScheme: theme.palette.mode },
+                }}
+                onFocus={(e) => e.target.showPicker()}
+                onClick={(e) => e.target.showPicker()}
               />
             )}
           />
