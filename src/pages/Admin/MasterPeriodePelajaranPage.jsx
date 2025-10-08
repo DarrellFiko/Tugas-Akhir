@@ -110,7 +110,7 @@ export default function MasterPeriodePelajaranPage() {
     setOptionLoading(true);
     try {
       const tahunRes = await getSimpleTahunAjaran();
-      setTahunAjaranList(Array.isArray(tahunRes.data?.data) ? tahunRes.data.data : []);
+      setTahunAjaranList(Array.isArray(tahunRes.data) ? tahunRes.data : []);
 
       const kelasRes = await getSimpleKelas();
       setKelasList(Array.isArray(kelasRes.data?.data) ? kelasRes.data.data : []);

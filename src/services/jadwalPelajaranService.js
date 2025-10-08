@@ -1,4 +1,3 @@
-// src/services/jadwalService.js
 import { getAPI } from "../plugins/axiosApi";
 import { ToastSuccess } from "../composables/sweetalert";
 import { ENDPOINTS } from "./endpoint";
@@ -12,9 +11,7 @@ export async function createJadwal(body) {
 
 // ================== GET ALL ==================
 export async function getAllJadwal() {
-  console.log(ENDPOINTS.JADWAL_PELAJARAN.GET_ALL)
   const res = await getAPI.get(ENDPOINTS.JADWAL_PELAJARAN.GET_ALL);
-  console.log(res)
   return res.data;
 }
 
@@ -41,5 +38,17 @@ export async function updateJadwal(id, body) {
 export async function deleteJadwal(id) {
   const res = await getAPI.delete(ENDPOINTS.JADWAL_PELAJARAN.DELETE(id));
   ToastSuccess.fire({ title: "Jadwal berhasil dihapus!" });
+  return res.data;
+}
+
+// ================== GET JADWAL SISWA ==================
+export async function getJadwalSiswa(id_tahun_ajaran) {
+  const res = await getAPI.get(ENDPOINTS.JADWAL_PELAJARAN.GET_BY_STUDENT(id_tahun_ajaran));
+  return res.data;
+}
+
+// ================== GET JADWAL GURU ==================
+export async function getJadwalGuru(id_tahun_ajaran) {
+  const res = await getAPI.get(ENDPOINTS.JADWAL_PELAJARAN.GET_BY_TEACHER(id_tahun_ajaran));
   return res.data;
 }

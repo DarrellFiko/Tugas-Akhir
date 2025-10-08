@@ -65,6 +65,8 @@ export const ENDPOINTS = {
     GET_BY_ID: (id) => `/kelas-tahun-ajaran/${id}`,
     UPDATE: (id) => `/kelas-tahun-ajaran/${id}`,
     DELETE: (id) => `/kelas-tahun-ajaran/${id}`,
+    GET_PELAJARAN_BY_ROLE: (id_tahun_ajaran) =>
+      `/kelas-tahun-ajaran/pelajaran/${id_tahun_ajaran}`,
   },
 
   JADWAL_PELAJARAN: {
@@ -74,6 +76,10 @@ export const ENDPOINTS = {
     GET_BY_ID: (id) => `/jadwal-pelajaran/${id}`,
     UPDATE: (id) => `/jadwal-pelajaran/${id}`,
     DELETE: (id) => `/jadwal-pelajaran/${id}`,
+    GET_BY_STUDENT: (id_tahun_ajaran) =>
+      `/jadwal-pelajaran/siswa/${id_tahun_ajaran}`,
+    GET_BY_TEACHER: (id_tahun_ajaran) =>
+      `/jadwal-pelajaran/guru/${id_tahun_ajaran}`,
   },
 
   KELAS_SISWA: {

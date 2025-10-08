@@ -1,123 +1,191 @@
-import { Box, Button, Grid, Typography } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import {
+  Box,
+  Button,
+  Grid,
+  Typography,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+} from "@mui/material";
+import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
 import TableTemplate from "../../components/tables/TableTemplate";
-import { useRef } from "react";
-import PrintOutlinedIcon from '@mui/icons-material/PrintOutlined';
 import { handlePrint } from "../../utils/utils";
+import { getSimpleTahunAjaran } from "../../services/tahunAjaranService";
+import { getJadwalGuru, getJadwalSiswa } from "../../services/jadwalPelajaranService";
 
 export default function JadwalPage() {
-  // States
   const printRef = useRef();
-  const role = localStorage.getItem("role")
+  const role = localStorage.getItem("role")?.toLowerCase(); // pastikan lowercase agar aman
 
+  // ================== STATES ==================
+  const [tahunAjaranList, setTahunAjaranList] = useState([]);
+  const [selectedTahun, setSelectedTahun] = useState("");
+  const [jadwalData, setJadwalData] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  // ================== COLUMNS ==================
   const studentColumns = [
     { field: "jam", label: "Jam", width: "auto" },
-    { field: "pelajaran", label: "Pelajaran", width: "170px", },
-    { field: "pengajar", label: "Pengajar", width: "230px" },
+    { field: "pelajaran", label: "Pelajaran", width: "180px" },
+    { field: "pengajar", label: "Pengajar", width: "220px" },
   ];
 
   const teacherColumns = [
     { field: "jam", label: "Jam", width: "auto" },
-    { field: "pelajaran", label: "Pelajaran", width: "230px", },
-    { field: "kelas", label: "Kelas", width: "170px" },
+    { field: "pelajaran", label: "Pelajaran", width: "220px" },
+    { field: "kelas", label: "Kelas", width: "180px" },
   ];
 
-  const studentRows = [
-    { jam: "08:00 - 09:00", pelajaran: "Matematikaaaaaaaaaaaaaaaaaaaa", pengajar: "Darrell Fiko Alexander Darrell Fiko Alexander" },
-    { jam: "08:00 - 10:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematikaaaaaaaaaaaaaaaaaaaa", pengajar: "Darrell Fiko Alexander Darrell Fiko Alexander" },
-    { jam: "08:00 - 10:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", pengajar: "Darrell Fiko Alexander" },
-  ];
+  // ================== FETCH FUNCTION (UTILITY) ==================
+  const fetchJadwalByRole = async (role, tahunId) => {
+    if (!tahunId) return {};
+    try {
+      let res;
 
-  const teacherRows = [
-    { jam: "08:00 - 10:00", pelajaran: "Matematika", kelas: "X-IPA-1" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-1" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-2" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-2" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPS-1" },
-    { jam: "08:00 - 10:00", pelajaran: "Matematika", kelas: "X-IPS-1" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPS-2" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-2" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-3" },
-    { jam: "08:00 - 09:00", pelajaran: "Matematika", kelas: "X-IPA-3" },
-  ];
+      if (role === "guru") {
+        res = await getJadwalGuru(tahunId);
+      } else if (role === "siswa") {
+        res = await getJadwalSiswa(tahunId);
+      } else {
+        console.warn("Role tidak dikenali:", role);
+        return {};
+      }
 
-  return <>
+      // Backend sudah return object grouped per hari (misal: {Senin: [...], Selasa: [...]})
+      return res?.data || {};
+    } catch (err) {
+      console.error("Error fetch jadwal:", err);
+      return {};
+    }
+  };
 
-    <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Jadwal Pelajaran
-      </Typography>
+  // ================== FETCH TAHUN AJARAN ==================
+  const fetchTahunAjaran = async () => {
+    try {
+      const res = await getSimpleTahunAjaran();
+      const data = res?.data || [];
+      setTahunAjaranList(data);
 
-      {/* Print Button */}
-      <Button variant="contained" color="primary" endIcon={ <PrintOutlinedIcon /> } onClick={ () => handlePrint(printRef) } sx={{ mb: 2 }}>
-        Cetak Jadwal
-      </Button>
-    </Box>
+      if (data.length > 0) {
+        const last = data[data.length - 1];
+        setSelectedTahun(last.id_tahun_ajaran);
 
-    <Box ref={printRef}>
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TableTemplate 
-            key={"Senin"}
-            title="Senin"
-            columns={ role == "student" ? studentColumns : teacherColumns }
-            rows={ role == "student" ? studentRows : teacherRows }
-            initialRowsPerPage={ 999 } 
-            tableHeight={ 400 }
-            isCheckbox={ false }
-            isUpdate={ false }
-            isDelete={ false }
-            isUpload={ false }
-            isCreate={ false }
-            isDownload={ false }
-            isPagination={ false }
-            hideToolbar
-          />
+        setIsLoading(true);
+        const jadwal = await fetchJadwalByRole(role, last.id_tahun_ajaran);
+        setJadwalData(jadwal);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error("Error fetch tahun ajaran:", err);
+    }
+  };
+
+  // ================== FETCH JADWAL SAAT GANTI TAHUN ==================
+  useEffect(() => {
+    if (!selectedTahun) return;
+    const fetch = async () => {
+      setIsLoading(true);
+      const jadwal = await fetchJadwalByRole(role, selectedTahun);
+      setJadwalData(jadwal);
+      setIsLoading(false);
+    };
+    fetch();
+  }, [selectedTahun]);
+
+  // ================== FETCH SAAT MOUNT ==================
+  useEffect(() => {
+    fetchTahunAjaran();
+  }, []);
+
+  // ================== SORT HARI (Senin - Sabtu) ==================
+  const dayOrder = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  const sortedJadwal = Object.keys(jadwalData)
+    .sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b))
+    .reduce((obj, key) => {
+      obj[key] = jadwalData[key];
+      return obj;
+    }, {});
+
+  // ================== RENDER ==================
+  return (
+    <>
+      {/* HEADER */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <Typography variant="h4" sx={{ mb: 3 }}>
+          Jadwal Pelajaran
+        </Typography>
+
+        <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+          {/* Select Tahun Ajaran */}
+          <FormControl size="small" sx={{ minWidth: 180 }}>
+            <InputLabel>Tahun Ajaran</InputLabel>
+            <Select
+              label="Tahun Ajaran"
+              value={selectedTahun}
+              onChange={(e) => setSelectedTahun(e.target.value)}
+            >
+              {tahunAjaranList.map((th) => (
+                <MenuItem key={th.id_tahun_ajaran} value={th.id_tahun_ajaran}>
+                  {th.nama}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Print Button */}
+          <Button
+            variant="contained"
+            color="primary"
+            endIcon={<PrintOutlinedIcon />}
+            onClick={() => handlePrint(printRef)}
+            disabled={isLoading}
+          >
+            {isLoading ? "Memuat..." : "Cetak Jadwal"}
+          </Button>
+        </Box>
+      </Box>
+
+      {/* CONTENT */}
+      <Box ref={printRef}>
+        <Grid container spacing={3}>
+          {isLoading ? (
+            <Grid item size={{ xs: 12 }}>
+              <Typography variant="body1" sx={{ mt: 2 }}>
+                Memuat jadwal...
+              </Typography>
+            </Grid>
+          ) : Object.keys(sortedJadwal).length > 0 ? (
+            Object.entries(sortedJadwal).map(([hari, data]) => (
+              <Grid item size={{ xs: 12, md: 6 }} key={hari}>
+                <TableTemplate
+                  key={hari}
+                  title={hari}
+                  columns={role === "siswa" ? studentColumns : teacherColumns}
+                  rows={data || []}
+                  initialRowsPerPage={999}
+                  tableHeight={400}
+                  isCheckbox={false}
+                  isUpdate={false}
+                  isDelete={false}
+                  isUpload={false}
+                  isCreate={false}
+                  isDownload={false}
+                  isPagination={false}
+                  hideToolbar
+                />
+              </Grid>
+            ))
+          ) : (
+            <Grid item xs={12}>
+              <Typography variant="body1" sx={{ mt: 2 }}>
+                Tidak ada jadwal tersedia untuk tahun ajaran ini.
+              </Typography>
+            </Grid>
+          )}
         </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TableTemplate 
-            key={"Selasa"}
-            title="Selasa"
-            columns={ role == "student" ? studentColumns : teacherColumns }
-            initialRowsPerPage={ 100 } 
-            tableHeight={ 400 }
-            isCheckbox={ false }
-            isUpdate={ false }
-            isDelete={ false }
-            isUpload={ false }
-            isCreate={ false }
-            isDownload={ false }
-            isPagination={ false }
-            hideToolbar
-          />
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <TableTemplate
-            key={"Rabu"} 
-            title="Rabu"
-            columns={ role == "student" ? studentColumns : teacherColumns }
-            rows={ role == "student" ? studentRows : teacherRows }
-            initialRowsPerPage={ 100 } 
-            tableHeight={ 400 }
-            isCheckbox={ false }
-            isUpdate={ false }
-            isDelete={ false }
-            isUpload={ false }
-            isCreate={ false }
-            isDownload={ false }
-            isPagination={ false }
-            hideToolbar
-          />
-        </Grid>
-      </Grid>
-    </Box>
-  </>
+      </Box>
+    </>
+  );
 }
