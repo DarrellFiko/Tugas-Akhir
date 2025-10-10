@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Pengumuman from "./Pengumuman";
+import { useParams } from "react-router-dom";
 import {
   Dialog,
   DialogTitle,
@@ -10,7 +10,17 @@ import {
   FormHelperText,
   Typography,
 } from "@mui/material";
-import { PopupEdit } from "../../composables/sweetalert";
+import { useForm } from "react-hook-form";
+import Pengumuman from "../../components/classes/Pengumuman";
+import { PopupEdit, ToastError, ToastSuccess } from "../../composables/sweetalert";
+import {
+  getAllPengumuman,
+  createPengumuman,
+  updatePengumuman,
+  deletePengumuman,
+  downloadPengumumanFile,
+} from "../../services/pengumumanService";
+import { createKomentar, deleteKomentar, updateKomentar } from "../../services/komentarService";
 
 export default function TabPengumuman() {
   const [loading, setLoading] = useState(false);
@@ -19,133 +29,151 @@ export default function TabPengumuman() {
   const [openDialog, setOpenDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDesc, setNewDesc] = useState("");
-  const [newFile, setNewFile] = useState(null);
-  const [errors, setErrors] = useState({ title: false, file: false });
+  const [expanded, setExpanded] = useState(false);
 
+  const { id } = useParams(); // id_kelas_tahun_ajaran dari route
   const role = localStorage.getItem("role");
 
-  const sendComment = (id, text, setText) => {
-    if (!text.trim()) return;
-    console.log("Pengumuman ID:", id, "Comment:", text);
-    setText("");
-  };
+  // ============ Hook Form ============
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      judul: "",
+      isi: "",
+      file: null,
+    },
+  });
 
-  useEffect(() => {
+  // ================== FETCH DATA ==================
+  const fetchPengumuman = async () => {
     setLoading(true);
-    const data = [];
-    for (let i = 1; i <= 10; i++) {
-      const hasComments = Math.random() > 0.5;
-      const comments = hasComments
-        ? Array.from({ length: 15 }, (_, idx) => ({
-            from: idx % 2 === 0 ? "Fiko" : "No Name",
-            text: `Komentar ${String.fromCharCode(
-              65 + idx
-            )} untuk pengumuman ${i}`,
-          }))
-        : [];
+    try {
+      const res = await getAllPengumuman(id);
 
-      data.push({
-        id: i,
-        title: `Pengumuman ${i}`,
-        description: `Ini description pengumuman yang ke-${i}`,
-        comments,
-        file: `file-${i}.pdf`,
-        from: "admin",
+      setPengumuman((prev) => {
+        const mapPrev = new Map(prev.map((p) => [p.id_pengumuman, p]));
+        const newData = res.data || [];
+        return newData.map((item) => ({
+          ...mapPrev.get(item.id_pengumuman),
+          ...item,
+        }));
       });
+    } catch (err) {
+      console.error("Gagal fetch pengumuman:", err);
+    } finally {
+      setLoading(false);
     }
-    setPengumuman(data);
-    setLoading(false);
-  }, []);
-
-  const handleCreate = () => {
-    let hasError = false;
-    const newErrors = { title: false, file: false };
-
-    if (!newTitle.trim()) {
-      newErrors.title = true;
-      hasError = true;
-    }
-    if (!newFile) {
-      newErrors.file = true;
-      hasError = true;
-    }
-
-    setErrors(newErrors);
-    if (hasError) return;
-
-    const newData = {
-      id: pengumuman.length + 1,
-      title: newTitle,
-      description: newDesc,
-      comments: [],
-      file: newFile.name,
-      from: "teacher",
-    };
-
-    console.log("Create Data:", newData);   // <<=== log data
-
-    setPengumuman([newData, ...pengumuman]);
-    resetForm();
-    setOpenDialog(false);
   };
 
-  const handleUpdate = () => {
-    let hasError = false;
-    const newErrors = { title: false, file: false };
-
-    if (!newTitle.trim()) {
-      newErrors.title = true;
-      hasError = true;
+  // ================== KOMENTAR HANDLER ==================
+  const sendComment = async (id_pengumuman, text, setText) => {
+    if (!text.trim()) return;
+    try {
+      await createKomentar({ id_pengumuman, komentar: text });
+      setText("");
+      await fetchPengumuman();
+    } catch (error) {
+      console.error("Gagal kirim komentar:", error);
     }
-    if (!newFile && !editData?.file) {
-      newErrors.file = true;
-      hasError = true;
-    }
-
-    setErrors(newErrors);
-    if (hasError) return;
-
-    const updatedData = pengumuman.map((item) =>
-      item.id === editData.id
-        ? {
-            ...item,
-            title: newTitle,
-            description: newDesc,
-            file: newFile ? newFile.name : editData.file,
-          }
-        : item
-    );
-
-    setPengumuman(updatedData);
-    resetForm();
-    setOpenDialog(false);
   };
 
-  const resetForm = () => {
-    setNewTitle("");
-    setNewDesc("");
-    setNewFile(null);
-    setErrors({ title: false, file: false });
-    setEditMode(false);
-    setEditData(null);
+  const handleUpdateComment = async (id_komentar, text) => {
+    if (!text.trim()) return;
+    try {
+      await updateKomentar(id_komentar, { komentar: text });
+      ToastSuccess.fire({ title: "Komentar berhasil diupdate" });
+      await fetchPengumuman();
+    } catch (error) {
+      console.error("Gagal update komentar:", error);
+    }
   };
 
+  const handleDeleteComment = async (id_komentar) => {
+    try {
+      await deleteKomentar(id_komentar);
+      ToastSuccess.fire({ title: "Komentar berhasil dihapus" });
+      await fetchPengumuman();
+    } catch (error) {
+      console.error("Gagal hapus komentar:", error);
+    }
+  };
+
+  // ================== CREATE / UPDATE PENGUMUMAN ==================
+  const onSubmit = async (data) => {
+    try {
+      if (data.file && data.file.type !== "application/pdf") {
+        ToastError.fire({ title: "Hanya file PDF yang diperbolehkan!" });
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("judul", data.judul);
+      formData.append("isi", data.isi);
+      if (data.file) formData.append("file", data.file);
+
+      if (editMode) {
+        await updatePengumuman(editData.id_pengumuman, formData);
+        ToastSuccess.fire({ title: "Berhasil Mengubah Pengumuman" });
+      } else {
+        await createPengumuman(formData);
+        ToastSuccess.fire({ title: "Berhasil Membuat Pengumuman" });
+      }
+
+      await fetchPengumuman();
+      reset();
+      setOpenDialog(false);
+      setEditMode(false);
+      setEditData(null);
+    } catch (err) {
+      console.error("Gagal simpan pengumuman:", err);
+    }
+  };
+
+  // ================== DELETE ==================
+  const handleDelete = async (id_pengumuman) => {
+    try {
+      await deletePengumuman(id_pengumuman);
+      await fetchPengumuman();
+      ToastSuccess.fire({ title: "Berhasil Menghapus Pengumuman" });
+    } catch (err) {
+      console.error("Gagal hapus pengumuman:", err);
+    }
+  };
+
+  // ================== DOWNLOAD ==================
+  const handleDownload = async (id_pengumuman) => {
+    try {
+      await downloadPengumumanFile(id_pengumuman);
+      ToastSuccess.fire({ title: "Berhasil Mendownload Pengumuman" });
+    } catch (err) {
+      console.error("Gagal download pengumuman:", err);
+    }
+  };
+
+  // ================== DIALOG HANDLER ==================
   const handleCancel = async () => {
-    if ((newTitle || newDesc || newFile) && !editMode) {
+    const formValues = watch();
+    if ((formValues.judul || formValues.isi || formValues.file) && !editMode) {
       const confirmClose = await PopupEdit.fire({
         title: "Batalkan?",
         text: "Data sudah diisi sebagian. Yakin ingin membatalkan?",
       });
       if (!confirmClose.isConfirmed) return;
     }
-    resetForm();
+    reset();
     setOpenDialog(false);
+    setEditMode(false);
+    setEditData(null);
   };
 
   const openCreateDialog = () => {
-    resetForm();
+    reset();
     setEditMode(false);
     setOpenDialog(true);
   };
@@ -153,30 +181,49 @@ export default function TabPengumuman() {
   const openUpdateDialog = (data) => {
     setEditMode(true);
     setEditData(data);
-    setNewTitle(data.title || "");
-    setNewDesc(data.description || "");
-    setNewFile(null);
+    reset({
+      judul: data.judul || "",
+      isi: data.isi || "",
+      file: null,
+    });
     setOpenDialog(true);
   };
 
+  // ================== EFFECT ==================
+  useEffect(() => {
+    fetchPengumuman();
+    const interval = setInterval(fetchPengumuman, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <>
+      <Typography variant="h4" sx={{ mb: 3 }}>
+        Pengumuman
+      </Typography>
+
       <Pengumuman
-        title="Pengumuman Kelas"
+        title="Pengumuman"
         data={pengumuman}
+        loading={loading}
         commentInputs={commentInputs}
         setCommentInputs={setCommentInputs}
         sendComment={sendComment}
+        onUpdateComment={handleUpdateComment}
+        onDeleteComment={handleDeleteComment}
+        expanded={expanded}
+        setExpanded={setExpanded}
         itemsPerPage={10}
-        isCreate={role == "teacher"}
-        isUpdate={role == "teacher"}
-        isDelete={role == "teacher"}
-        onCreate={role == "teacher" ? openCreateDialog : () => {}}
-        onUpdate={role == "teacher" ? (item) => openUpdateDialog(item) : () => {}}
-        onDelete={role == "teacher" ? (id) => console.log("Delete ID:", id) : () => {}}
+        isCreate={role === "guru"}
+        isUpdate={role === "guru"}
+        isDelete={role === "guru"}
+        onCreate={openCreateDialog}
+        onUpdate={openUpdateDialog}
+        onDelete={handleDelete}
+        onDownload={handleDownload}
       />
 
-
+      {/* ===== DIALOG FORM ===== */}
       <Dialog open={openDialog} onClose={handleCancel} fullWidth>
         <DialogTitle>
           {editMode ? "Update Pengumuman" : "Buat Pengumuman Baru"}
@@ -187,10 +234,9 @@ export default function TabPengumuman() {
             fullWidth
             required
             margin="normal"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            error={errors.title}
-            helperText={errors.title ? "Judul wajib diisi" : ""}
+            {...register("judul", { required: "Judul wajib diisi" })}
+            error={!!errors.judul}
+            helperText={errors.judul?.message}
           />
           <TextField
             label="Deskripsi"
@@ -198,14 +244,14 @@ export default function TabPengumuman() {
             multiline
             rows={4}
             margin="normal"
-            value={newDesc}
-            onChange={(e) => setNewDesc(e.target.value)}
+            {...register("isi")}
           />
           <div style={{ marginTop: "16px" }}>
             <Typography variant="body2" sx={{ mb: 1 }}>
-              Upload File
+              Upload File (PDF) Opsional
             </Typography>
-            {editMode && editData?.file && !newFile && (
+
+            {editMode && editData?.file && !watch("file") && (
               <Typography
                 variant="caption"
                 color="text.secondary"
@@ -214,21 +260,23 @@ export default function TabPengumuman() {
                 File sudah ada: {editData.file || "File lama"}
               </Typography>
             )}
+
             <input
               type="file"
-              onChange={(e) => setNewFile(e.target.files[0])}
+              accept="application/pdf"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                setValue("file", file);
+              }}
             />
             {errors.file && (
-              <FormHelperText error>File wajib diupload</FormHelperText>
+              <FormHelperText error>{errors.file.message}</FormHelperText>
             )}
           </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Batal</Button>
-          <Button
-            onClick={editMode ? handleUpdate : handleCreate}
-            variant="contained"
-          >
+          <Button onClick={handleSubmit(onSubmit)} variant="contained">
             {editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>

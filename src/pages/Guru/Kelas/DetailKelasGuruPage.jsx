@@ -23,9 +23,10 @@ import {
   handleUploadFile,
 } from "../../../utils/utils";
 import TabPengumuman from "../../../components/classes/TabPengumuman";
-import TabMateriGuru from "../../../components/classes/guru/TabMateriGuru";
+import TabMateri from "../../../components/classes/TabMateri";
 import TabModuleGuru from "../../../components/classes/guru/TabModuleGuru";
 import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
+import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
 
 export default function DetailKelasGuruPage() {
   const location = useLocation();
@@ -36,7 +37,7 @@ export default function DetailKelasGuruPage() {
   // ambil tab terakhir dari localStorage, default = 0
   const savedTab = Number(localStorage.getItem("detailKelasSiswaTab") || 0);
   const [tab, setTab] = useState(savedTab);
-  const [notifCount, setNotifCount] = useState(3); // contoh awal notifikasi >0
+  const [notifCount, setNotifCount] = useState(3);
 
   const handleTabChange = (e, newValue) => {
     setTab(newValue);
@@ -48,22 +49,6 @@ export default function DetailKelasGuruPage() {
       setNotifCount(0);
     }
   }, [tab, notifCount]);
-
-  // === Data siswa ===
-  const columnsListSiswa = [
-    { field: "nrp", label: "NRP", width: "150px" },
-    { field: "nama", label: "Nama", width: "400px" },
-  ];
-
-  const rowsListSiswa = [
-    { id: 1, nrp: "221170552", nama: "DEVINA NYOLANDA" },
-    { id: 2, nrp: "221170553", nama: "ELIZABETH MICHELLIN KRISTIANI" },
-    { id: 3, nrp: "221170566", nama: "STEPHEN REYNALD" },
-    { id: 4, nrp: "221170567", nama: "ALICIA WIDYADHARI KOSMAN" },
-    { id: 5, nrp: "221170572", nama: "CLARISSA AVRELIA TANWIJAYA" },
-    { id: 6, nrp: "221170574", nama: "GRACIELLA JENNIEFER ADIWIJAYA" },
-    { id: 7, nrp: "221170585", nama: "YOANES DE BRITTO BRANADI RYANDONO" },
-  ];
 
   // === Presensi ===
   const columnsPresensi = [
@@ -105,18 +90,6 @@ export default function DetailKelasGuruPage() {
       topik: "Bahasan Dasar - Introduction",
       absensi: true,
     },
-    {
-      id: 3,
-      hariTanggal: new Date("2025-09-17"),
-      topik: "Praktikum Dasar",
-      absensi: false,
-    },
-    {
-      id: 4,
-      hariTanggal: new Date("2025-09-25"),
-      topik: "Diskusi Studi Kasus",
-      absensi: true,
-    },
   ];
 
   // === Penilaian ===
@@ -148,10 +121,7 @@ export default function DetailKelasGuruPage() {
     }
   };
 
-  // helper ubah header jadi snake_case
-  const normalizeField = (header) => {
-    return header.toLowerCase().replace(/\s+/g, "_");
-  };
+  const normalizeField = (header) => header.toLowerCase().replace(/\s+/g, "_");
 
   const handleConfirmUpload = async () => {
     if (!selectedFile) {
@@ -160,16 +130,11 @@ export default function DetailKelasGuruPage() {
     }
     try {
       const { columns, rows } = await handleUploadFile(selectedFile);
-      console.log(columns, rows);
-
-      // mapping ulang header
       const mappedColumns = columns.map((c) => ({
         field: normalizeField(c.label),
         label: c.label,
         width: "150px",
       }));
-
-      // mapping rows agar sesuai field baru
       const mappedRows = rows.map((row, idx) => {
         const newRow = { id: idx + 1 };
         columns.forEach((c) => {
@@ -178,11 +143,9 @@ export default function DetailKelasGuruPage() {
         });
         return newRow;
       });
-
       if (!mappedColumns.some((c) => c.field === "nama")) {
         throw new Error("File harus memiliki kolom 'Nama'");
       }
-
       setColumnsPenilaian(mappedColumns);
       setRowsPenilaian(mappedRows);
       ToastSuccess.fire({ title: "Data uploaded successfully!" });
@@ -198,13 +161,15 @@ export default function DetailKelasGuruPage() {
     else ToastError.fire({ title: "Download Failed!" });
   };
 
+  useEffect(() => {
+    if (!kelas) navigate("/kelas");
+  }, []);
+
   return (
     <>
-      <Box
-        sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h4" sx={{ mb: 3 }}>
-          {kelas?.title || `Detail Kelas ${id}`}
+          {`${kelas?.nama_pelajaran} - ${kelas?.nama_kelas}`}
         </Typography>
 
         <Button
@@ -241,25 +206,10 @@ export default function DetailKelasGuruPage() {
       </Tabs>
 
       {/* Materi */}
-      {tab === 0 && <TabMateriGuru />}
+      {tab === 0 && <TabMateri idKelasTahunAjaran={id} />}
 
       {/* Daftar Siswa */}
-      {tab === 1 && (
-        <TableTemplate
-          key={"siswa"}
-          title={"Daftar Siswa"}
-          columns={columnsListSiswa}
-          rows={rowsListSiswa}
-          initialRowsPerPage={10}
-          tableHeight={400}
-          isCheckbox={false}
-          isUpdate={false}
-          isDelete={false}
-          isUpload={false}
-          isCreate={false}
-          isDownload={false}
-        />
-      )}
+      {tab === 1 && <TabDaftarSiswa idKelasTahunAjaran={id} />}
 
       {/* Presensi */}
       {tab === 2 && (
@@ -273,15 +223,9 @@ export default function DetailKelasGuruPage() {
           isCheckbox={false}
           isUpload={false}
           isDownload={false}
-          onCreate={() => {
-            navigate(`/kelas/detail/${id}/presensi/new`);
-          }}
-          onUpdate={(row) => {
-            navigate(`/kelas/detail/${id}/presensi/${row.id}`);
-          }}
-          onDelete={(row) => {
-            console.log("Delete presensi:", row.id);
-          }}
+          onCreate={() => navigate(`/kelas/detail/${id}/presensi/new`)}
+          onUpdate={(row) => navigate(`/kelas/detail/${id}/presensi/${row.id}`)}
+          onDelete={(row) => console.log("Delete presensi:", row.id)}
         />
       )}
 
@@ -300,20 +244,12 @@ export default function DetailKelasGuruPage() {
             tableHeight={400}
             isCheckbox={false}
             isCreate={false}
-            onDelete={() => {
-              console.log("Delete");
-            }}
             onUpload={handleOpenUpload}
             onDownload={handleDownloadPenilaian}
           />
 
           {/* Dialog Upload */}
-          <Dialog
-            open={openUpload}
-            onClose={handleCloseUpload}
-            fullWidth
-            maxWidth="sm"
-          >
+          <Dialog open={openUpload} onClose={handleCloseUpload} fullWidth maxWidth="sm">
             <DialogTitle>Upload File XLSX</DialogTitle>
             <DialogContent dividers>
               <TextField
@@ -328,11 +264,7 @@ export default function DetailKelasGuruPage() {
               <Button onClick={handleCloseUpload} color="primary">
                 Batal
               </Button>
-              <Button
-                onClick={handleConfirmUpload}
-                variant="contained"
-                color="primary"
-              >
+              <Button onClick={handleConfirmUpload} variant="contained" color="primary">
                 Upload
               </Button>
             </DialogActions>

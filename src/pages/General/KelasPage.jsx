@@ -141,15 +141,22 @@ export default function KelasPage() {
                 }}
               >
                 <CardContent sx={{ flex: 1, textAlign: "center" }}>
-                  <Typography variant="subtitle1" fontWeight="bold">
+                  <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1 }}>
                     {c.nama_pelajaran}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ wordBreak: "break-word", whiteSpace: "normal", mb: 1 }}
+                  >
+                    {c.nama_kelas || "-"}
                   </Typography>
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     sx={{ wordBreak: "break-word", whiteSpace: "normal" }}
                   >
-                    {c.nama_kelas || c.nama_guru || "-"}
+                    {c.nama_pengajar || "-"}
                   </Typography>
                 </CardContent>
               </Card>

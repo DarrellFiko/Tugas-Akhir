@@ -13,29 +13,19 @@ export const getAllKelasSiswa = async (params = {}) => {
   return res.data;
 };
 
+// ================== GET LIST SISWA BY KELAS TAHUN AJARAN ==================
+export const getListSiswaByKelasTahunAjaran = async (id_kelas_tahun_ajaran) => {
+  const res = await getAPI.get(
+    ENDPOINTS.KELAS_SISWA.GET_LIST_SISWA(id_kelas_tahun_ajaran)
+  );
+  return res.data;
+};
+
 // ================== GET BY ID ==================
 export const getKelasSiswaById = async (id) => {
   const res = await getAPI.get(ENDPOINTS.KELAS_SISWA.GET_BY_ID(id));
   return res.data;
 };
-
-// // ================== UPLOAD RAPOR ==================
-// export const uploadRapor = async (id, tipe, file) => {
-//   const formData = new FormData();
-//   formData.append("rapor", file);
-
-//   const res = await getAPI.put(
-//     ENDPOINTS.KELAS_SISWA.UPLOAD_RAPOR(id, tipe),
-//     formData,
-//     {
-//       headers: {
-//         "Content-Type": "multipart/form-data",
-//       },
-//     }
-//   );
-
-//   return res.data;
-// };
 
 // ================== DELETE ==================
 export const deleteKelasSiswa = async (id) => {

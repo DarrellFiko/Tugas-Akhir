@@ -65,29 +65,36 @@ export const ENDPOINTS = {
     GET_BY_ID: (id) => `/kelas-tahun-ajaran/${id}`,
     UPDATE: (id) => `/kelas-tahun-ajaran/${id}`,
     DELETE: (id) => `/kelas-tahun-ajaran/${id}`,
-    GET_PELAJARAN_BY_ROLE: (id_tahun_ajaran) =>
-      `/kelas-tahun-ajaran/pelajaran/${id_tahun_ajaran}`,
+    GET_PELAJARAN_BY_ROLE: (id_tahun_ajaran) => `/kelas-tahun-ajaran/pelajaran/${id_tahun_ajaran}`,
   },
 
   JADWAL_PELAJARAN: {
     CREATE: "/jadwal-pelajaran",
     GET_ALL: "/jadwal-pelajaran",
     GET_SIMPLE: "/jadwal-pelajaran/simple",
+    GET_BY_STUDENT: (id_tahun_ajaran) => `/jadwal-pelajaran/siswa/${id_tahun_ajaran}`,
+    GET_BY_TEACHER: (id_tahun_ajaran) => `/jadwal-pelajaran/guru/${id_tahun_ajaran}`,
     GET_BY_ID: (id) => `/jadwal-pelajaran/${id}`,
     UPDATE: (id) => `/jadwal-pelajaran/${id}`,
     DELETE: (id) => `/jadwal-pelajaran/${id}`,
-    GET_BY_STUDENT: (id_tahun_ajaran) =>
-      `/jadwal-pelajaran/siswa/${id_tahun_ajaran}`,
-    GET_BY_TEACHER: (id_tahun_ajaran) =>
-      `/jadwal-pelajaran/guru/${id_tahun_ajaran}`,
   },
 
   KELAS_SISWA: {
     CREATE: "/kelas-siswa",
     GET_ALL: "/kelas-siswa",
+    GET_LIST_SISWA: (id_kelas_tahun_ajaran) => `/kelas-siswa/list-siswa?id_kelas_tahun_ajaran=${id_kelas_tahun_ajaran}`,
     GET_BY_ID: (id) => `/kelas-siswa/${id}`,
     UPLOAD_RAPOR: (id, tipe) => `/kelas-siswa/upload-rapor/${id}/${tipe}`,
     DELETE_RAPOR: (id, tipe) => `/kelas-siswa/delete-rapor/${id}/${tipe}`,
     DELETE: (id) => `/kelas-siswa/${id}`,
+  },
+
+  MATERI: {
+    CREATE: "/materi",
+    GET_ALL: "/materi",
+    GET_BY_ID: (id_materi) => `/materi/${id_materi}`,
+    UPDATE: (id_materi) => `/materi/${id_materi}`,
+    DELETE: (id_materi) => `/materi/${id_materi}`,
+    DOWNLOAD: (id_materi) => `/materi/download/${id_materi}`,
   },
 };

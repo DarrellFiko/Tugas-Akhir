@@ -145,7 +145,7 @@ const adminRoutes = [
 
 // Function to get routes by role
 export function getRoutes(role) {
-  if (!role) return [...loginRoutes]; // handle undefined/null role
+  if (!role) return [...loginRoutes];
 
   switch (role.toLowerCase()) {
     case "siswa":

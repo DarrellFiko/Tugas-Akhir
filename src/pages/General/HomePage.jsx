@@ -88,7 +88,6 @@ export default function HomePage() {
       await fetchPengumuman();
     } catch (error) {
       console.error("Gagal update komentar:", error);
-      ToastError.fire({ title: "Gagal update komentar" });
     }
   };
 
@@ -100,7 +99,6 @@ export default function HomePage() {
       await fetchPengumuman();
     } catch (error) {
       console.error("Gagal hapus komentar:", error);
-      ToastError.fire({ title: "Gagal hapus komentar" });
     }
   };
 
