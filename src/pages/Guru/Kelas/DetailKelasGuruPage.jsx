@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
   Tabs,
   Tab,
-  Badge,
   Button,
   Dialog,
   DialogTitle,
@@ -13,10 +12,9 @@ import {
   TextField,
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import TableTemplate from "../../../components/tables/TableTemplate";
 import {
-  formatDate,
   handleDownloadFile,
   handleUploadFile,
 } from "../../../utils/utils";
@@ -25,9 +23,6 @@ import TabMateri from "../../../components/classes/TabMateri";
 import TabModuleGuru from "../../../components/classes/guru/TabModuleGuru";
 import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
 import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
-import {
-  getAllBeritaAcara,
-} from "../../../services/beritaAcaraService";
 import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 import TabPresensi from "../../../components/classes/TabPresensi";
 
@@ -39,18 +34,11 @@ export default function DetailKelasGuruPage() {
   const savedTab = Number(localStorage.getItem("detailKelasSiswaTab") || 0);
   const [tab, setTab] = useState(savedTab);
   const [kelas, setKelas] = useState(null);
-  const [notifCount, setNotifCount] = useState(3);
 
   const handleTabChange = (e, newValue) => {
     setTab(newValue);
     localStorage.setItem("detailKelasSiswaTab", newValue);
   };
-
-  useEffect(() => {
-    if (tab === 5 && notifCount > 0) {
-      setNotifCount(0);
-    }
-  }, [tab, notifCount]);
 
   // === Penilaian ===
   const [columnsPenilaian, setColumnsPenilaian] = useState([
@@ -164,13 +152,7 @@ export default function DetailKelasGuruPage() {
         <Tab label="Presensi" />
         <Tab label="Module" />
         <Tab label="Penilaian" />
-        <Tab
-          label={
-            <Badge color="error" badgeContent={notifCount}>
-              Pengumuman
-            </Badge>
-          }
-        />
+        <Tab label="Pengumuman"/>
       </Tabs>
 
       {/* Materi */}

@@ -25,19 +25,11 @@ export default function DetailKelasSiswaPage() {
 
   const savedTab = Number(localStorage.getItem("detailKelasSiswaTab") || 0);
   const [tab, setTab] = useState(savedTab);
-  const [notifCount, setNotifCount] = useState(0);
 
   const handleTabChange = (e, newValue) => {
     setTab(newValue);
     localStorage.setItem("detailKelasSiswaTab", newValue);
   };
-
-  // Reset badge notifikasi ketika tab pengumuman dibuka
-  useEffect(() => {
-    if (tab === 4 && notifCount > 0) {
-      setNotifCount(0);
-    }
-  }, [tab, notifCount]);
 
   const columnsModule = [
     { field: "namaModule", label: "Nama Module", width: "250px" },
@@ -123,13 +115,7 @@ export default function DetailKelasSiswaPage() {
         <Tab label="Daftar Siswa" />
         <Tab label="Presensi" />
         <Tab label="Module" />
-        <Tab
-          label={
-            <Badge color="error" badgeContent={notifCount}>
-              Pengumuman
-            </Badge>
-          }
-        />
+        <Tab label="Pengumuman"/>
       </Tabs>
 
       {/* Tab Materi */}
