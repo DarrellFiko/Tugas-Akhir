@@ -97,4 +97,12 @@ export const ENDPOINTS = {
     DELETE: (id_materi) => `/materi/${id_materi}`,
     DOWNLOAD: (id_materi) => `/materi/download/${id_materi}`,
   },
+
+  BERITA_ACARA: {
+    CREATE: "/berita-acara",
+    GET_ALL: "/berita-acara",
+    GET_BY_ID: (id_berita_acara) => `/berita-acara/${id_berita_acara}`,
+    UPDATE: (id_berita_acara) => `/berita-acara/${id_berita_acara}`,
+    DELETE: (id_berita_acara) => `/berita-acara/${id_berita_acara}`,
+  },
 };

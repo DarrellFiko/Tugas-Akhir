@@ -1,4 +1,6 @@
-import React, { useState, useMemo } from "react";
+// src/pages/classes/guru/DetailPresensiGuruPage.jsx
+
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -15,24 +17,20 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import TableTemplate from "../../../components/tables/TableTemplate";
-import { PopupEdit } from "../../../composables/sweetalert";
+import { PopupEdit, ToastError, ToastSuccess } from "../../../composables/sweetalert";
+import { getListSiswaByKelasTahunAjaran } from "../../../services/kelasSiswaService";
+import {
+  createBeritaAcara,
+  getBeritaAcaraById,
+  updateBeritaAcara,
+} from "../../../services/beritaAcaraService";
 
-// Dummy data siswa
-const dummyStudents = [
-  { id: 1, nrp: "221170552", nama: "DEVINA NYOLANDA" },
-  { id: 2, nrp: "221170553", nama: "ELIZABETH MICHELLIN KRISTIANI" },
-  { id: 3, nrp: "221170566", nama: "STEPHEN REYNALD" },
-  { id: 4, nrp: "221170567", nama: "ALICIA WIDYADHARI KOSMAN" },
-  { id: 5, nrp: "221170572", nama: "CLARISSA AVRELIA TANWIJAYA" },
-  { id: 6, nrp: "221170574", nama: "GRACIELLA JENNIEFER ADIWIJAYA" },
-  { id: 7, nrp: "221170585", nama: "YOANES DE BRITTO BRANADI RYANDONO" },
-];
-
-const statusOptions = ["Hadir", "Tidak Hadir", "Ijin", "Sakit"];
+const statusOptions = ["Hadir", "Izin", "Sakit", "Alpha"];
 
 export default function DetailPresensiGuruPage() {
   const { id, presensiId } = useParams();
   const navigate = useNavigate();
+  const [loadingCreate, setLoadingCreate] = useState(false);
 
   // default hari ini
   const today = new Date().toISOString().split("T")[0];
@@ -44,38 +42,98 @@ export default function DetailPresensiGuruPage() {
   const [errorJudul, setErrorJudul] = useState(false);
 
   // absensi siswa
-  const [rowsAbsensi, setRowsAbsensi] = useState(
-    dummyStudents.map((s) => ({
-      ...s,
-      status: "Hadir", // default hadir
-    }))
-  );
+  const [rowsAbsensi, setRowsAbsensi] = useState([]);
+  const [loadingSiswa, setLoadingSiswa] = useState(false);
 
-  // simpan data awal untuk deteksi perubahan
+  const presensiIdIsInteger = () => {
+    if (!presensiId) return false;
+    const n = Number(presensiId);
+    return Number.isInteger(n) && !Number.isNaN(n);
+  };
+
+  // ================== FETCH DATA ==================
+  const fetchData = async () => {
+    if (!id) return;
+    try {
+      setLoadingSiswa(true);
+
+      const listRes = await getListSiswaByKelasTahunAjaran(id);
+      const siswaList = listRes?.data || [];
+
+      // jika belum ada presensi, default Hadir
+      if (!presensiIdIsInteger()) {
+        setRowsAbsensi(siswaList.map((s) => ({ ...s, status: "Hadir" })));
+        return;
+      }
+
+      try {
+        const beritaRes = await getBeritaAcaraById(presensiId);
+        const berita = beritaRes?.data || null;
+
+        if (berita) {
+          setJudul(berita.judul || "");
+          setTanggal(berita.tanggal || today);
+          setDeskripsi(berita.deskripsi || "");
+        }
+
+        // mapping status dari berita acara
+        const presensiList = (berita?.presensiList || []).reduce((acc, p) => {
+          const siswaId = p?.siswa?.id_user ?? p.id_siswa;
+          if (siswaId != null) acc[String(siswaId)] = p;
+          return acc;
+        }, {});
+
+        // merge dengan daftar siswa terbaru
+        const merged = siswaList.map((s) => {
+          const idUser = s.id_user ?? s.id_siswa ?? s.id;
+          const pres = presensiList[String(idUser)];
+          return {
+            ...s,
+            id_user: idUser,
+            status: pres ? pres.status : "Alpha",
+          };
+        });
+
+        setRowsAbsensi(merged);
+      } catch (err) {
+        console.error("Gagal ambil berita acara, fallback ke daftar siswa:", err);
+        setRowsAbsensi(siswaList.map((s) => ({ ...s, status: "Hadir" })));
+      }
+    } catch (err) {
+      console.error("Gagal memuat daftar siswa:", err);
+    } finally {
+      setLoadingSiswa(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchData();
+  }, [id, presensiId]);
+
+  // ================== LOGIC ==================
   const initialData = useMemo(
     () => ({
       judul: "",
       tanggal: today,
       deskripsi: "",
-      absensi: dummyStudents.map((s) => ({ ...s, status: "Hadir" })),
+      absensi: rowsAbsensi.map((s) => ({ ...s, status: "Hadir" })),
     }),
     [today]
   );
 
-  // cek apakah ada perubahan
   const isChanged = () => {
+    if (presensiIdIsInteger()) return false;
     if (judul !== initialData.judul) return true;
     if (tanggal !== initialData.tanggal) return true;
     if (deskripsi !== initialData.deskripsi) return true;
     for (let i = 0; i < rowsAbsensi.length; i++) {
-      if (rowsAbsensi[i].status !== initialData.absensi[i].status) return true;
+      if (rowsAbsensi[i].status !== "Hadir") return true;
     }
     return false;
   };
 
-  // columns untuk TableTemplate
   const columnsAbsensi = [
-    { field: "nrp", label: "NRP", width: "150px" },
+    { field: "nis", label: "NIS", width: "150px" },
     { field: "nama", label: "Nama", width: "300px" },
     {
       field: "status",
@@ -89,44 +147,60 @@ export default function DetailPresensiGuruPage() {
           onChange={(e) =>
             setRowsAbsensi((prev) =>
               prev.map((r) =>
-                r.id === row.id ? { ...r, status: e.target.value } : r
+                r.id_user === row.id_user ? { ...r, status: e.target.value } : r
               )
             )
           }
           sx={{ justifyContent: "center" }}
         >
           {statusOptions.map((opt) => (
-            <FormControlLabel
-              key={opt}
-              value={opt}
-              control={<Radio />}
-              label={opt}
-            />
+            <FormControlLabel key={opt} value={opt} control={<Radio />} label={opt} />
           ))}
         </RadioGroup>
       ),
     },
   ];
 
-  const handleSimpan = () => {
+  // ================== HANDLE SIMPAN ==================
+  const handleSimpan = async () => {
     if (!judul.trim()) {
       setErrorJudul(true);
       return;
     }
     setErrorJudul(false);
-
-    const data = {
-      beritaAcara: {
+    setLoadingCreate(true);
+    try {
+      const body = {
+        id_kelas_tahun_ajaran: id,
         judul,
-        tanggal,
         deskripsi,
-      },
-      absensi: rowsAbsensi,
-    };
-    console.log("Presensi tersimpan:", data);
-    alert("Presensi berhasil disimpan! (lihat console.log)");
+        tanggal,
+        presensi: rowsAbsensi.map((r) => ({
+          id_siswa: r.id_user,
+          status: r.status,
+        })),
+      };
+
+      if (presensiIdIsInteger()) {
+        await updateBeritaAcara(presensiId, body);
+      } else {
+        await createBeritaAcara(body);
+      }
+
+      ToastSuccess.fire({
+        text: presensiIdIsInteger()
+          ? "Presensi berhasil diperbarui"
+          : "Presensi berhasil disimpan",
+      });
+      navigate(`/kelas/detail/${id}`);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingCreate(false);
+    }
   };
 
+  // ================== HANDLE BACK ==================
   const handleBack = async () => {
     if (isChanged()) {
       const confirmClose = await PopupEdit.fire({
@@ -135,15 +209,10 @@ export default function DetailPresensiGuruPage() {
       });
       if (!confirmClose.isConfirmed) return;
     }
-
-    // jika presensiId bukan angka → kembali ke halaman kelas
-    if (!presensiId || isNaN(Number(presensiId))) {
-      navigate(`/kelas/detail/${id}`);
-    } else {
-      navigate(-1);
-    }
+    navigate(`/kelas/detail/${id}`);
   };
 
+  // ================== RENDER ==================
   return (
     <Box>
       {/* Header */}
@@ -155,9 +224,7 @@ export default function DetailPresensiGuruPage() {
           mb: 3,
         }}
       >
-        <Typography variant="h4">
-          Presensi Kelas {id} - {presensiId}
-        </Typography>
+        <Typography variant="h4">Presensi Kelas - {presensiId ?? id}</Typography>
         <Button
           variant="contained"
           color="warning"
@@ -213,6 +280,7 @@ export default function DetailPresensiGuruPage() {
 
       {/* Table Absensi */}
       <TableTemplate
+        isLoading={loadingSiswa}
         key={"absensi"}
         title={"Daftar Absensi Siswa"}
         columns={columnsAbsensi}
@@ -230,7 +298,12 @@ export default function DetailPresensiGuruPage() {
 
       {/* Tombol Simpan */}
       <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-        <Button variant="contained" color="primary" onClick={handleSimpan}>
+        <Button
+          disabled={loadingCreate}
+          variant="contained"
+          color="primary"
+          onClick={handleSimpan}
+        >
           Simpan Presensi
         </Button>
       </Box>

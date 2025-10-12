@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -8,16 +8,14 @@ import {
   IconButton,
   Button,
 } from "@mui/material";
-import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TableTemplate from "../../../components/tables/TableTemplate";
-import { formatDate } from "../../../utils/utils";
 import TabPengumuman from "../../../components/classes/TabPengumuman";
 import TabMateri from "../../../components/classes/TabMateri";
 import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
+import TabPresensi from "../../../components/classes/TabPresensi";
 
 export default function DetailKelasSiswaPage() {
   const location = useLocation();
@@ -40,38 +38,6 @@ export default function DetailKelasSiswaPage() {
       setNotifCount(0);
     }
   }, [tab, notifCount]);
-
-  // ===================== COLUMNS =====================
-  const columnsListSiswa = [
-    { field: "nrp", label: "NRP", width: "150px" },
-    { field: "nama", label: "Nama", width: "400px" },
-  ];
-
-  const columnsPresensi = [
-    {
-      field: "hariTanggal",
-      label: "Hari / Tanggal",
-      width: "200px",
-      render: (value) => formatDate(value),
-    },
-    { field: "topik", label: "Topik", width: "400px" },
-    {
-      field: "absensi",
-      label: "Absensi",
-      width: "120px",
-      align: "center",
-      render: (value) =>
-        value ? (
-          <Box sx={{ fontSize: 28 }}>
-            <CheckOutlinedIcon color="primary" fontSize="inherit" />
-          </Box>
-        ) : (
-          <Box sx={{ fontSize: 28 }}>
-            <CloseOutlinedIcon color="error" fontSize="inherit" />
-          </Box>
-        ),
-    },
-  ];
 
   const columnsModule = [
     { field: "namaModule", label: "Nama Module", width: "250px" },
@@ -96,8 +62,6 @@ export default function DetailKelasSiswaPage() {
   ];
 
   // ===================== DATA STATE =====================
-  const [rowsListSiswa, setRowsListSiswa] = useState([]);
-  const [rowsPresensi, setRowsPresensi] = useState([]);
   const [rowsModule, setRowsModule] = useState([]);
 
   // ===================== FETCH DATA =====================
@@ -175,22 +139,7 @@ export default function DetailKelasSiswaPage() {
       {tab === 1 && <TabDaftarSiswa idKelasTahunAjaran={id} />}
 
       {/* Tab Presensi */}
-      {tab === 2 && (
-        <TableTemplate
-          key={"presensi"}
-          title={"Presensi"}
-          columns={columnsPresensi}
-          rows={rowsPresensi}
-          initialRowsPerPage={10}
-          tableHeight={400}
-          isCheckbox={false}
-          isUpdate={false}
-          isDelete={false}
-          isUpload={false}
-          isCreate={false}
-          isDownload={false}
-        />
-      )}
+      {tab === 2 && <TabPresensi idKelasTahunAjaran={id} />}
 
       {/* Tab Modul */}
       {tab === 3 && (

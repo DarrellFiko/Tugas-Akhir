@@ -12,8 +12,6 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
-import CheckOutlinedIcon from "@mui/icons-material/CheckOutlined";
-import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import TableTemplate from "../../../components/tables/TableTemplate";
@@ -27,16 +25,20 @@ import TabMateri from "../../../components/classes/TabMateri";
 import TabModuleGuru from "../../../components/classes/guru/TabModuleGuru";
 import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
 import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
+import {
+  getAllBeritaAcara,
+} from "../../../services/beritaAcaraService";
+import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
+import TabPresensi from "../../../components/classes/TabPresensi";
 
 export default function DetailKelasGuruPage() {
-  const location = useLocation();
-  const { kelas } = location.state || {};
   const { id } = useParams();
   const navigate = useNavigate();
 
   // ambil tab terakhir dari localStorage, default = 0
   const savedTab = Number(localStorage.getItem("detailKelasSiswaTab") || 0);
   const [tab, setTab] = useState(savedTab);
+  const [kelas, setKelas] = useState(null);
   const [notifCount, setNotifCount] = useState(3);
 
   const handleTabChange = (e, newValue) => {
@@ -49,48 +51,6 @@ export default function DetailKelasGuruPage() {
       setNotifCount(0);
     }
   }, [tab, notifCount]);
-
-  // === Presensi ===
-  const columnsPresensi = [
-    {
-      field: "hariTanggal",
-      label: "Hari / Tanggal",
-      width: "200px",
-      render: (value) => formatDate(value),
-    },
-    { field: "topik", label: "Topik", width: "400px" },
-    {
-      field: "absensi",
-      label: "Absensi",
-      width: "120px",
-      align: "center",
-      render: (value) =>
-        value ? (
-          <Box sx={{ fontSize: 28 }}>
-            <CheckOutlinedIcon color="primary" fontSize="inherit" />
-          </Box>
-        ) : (
-          <Box sx={{ fontSize: 28 }}>
-            <CloseOutlinedIcon color="error" fontSize="inherit" />
-          </Box>
-        ),
-    },
-  ];
-
-  const rowsPresensi = [
-    {
-      id: 1,
-      hariTanggal: new Date("2025-09-01"),
-      topik: "Pengenalan Materi & Kontrak Kuliah",
-      absensi: true,
-    },
-    {
-      id: 2,
-      hariTanggal: new Date("2025-09-09"),
-      topik: "Bahasan Dasar - Introduction",
-      absensi: true,
-    },
-  ];
 
   // === Penilaian ===
   const [columnsPenilaian, setColumnsPenilaian] = useState([
@@ -151,7 +111,6 @@ export default function DetailKelasGuruPage() {
       ToastSuccess.fire({ title: "Data uploaded successfully!" });
       setOpenUpload(false);
     } catch (err) {
-      ToastError.fire({ title: err.message || "Upload gagal" });
     }
   };
 
@@ -161,15 +120,24 @@ export default function DetailKelasGuruPage() {
     else ToastError.fire({ title: "Download Failed!" });
   };
 
+  const fetchKelasTahunAjaran = async () => {
+    try {
+      const res = await getKelasTahunAjaranById(id)
+      setKelas(res.data)
+    } catch (error) {
+      navigate("/kelas");
+    }
+  }
+
   useEffect(() => {
-    if (!kelas) navigate("/kelas");
+    fetchKelasTahunAjaran()
   }, []);
 
   return (
     <>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h4" sx={{ mb: 3 }}>
-          {`${kelas?.nama_pelajaran} - ${kelas?.nama_kelas}`}
+          {`${kelas?.Pelajaran?.nama_pelajaran || "-"} - ${kelas?.Kelas.nama_kelas || "-"}`}
         </Typography>
 
         <Button
@@ -212,22 +180,7 @@ export default function DetailKelasGuruPage() {
       {tab === 1 && <TabDaftarSiswa idKelasTahunAjaran={id} />}
 
       {/* Presensi */}
-      {tab === 2 && (
-        <TableTemplate
-          key={"presensi"}
-          title={"Presensi"}
-          columns={columnsPresensi}
-          rows={rowsPresensi}
-          initialRowsPerPage={10}
-          tableHeight={400}
-          isCheckbox={false}
-          isUpload={false}
-          isDownload={false}
-          onCreate={() => navigate(`/kelas/detail/${id}/presensi/new`)}
-          onUpdate={(row) => navigate(`/kelas/detail/${id}/presensi/${row.id}`)}
-          onDelete={(row) => console.log("Delete presensi:", row.id)}
-        />
-      )}
+      {tab === 2 && <TabPresensi idKelasTahunAjaran={id} />}
 
       {/* Module */}
       {tab === 3 && <TabModuleGuru />}
