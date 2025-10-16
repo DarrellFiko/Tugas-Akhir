@@ -36,6 +36,7 @@ export default function DetailPresensiGuruPage() {
   const today = new Date().toISOString().split("T")[0];
 
   // form berita acara
+  const [data, setData] = useState("");
   const [judul, setJudul] = useState("");
   const [tanggal, setTanggal] = useState(today);
   const [deskripsi, setDeskripsi] = useState("");
@@ -68,6 +69,7 @@ export default function DetailPresensiGuruPage() {
 
       try {
         const beritaRes = await getBeritaAcaraById(presensiId);
+        setData(beritaRes.data)
         const berita = beritaRes?.data || null;
 
         if (berita) {
@@ -224,7 +226,7 @@ export default function DetailPresensiGuruPage() {
           mb: 3,
         }}
       >
-        <Typography variant="h4">Presensi Kelas - {presensiId ?? id}</Typography>
+        <Typography variant="h4">Presensi Kelas - {data?.kelasTahunAjaran?.Pelajaran?.nama_pelajaran || "Baru"}</Typography>
         <Button
           variant="contained"
           color="warning"

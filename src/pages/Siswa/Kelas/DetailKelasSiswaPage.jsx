@@ -1,21 +1,19 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
   Tabs,
   Tab,
-  Badge,
-  IconButton,
   Button,
 } from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import TableTemplate from "../../../components/tables/TableTemplate";
 import TabPengumuman from "../../../components/classes/TabPengumuman";
 import TabMateri from "../../../components/classes/TabMateri";
 import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
 import TabPresensi from "../../../components/classes/TabPresensi";
+
+import TabModule from "../../../components/classes/TabModule";
 
 export default function DetailKelasSiswaPage() {
   const location = useLocation();
@@ -31,56 +29,9 @@ export default function DetailKelasSiswaPage() {
     localStorage.setItem("detailKelasSiswaTab", newValue);
   };
 
-  const columnsModule = [
-    { field: "namaModule", label: "Nama Module", width: "250px" },
-    { field: "jenisModule", label: "Jenis Module", width: "120px" },
-    { field: "sifat", label: "Sifat", width: "100px" },
-    { field: "deadline", label: "Deadline", width: "250px" },
-    { field: "status", label: "Status", width: "120px" },
-    { field: "banyakPengumpulan", label: "Banyak Pengumpulan", width: "150px" },
-    {
-      field: "action",
-      label: "Action",
-      width: "100px",
-      align: "center",
-      render: (value, row) => (
-        <IconButton
-          onClick={() => navigate(`/kelas/detail/${id}/module/${row.id}`)}
-        >
-          <InfoOutlinedIcon color="primary" />
-        </IconButton>
-      ),
-    },
-  ];
-
-  // ===================== DATA STATE =====================
-  const [rowsModule, setRowsModule] = useState([]);
-
-  // ===================== FETCH DATA =====================
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchData = async () => {
-      try {
-        // TODO: Integrasikan ke API
-        // const siswaRes = await getSiswaByKelas(id);
-        // const presensiRes = await getPresensiByKelas(id);
-        // const moduleRes = await getModulesByKelas(id);
-
-        // setRowsListSiswa(siswaRes.data);
-        // setRowsPresensi(presensiRes.data);
-        // setRowsModule(moduleRes.data);
-      } catch (err) {
-        console.error("Gagal memuat data kelas:", err);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
-  // ===================== RENDER =====================
   return (
     <>
+      {/* HEADER */}
       <Box
         sx={{
           display: "flex",
@@ -103,6 +54,7 @@ export default function DetailKelasSiswaPage() {
         </Button>
       </Box>
 
+      {/* TABS */}
       <Tabs
         value={tab}
         onChange={handleTabChange}
@@ -114,38 +66,15 @@ export default function DetailKelasSiswaPage() {
         <Tab label="Materi" />
         <Tab label="Daftar Siswa" />
         <Tab label="Presensi" />
-        <Tab label="Module" />
-        <Tab label="Pengumuman"/>
+        <Tab label="Modul" />
+        <Tab label="Pengumuman" />
       </Tabs>
 
-      {/* Tab Materi */}
+      {/* TAB CONTENT */}
       {tab === 0 && <TabMateri idKelasTahunAjaran={id} />}
-
-      {/* Tab Daftar Siswa */}
       {tab === 1 && <TabDaftarSiswa idKelasTahunAjaran={id} />}
-
-      {/* Tab Presensi */}
       {tab === 2 && <TabPresensi idKelasTahunAjaran={id} />}
-
-      {/* Tab Modul */}
-      {tab === 3 && (
-        <TableTemplate
-          key={"modul"}
-          title={"Modul"}
-          columns={columnsModule}
-          rows={rowsModule}
-          initialRowsPerPage={10}
-          tableHeight={400}
-          isCheckbox={false}
-          isUpdate={false}
-          isDelete={false}
-          isUpload={false}
-          isCreate={false}
-          isDownload={false}
-        />
-      )}
-
-      {/* Tab Pengumuman */}
+      {tab === 3 && <TabModule />}
       {tab === 4 && <TabPengumuman idKelasTahunAjaran={id} />}
     </>
   );

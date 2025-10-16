@@ -20,11 +20,11 @@ import {
 } from "../../../utils/utils";
 import TabPengumuman from "../../../components/classes/TabPengumuman";
 import TabMateri from "../../../components/classes/TabMateri";
-import TabModuleGuru from "../../../components/classes/guru/TabModuleGuru";
 import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
 import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
 import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 import TabPresensi from "../../../components/classes/TabPresensi";
+import TabModule from "../../../components/classes/TabModule";
 
 export default function DetailKelasGuruPage() {
   const { id } = useParams();
@@ -165,7 +165,7 @@ export default function DetailKelasGuruPage() {
       {tab === 2 && <TabPresensi idKelasTahunAjaran={id} />}
 
       {/* Module */}
-      {tab === 3 && <TabModuleGuru />}
+      {tab === 3 && <TabModule />}
 
       {/* Penilaian */}
       {tab === 4 && (

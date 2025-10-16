@@ -157,8 +157,10 @@ export default function App() {
 
       const token = response.token;
       const userRole = response.role ? response.role.toLowerCase() : "";
+      console.log(response)
 
       localStorage.setItem("authToken", token);
+      localStorage.setItem("id_user", response.id_user);
       localStorage.setItem("authUser", response.nama);
       localStorage.setItem("profilePicture", response.profile_picture);
       localStorage.setItem("role", userRole);
@@ -175,6 +177,7 @@ export default function App() {
     await userService.logout()
        
     localStorage.removeItem("authToken");
+    localStorage.removeItem("id_user");
     localStorage.removeItem("authUser");
     localStorage.removeItem("role");
     localStorage.removeItem("profilePicture");

@@ -1,3 +1,4 @@
+// src/pages/classes/guru/DetailModuleGuruPage.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -12,74 +13,53 @@ import {
   DialogContent,
   DialogActions,
   Stack,
+  CircularProgress,
+  MenuItem,
 } from "@mui/material";
-import TableTemplate from "../../../components/tables/TableTemplate";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
-import { useNavigate } from "react-router-dom";
+import TableTemplate from "../../../components/tables/TableTemplate";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTheme } from "@mui/material/styles";
+import { getModulById, updateModul } from "../../../services/modulService";
+import { getListSiswaByKelasTahunAjaran } from "../../../services/kelasSiswaService";
+import { ToastSuccess, ToastError } from "../../../composables/sweetalert";
+import { downloadPengumpulanModulZip } from "../../../services/pengumpulanModulService";
 
 export default function DetailModuleGuruPage() {
   const navigate = useNavigate();
   const theme = useTheme();
+  const { modulId } = useParams();
+  const userId = parseInt(localStorage.getItem("id_user"));
 
-  // Helper: konversi Date ke format "YYYY-MM-DDTHH:mm"
+  const [loading, setLoading] = useState(true);
+  const [moduleInfo, setModuleInfo] = useState(null);
+  const [rowsPengumpulan, setRowsPengumpulan] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [openEdit, setOpenEdit] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
+  const [timeLeft, setTimeLeft] = useState("");
+
+  // =================== Helper ===================
   const formatDateTimeLocal = (date) => {
+    if (!date) return "";
+    const d = date instanceof Date ? date : new Date(date);
+    if (Number.isNaN(d.getTime())) return "";
     const pad = (n) => (n < 10 ? "0" + n : n);
     return (
-      date.getFullYear() +
+      d.getFullYear() +
       "-" +
-      pad(date.getMonth() + 1) +
+      pad(d.getMonth() + 1) +
       "-" +
-      pad(date.getDate()) +
+      pad(d.getDate()) +
       "T" +
-      pad(date.getHours()) +
+      pad(d.getHours()) +
       ":" +
-      pad(date.getMinutes())
+      pad(d.getMinutes())
     );
   };
 
-  // Default = hari ini jam sekarang
-  const now = new Date();
-  const [startTime, setStartTime] = useState(now);
-  const [endTime, setEndTime] = useState(
-    new Date(now.getTime() + 60 * 60 * 1000)
-  );
-
-  // State countdown
-  const [timeLeft, setTimeLeft] = useState("");
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const now = new Date();
-
-      if (now < startTime) {
-        const diff = startTime - now;
-        const hours = Math.floor(diff / 1000 / 60 / 60);
-        const minutes = Math.floor((diff / 1000 / 60) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        setTimeLeft(
-          `Belum mulai, akan dimulai dalam ${
-            hours > 0 ? hours + " jam " : ""
-          }${minutes} menit ${seconds} detik`
-        );
-      } else if (now >= startTime && now < endTime) {
-        const diff = endTime - now;
-        const hours = Math.floor(diff / 1000 / 60 / 60);
-        const minutes = Math.floor((diff / 1000 / 60) % 60);
-        const seconds = Math.floor((diff / 1000) % 60);
-        setTimeLeft(
-          `${hours > 0 ? hours + " jam " : ""}${minutes} menit ${seconds} detik tersisa`
-        );
-      } else {
-        setTimeLeft("Waktu pengerjaan telah habis");
-        clearInterval(timer);
-      }
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [startTime, endTime]);
-
-  // Format deadline
   const formatterDateTime = new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
     month: "long",
@@ -88,137 +68,193 @@ export default function DetailModuleGuruPage() {
     minute: "2-digit",
   });
 
-  const formattedWorkTime = `${formatterDateTime.format(
-    startTime
-  )} - ${formatterDateTime.format(endTime)} WIB`;
+  // =================== Fetch Modul ===================
+  const fetchModul = async () => {
+    try {
+      setLoading(true);
+      const res = await getModulById(modulId);
+      const payload = res?.data;
 
-  // Data Module (editable)
-  const [moduleInfo, setModuleInfo] = useState([
-    { label: "Nama Module", value: "Regresi Linier Sederhana" },
-    { label: "Jenis Module", value: "TUGAS" },
-    { label: "Deadline", value: formattedWorkTime },
-    {
-      label: "Keterangan",
-      value:
-        "Kerjakan 2 soal regresi linier sederhana dg masing-masing 4 pertanyaan",
-    },
-    { label: "Sifat Pengumpulan", value: "Online" },
-    { label: "Sifat Module", value: "Perorangan" },
-    { label: "Tipe File Module", value: "pdf" },
-    { label: "Status Module", value: "Aktif" },
-    { label: "Total Module Terkumpul", value: "26 / 31" },
-  ]);
+      if (!payload || !payload.id_modul) {
+        setModuleInfo(null);
+        ToastError.fire({ title: "Data modul tidak ditemukan" });
+        return;
+      }
 
-  // Edit dialog
-  const [openEdit, setOpenEdit] = useState(false);
-  const [editData, setEditData] = useState({});
-  const [errors, setErrors] = useState({}); // <- error state
+      if(payload.id_created_by !== userId) {
+        navigate(-1);
+        return;
+      }
 
+      const rawStart = payload.start_date ?? null;
+      const rawEnd = payload.end_date ?? null;
+      const parsedStart = rawStart ? new Date(rawStart) : new Date();
+      const parsedEnd = rawEnd ? new Date(rawEnd) : new Date(parsedStart.getTime() + 60 * 60 * 1000);
+
+      setModuleInfo({
+        id_modul: payload.id_modul,
+        id_kelas_tahun_ajaran: payload.id_kelas_tahun_ajaran,
+        nama_modul: payload.nama_modul ?? "",
+        jenis_modul: payload.jenis_modul ?? "",
+        keterangan: payload.keterangan ?? "",
+        sifat_pengumpulan: payload.sifat_pengumpulan ?? "Online",
+        sifat_modul: payload.status_modul ?? "Perorangan",
+        tipe_file_modul: payload.tipe_file_modul ?? "PDF",
+        status_modul: payload.status_modul ?? "Perorangan",
+        start_date: parsedStart,
+        end_date: parsedEnd,
+      });
+
+      setStartTime(parsedStart);
+      setEndTime(parsedEnd);
+
+      // simpan data pengumpulan mentah untuk merge nanti
+      const pengumpulan = payload.pengumpulan ?? [];
+      await fetchListSiswa(payload.id_kelas_tahun_ajaran, pengumpulan);
+    } catch (err) {
+      console.error("fetchModul error:", err);
+      ToastError.fire({ title: "Gagal memuat data modul" });
+      setModuleInfo(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =================== Fetch Siswa + Merge Pengumpulan ===================
+  const fetchListSiswa = async (idKelasTahunAjaran, pengumpulan) => {
+    if (!idKelasTahunAjaran) return;
+    try {
+      const res = await getListSiswaByKelasTahunAjaran(idKelasTahunAjaran);
+      const siswaList = res?.data || [];
+
+      // merge siswa + pengumpulan (pakai id_user)
+      const merged = siswaList.map((s) => {
+        const found = pengumpulan.find((p) => p.id_siswa === s.id_user);
+        return {
+          id_user: s.id_user,
+          nis: s.nis ?? "-",
+          nisn: s.nisn ?? "-",
+          nama: s.nama ?? "-",
+          waktu_kumpul: found?.created_at
+            ? formatterDateTime.format(new Date(found.created_at))
+            : "-",
+          status_kumpul: found ? "Sudah Mengumpulkan" : "Belum Mengumpulkan",
+          isSubmitted: !!found,
+        };
+      });
+
+      setRowsPengumpulan(merged);
+    } catch (err) {
+      console.error("fetchListSiswa error:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (modulId) fetchModul();
+  }, [modulId]);
+
+  // =================== Countdown ===================
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      if (!startTime || !endTime) {
+        setTimeLeft("");
+        return;
+      }
+      if (now < startTime) {
+        const diff = startTime - now;
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        setTimeLeft(`Belum mulai: ${h} jam ${m} menit ${s} detik lagi`);
+      } else if (now >= startTime && now < endTime) {
+        const diff = endTime - now;
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        setTimeLeft(`Tersisa ${h} jam ${m} menit ${s} detik`);
+      } else {
+        setTimeLeft("Waktu pengerjaan telah habis");
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [startTime, endTime]);
+
+  // =================== Edit Handler ===================
   const handleOpenEdit = () => {
-    const obj = {};
-    moduleInfo.forEach((m) => {
-      obj[m.label] = m.value;
-    });
-    setEditData(obj);
+    if (!moduleInfo) return;
+    setEditData({ ...moduleInfo });
     setOpenEdit(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     const newErrors = {};
-
-    // Validasi wajib diisi
-    if (!editData["Nama Module"]?.trim()) {
-      newErrors["Nama Module"] = "Nama module wajib diisi";
-    }
-    if (!editData["Jenis Module"]?.trim()) {
-      newErrors["Jenis Module"] = "Jenis module wajib diisi";
-    }
-    if (!startTime || !endTime) {
-      newErrors["Deadline"] = "Deadline wajib diisi";
-    }
-
-    // Validasi start <= end
-    if (startTime > endTime) {
-      newErrors["Deadline"] = "Start date tidak boleh lebih dari End date";
-    }
+    if (!editData.nama_modul?.trim()) newErrors.nama_modul = "Nama modul wajib diisi";
+    if (!editData.jenis_modul?.trim()) newErrors.jenis_modul = "Jenis modul wajib diisi";
+    if (startTime > endTime) newErrors.deadline = "Waktu mulai tidak boleh lebih dari waktu selesai";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return; // stop simpan
+      return;
     }
 
-    setErrors({});
-
-    const updated = moduleInfo.map((m) => {
-      if (m.label === "Deadline") {
-        return {
-          ...m,
-          value: `${formatterDateTime.format(startTime)} - ${formatterDateTime.format(
-            endTime
-          )} WIB`,
-        };
-      }
-      return { ...m, value: editData[m.label] };
-    });
-    setModuleInfo(updated);
-    setOpenEdit(false);
+    try {
+      const payload = {
+        nama_modul: editData.nama_modul,
+        jenis_modul: editData.jenis_modul,
+        keterangan: editData.keterangan,
+        sifat_pengumpulan: editData.sifat_pengumpulan,
+        sifat_modul: editData.sifat_modul,
+        tipe_file_modul: editData.tipe_file_modul,
+        status_modul: editData.status_modul,
+        start_date: startTime.toISOString(),
+        end_date: endTime.toISOString(),
+      };
+      await updateModul(modulId, payload);
+      ToastSuccess.fire({ title: "Modul berhasil diperbarui!" });
+      setOpenEdit(false);
+      fetchModul();
+    } catch (err) {
+      console.error("updateModul error:", err);
+      ToastError.fire({ title: "Gagal memperbarui modul" });
+    }
   };
 
+  // =================== Table Config ===================
   const columnsPengumpulan = [
-    { field: "nrp", label: "NRP", width: "150px" },
-    { field: "nama", label: "Nama", width: "350px" },
-    { field: "waktu", label: "Waktu kumpul", width: "250px" },
+    { field: "nis", label: "NIS", width: "150px" },
+    { field: "nama", label: "Nama", width: "300px" },
+    { field: "waktu_kumpul", label: "Waktu Kumpul", width: "250px" },
+    { field: "status_kumpul", label: "Status", width: "200px" },
   ];
 
-  const rowsPengumpulan = [
-    {
-      id: 1,
-      no: 1,
-      nrp: "218116674",
-      nama: "ALEXANDER GABRIEL EVAN",
-      waktu: "-",
-      statusKumpul: false,
-    },
-    {
-      id: 2,
-      no: 2,
-      nrp: "220116897",
-      nama: "WILLIAM TJANDRA",
-      waktu: "-",
-      statusKumpul: false,
-    },
-    {
-      id: 3,
-      no: 3,
-      nrp: "221116935",
-      nama: "ALDI AFENDIYANTO",
-      waktu: "14 May 2023 21:30:10",
-      statusKumpul: true,
-    },
-  ];
+  const semuaSudah =
+    rowsPengumpulan.length > 0 &&
+    rowsPengumpulan.every((r) => r.isSubmitted === true);
 
-  // Status global (semua sudah kumpul atau belum)
-  const semuaSudah = rowsPengumpulan.every((r) => r.statusKumpul);
+  // =================== UI ===================
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
-  // Simulasi download semua file
-  const handleDownloadAll = () => {
-    console.log("Download semua file...");
-    alert("Download semua file dimulai!");
-  };
+  if (!moduleInfo) {
+    return (
+      <Typography variant="h6" align="center" mt={4}>
+        Data modul tidak ditemukan
+      </Typography>
+    );
+  }
 
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h4" sx={{ mb: 3 }}>
-          Detail Module
+          Detail Modul
         </Typography>
-
         <Button
           variant="contained"
           color="warning"
@@ -230,57 +266,7 @@ export default function DetailModuleGuruPage() {
         </Button>
       </Box>
 
-      {/* Input Start & End Date */}
-      <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
-        <TextField
-          label="Start Date"
-          type="datetime-local"
-          value={formatDateTimeLocal(startTime)}
-          onChange={(e) => {
-            const newStart = new Date(e.target.value);
-            setStartTime(newStart);
-            if (newStart > endTime) {
-              setErrors((prev) => ({
-                ...prev,
-                Deadline: "Start date tidak boleh lebih dari End date",
-              }));
-            } else {
-              setErrors((prev) => ({ ...prev, Deadline: undefined }));
-            }
-          }}
-          InputLabelProps={{ shrink: true }}
-          inputProps={{
-            onFocus: (e) => e.target.showPicker?.(),
-          }}
-          error={!!errors["Deadline"]}
-          helperText={errors["Deadline"]}
-        />
-        <TextField
-          label="End Date"
-          type="datetime-local"
-          value={formatDateTimeLocal(endTime)}
-          onChange={(e) => {
-            const newEnd = new Date(e.target.value);
-            setEndTime(newEnd);
-            if (startTime > newEnd) {
-              setErrors((prev) => ({
-                ...prev,
-                Deadline: "End date tidak boleh kurang dari Start date",
-              }));
-            } else {
-              setErrors((prev) => ({ ...prev, Deadline: undefined }));
-            }
-          }}
-          InputLabelProps={{ shrink: true }}
-          inputProps={{
-            onFocus: (e) => e.target.showPicker?.(),
-          }}
-          error={!!errors["Deadline"]}
-          helperText={errors["Deadline"]}
-        />
-      </Box>
-
-      {/* === Banner Status === */}
+      {/* Status dan Countdown */}
       <Box
         sx={{
           bgcolor: semuaSudah ? "seagreen" : "firebrick",
@@ -289,83 +275,55 @@ export default function DetailModuleGuruPage() {
           textAlign: "center",
           p: 4,
           mb: 3,
-          boxShadow: 2,
         }}
       >
-        <Typography variant="body1" fontWeight={500}>
-          Status
+        <Typography variant="h6">
+          {semuaSudah ? "Semua Siswa Sudah Mengumpulkan" : "Masih Ada yang Belum Mengumpulkan"}
         </Typography>
-        <Typography variant="h5" fontWeight="bold">
-          {semuaSudah ? "Sudah Mengumpulkan Semua" : "Belum Mengumpulkan Semua"}
+        <Typography variant="body2" sx={{ mt: 1 }}>
+          {timeLeft}
         </Typography>
+
         <Button
           variant="contained"
           color="primary"
-          onClick={handleDownloadAll}
           sx={{ mt: 2 }}
+          onClick={() => downloadPengumpulanModulZip(modulId)}
         >
-          Download Semua File
+          Download Semua Pengumpulan (ZIP)
         </Button>
-        {/* Countdown */}
-        <Typography variant="body2" sx={{ mt: 2 }}>
-          {timeLeft}
-        </Typography>
       </Box>
 
       <Grid container spacing={2}>
-        {/* Info Module */}
+        {/* Info Modul */}
         <Grid item size={{ xs: 12, md: 5 }}>
           <Card elevation={2} sx={{ borderRadius: 2 }}>
             <CardContent>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="h6" gutterBottom>
-                  Informasi Module
-                </Typography>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography variant="h6">Informasi Modul</Typography>
                 <Button variant="outlined" size="small" onClick={handleOpenEdit}>
                   Edit
                 </Button>
               </Box>
 
-              <Box
-                sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 1 }}
-              >
-                {moduleInfo.map((row, idx) => (
-                  <Box
-                    key={idx}
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      my: 1,
-                      alignItems: "flex-start",
-                    }}
-                  >
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ width: "45%", fontWeight: 500 }}
-                    >
-                      {row.label}
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ width: "5%" }}
-                    >
-                      :
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ width: "55%" }}
-                    >
-                      {row.value}
-                    </Typography>
+              <Box sx={{ mt: 2 }}>
+                {[
+                  ["Nama Modul", moduleInfo.nama_modul],
+                  ["Jenis Modul", moduleInfo.jenis_modul],
+                  ["Keterangan", moduleInfo.keterangan],
+                  ["Sifat Pengumpulan", moduleInfo.sifat_pengumpulan],
+                  ["Sifat Modul", moduleInfo.sifat_modul],
+                  ["Tipe File Modul", moduleInfo.tipe_file_modul],
+                  ["Status Modul", moduleInfo.status_modul],
+                  [
+                    "Deadline",
+                    `${formatterDateTime.format(startTime)} - ${formatterDateTime.format(endTime)} WIB`,
+                  ],
+                ].map(([label, value], i) => (
+                  <Box key={i} sx={{ display: "flex", my: 1 }}>
+                    <Typography sx={{ width: "45%", fontWeight: 500 }}>{label}</Typography>
+                    <Typography sx={{ width: "5%" }}>:</Typography>
+                    <Typography sx={{ width: "50%" }}>{value ?? "-"}</Typography>
                   </Box>
                 ))}
               </Box>
@@ -373,11 +331,10 @@ export default function DetailModuleGuruPage() {
           </Card>
         </Grid>
 
-        {/* Table Pengumpulan */}
+        {/* Tabel Pengumpulan */}
         <Grid item size={{ xs: 12, md: 7 }}>
           <TableTemplate
-            key={"pengumpulan"}
-            title={"Daftar Pengumpulan"}
+            title={"Daftar Pengumpulan Siswa"}
             columns={columnsPengumpulan}
             rows={rowsPengumpulan}
             initialRowsPerPage={999}
@@ -390,108 +347,84 @@ export default function DetailModuleGuruPage() {
             isDownload={false}
             isPagination={false}
             getRowClassName={(row) =>
-              row.statusKumpul ? "highlight-row" : ""
+              row.isSubmitted ? { backgroundColor: "seagreen" } : {}
             }
           />
         </Grid>
       </Grid>
 
-      {/* Edit Dialog */}
+      {/* Dialog Edit */}
       <Dialog open={openEdit} onClose={() => setOpenEdit(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Informasi Module</DialogTitle>
+        <DialogTitle>Edit Modul</DialogTitle>
         <DialogContent dividers>
           <Stack spacing={2}>
-            {Object.keys(editData).map((key, idx) => {
-              if (key === "Deadline") {
-                return (
-                  <Grid container spacing={2}>
-                    <Grid item size={{ xs: 12, sm: 6 }}>
-                      <TextField
-                        label="Start Date"
-                        type="datetime-local"
-                        value={formatDateTimeLocal(startTime)}
-                        onChange={(e) => {
-                          const newStart = new Date(e.target.value);
-                          setStartTime(newStart);
-                          if (newStart > endTime) {
-                            setErrors((prev) => ({
-                              ...prev,
-                              Deadline: "Start date tidak boleh lebih dari End date",
-                            }));
-                          } else {
-                            setErrors((prev) => ({ ...prev, Deadline: undefined }));
-                          }
-                        }}
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{ onFocus: (e) => e.target.showPicker?.() }}
-                        fullWidth
-                        size="small"
-                        error={!!errors["Deadline"]}
-                        helperText={errors["Deadline"]}
-                      />
-                    </Grid>
-                    <Grid item size={{ xs: 12, sm: 6 }}>
-                      <TextField
-                        label="End Date"
-                        type="datetime-local"
-                        value={formatDateTimeLocal(endTime)}
-                        onChange={(e) => {
-                          const newEnd = new Date(e.target.value);
-                          setEndTime(newEnd);
-                          if (startTime > newEnd) {
-                            setErrors((prev) => ({
-                              ...prev,
-                              Deadline: "End date tidak boleh kurang dari Start date",
-                            }));
-                          } else {
-                            setErrors((prev) => ({ ...prev, Deadline: undefined }));
-                          }
-                        }}
-                        InputLabelProps={{ shrink: true }}
-                        inputProps={{ onFocus: (e) => e.target.showPicker?.() }}
-                        fullWidth
-                        size="small"
-                        error={!!errors["Deadline"]}
-                        helperText={errors["Deadline"]}
-                      />
-                    </Grid>
-                  </Grid>
-                );
-              }
+            <TextField
+              label="Nama Modul"
+              value={editData.nama_modul || ""}
+              onChange={(e) => setEditData({ ...editData, nama_modul: e.target.value })}
+              fullWidth
+              size="small"
+              error={!!errors.nama_modul}
+              helperText={errors.nama_modul}
+            />
+            <TextField
+              label="Jenis Modul"
+              value={editData.jenis_modul || ""}
+              onChange={(e) => setEditData({ ...editData, jenis_modul: e.target.value })}
+              fullWidth
+              size="small"
+              error={!!errors.jenis_modul}
+              helperText={errors.jenis_modul}
+            />
+            <TextField
+              label="Keterangan"
+              value={editData.keterangan || ""}
+              onChange={(e) => setEditData({ ...editData, keterangan: e.target.value })}
+              fullWidth
+              size="small"
+              multiline
+              rows={3}
+            />
+            <TextField
+              select
+              label="Tipe File Modul"
+              value={editData.tipe_file_modul || "PDF"}
+              onChange={(e) => setEditData({ ...editData, tipe_file_modul: e.target.value })}
+              fullWidth
+              size="small"
+            >
+              <MenuItem value="PDF">PDF</MenuItem>
+              <MenuItem value="PPT">PPT</MenuItem>
+              <MenuItem value="Word">Word</MenuItem>
+            </TextField>
 
-              // non-editable fields
-              if (
-                key === "Sifat Pengumpulan" ||
-                key === "Status Module" ||
-                key === "Total Module Terkumpul"
-              ) {
-                return (
-                  <TextField
-                    key={idx}
-                    label={key}
-                    value={editData[key]}
-                    fullWidth
-                    size="small"
-                    disabled
-                  />
-                );
-              }
-
-              return (
-                <TextField
-                  key={idx}
-                  label={key}
-                  value={editData[key]}
-                  onChange={(e) =>
-                    setEditData({ ...editData, [key]: e.target.value })
-                  }
-                  fullWidth
-                  size="small"
-                  error={!!errors[key]}
-                  helperText={errors[key]}
-                />
-              );
-            })}
+            <TextField
+              label="Start Date"
+              type="datetime-local"
+              value={formatDateTimeLocal(startTime)}
+              onChange={(e) => {
+                const d = new Date(e.target.value);
+                if (!Number.isNaN(d.getTime())) setStartTime(d);
+              }}
+              fullWidth
+              size="small"
+            />
+            <TextField
+              label="End Date"
+              type="datetime-local"
+              value={formatDateTimeLocal(endTime)}
+              onChange={(e) => {
+                const d = new Date(e.target.value);
+                if (!Number.isNaN(d.getTime())) setEndTime(d);
+              }}
+              fullWidth
+              size="small"
+            />
+            {errors.deadline && (
+              <Typography color="error" variant="body2">
+                {errors.deadline}
+              </Typography>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -504,14 +437,8 @@ export default function DetailModuleGuruPage() {
 
       <style>
         {`
-          .highlight-row {
-            background-color: seagreen !important;
-          }
-          /* Kalender popup bawaan datetime-local */
           input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-            filter: ${theme.palette.mode === "dark"
-              ? "invert(1)"
-              : "invert(0)"};
+            filter: ${theme.palette.mode === "dark" ? "invert(1)" : "invert(0)"};
           }
           input[type="datetime-local"] {
             color-scheme: ${theme.palette.mode};

@@ -46,7 +46,7 @@ export default function TabPresensi({ idKelasTahunAjaran }) {
       case "sakit":
         color = "error";
         break;
-      case "ijin":
+      case "izin":
         color = "warning";
         break;
       case "alpha":

@@ -105,4 +105,23 @@ export const ENDPOINTS = {
     UPDATE: (id_berita_acara) => `/berita-acara/${id_berita_acara}`,
     DELETE: (id_berita_acara) => `/berita-acara/${id_berita_acara}`,
   },
+
+   MODUL: {
+    CREATE: "/modul",
+    GET_ALL: "/modul",
+    GET_BY_ID: (id_modul) => `/modul/${id_modul}`,
+    UPDATE: (id_modul) => `/modul/${id_modul}`,
+    DELETE: (id_modul) => `/modul/${id_modul}`,
+    DOWNLOAD: (id_modul) => `/modul/download/${id_modul}`,
+    DOWNLOAD_ZIP: (id_modul) => `/pengumpulan-modul/download-zip/${id_modul}`,
+  },
+
+  PENGUMPULAN_MODUL: {
+    CREATE: "/pengumpulan-modul",
+    GET_ALL: "/pengumpulan-modul",
+    GET_BY_ID: (id_pengumpulan_modul) => `/pengumpulan-modul/${id_pengumpulan_modul}`,
+    DELETE: (id_pengumpulan_modul) => `/pengumpulan-modul/${id_pengumpulan_modul}`,
+    DOWNLOAD: (id_pengumpulan_modul) => `/pengumpulan-modul/download/${id_pengumpulan_modul}`,
+    DOWNLOAD_ZIP: (id_modul) => `/pengumpulan-modul/download-zip/${id_modul}`,
+  },
 };

@@ -498,11 +498,11 @@ export default function TableTemplate({
                       tabIndex={-1}
                       key={rowKey || index}
                       selected={isItemSelected}
-                      className={getRowClassName ? getRowClassName(row) : ""}
                       sx={{
                         cursor: isCheckbox ? 'default' : 'pointer',
                         borderBottom: '1px solid',
                         borderColor: 'divider',
+                        ...(getRowClassName ? getRowClassName(row) : {}),
                       }}
                     >
                       {isCheckbox && (
