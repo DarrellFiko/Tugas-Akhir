@@ -5,26 +5,19 @@ import {
   Tabs,
   Tab,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  CircularProgress,
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import { useNavigate, useParams } from "react-router-dom";
-import TableTemplate from "../../../components/tables/TableTemplate";
-import {
-  handleDownloadFile,
-  handleUploadFile,
-} from "../../../utils/utils";
+
 import TabPengumuman from "../../../components/classes/TabPengumuman";
 import TabMateri from "../../../components/classes/TabMateri";
-import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
 import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
 import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 import TabPresensi from "../../../components/classes/TabPresensi";
 import TabModule from "../../../components/classes/TabModule";
+import TableTemplate from "../../../components/tables/TableTemplate";
+import { getNilaiGuruByKelas } from "../../../services/nilaiService";
 
 export default function DetailKelasGuruPage() {
   const { id } = useParams();
@@ -35,97 +28,75 @@ export default function DetailKelasGuruPage() {
   const [tab, setTab] = useState(savedTab);
   const [kelas, setKelas] = useState(null);
 
+  // State untuk nilai siswa
+  const [loadingSiswa, setLoadingSiswa] = useState(false);
+  const [rowsNilaiSiswa, setRowsNilaiSiswa] = useState([]);
+  const [nilaiSiswa, setNilaiSiswa] = useState([]);
+
   const handleTabChange = (e, newValue) => {
     setTab(newValue);
     localStorage.setItem("detailKelasSiswaTab", newValue);
   };
 
-  // === Penilaian ===
-  const [columnsPenilaian, setColumnsPenilaian] = useState([
-    { field: "nama", label: "Nama Siswa", width: "250px" },
-  ]);
-  const [rowsPenilaian, setRowsPenilaian] = useState([]);
-
-  // === Upload Dialog ===
-  const [openUpload, setOpenUpload] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  const handleOpenUpload = () => {
-    setSelectedFile(null);
-    setOpenUpload(true);
-  };
-  const handleCloseUpload = () => setOpenUpload(false);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const ext = file.name.split(".").pop().toLowerCase();
-      if (ext !== "xlsx" && ext !== "csv") {
-        ToastError.fire({ title: "File harus berformat XLSX atau CSV" });
-        e.target.value = "";
-        return;
-      }
-      setSelectedFile(file);
-    }
-  };
-
-  const normalizeField = (header) => header.toLowerCase().replace(/\s+/g, "_");
-
-  const handleConfirmUpload = async () => {
-    if (!selectedFile) {
-      ToastError.fire({ title: "Harap pilih file terlebih dahulu" });
-      return;
-    }
-    try {
-      const { columns, rows } = await handleUploadFile(selectedFile);
-      const mappedColumns = columns.map((c) => ({
-        field: normalizeField(c.label),
-        label: c.label,
-        width: "150px",
-      }));
-      const mappedRows = rows.map((row, idx) => {
-        const newRow = { id: idx + 1 };
-        columns.forEach((c) => {
-          const field = normalizeField(c.label);
-          newRow[field] = row[c.field];
-        });
-        return newRow;
-      });
-      if (!mappedColumns.some((c) => c.field === "nama")) {
-        throw new Error("File harus memiliki kolom 'Nama'");
-      }
-      setColumnsPenilaian(mappedColumns);
-      setRowsPenilaian(mappedRows);
-      ToastSuccess.fire({ title: "Data uploaded successfully!" });
-      setOpenUpload(false);
-    } catch (err) {
-    }
-  };
-
-  const handleDownloadPenilaian = () => {
-    const success = handleDownloadFile(rowsPenilaian, "penilaian");
-    if (success) ToastSuccess.fire({ title: "Download Success!" });
-    else ToastError.fire({ title: "Download Failed!" });
-  };
-
+  // Fetch detail kelas
   const fetchKelasTahunAjaran = async () => {
     try {
-      const res = await getKelasTahunAjaranById(id)
-      setKelas(res.data)
+      const res = await getKelasTahunAjaranById(id);
+      setKelas(res.data);
     } catch (error) {
       navigate("/kelas");
     }
-  }
+  };
+
+  // Fetch nilai siswa (guru)
+  const fetchNilaiGuru = async () => {
+    setLoadingSiswa(true);
+    try {
+      const res = await getNilaiGuruByKelas(id);
+      const headers = res.headers || [];
+      const rows = res.rows || [];
+
+      // Format kolom untuk TableTemplate
+      const columns = [
+        ...headers.map((h) => ({
+          field: h?.field,
+          label: h?.label,
+          width: h?.width,
+        })),
+      ];
+
+      setNilaiSiswa(columns);
+      setRowsNilaiSiswa(rows);
+    } catch (error) {
+      console.error("Gagal mengambil nilai:", error);
+    } finally {
+      setLoadingSiswa(false);
+    }
+  };
 
   useEffect(() => {
-    fetchKelasTahunAjaran()
+    fetchKelasTahunAjaran();
   }, []);
+
+  useEffect(() => {
+    if (tab === 4) {
+      fetchNilaiGuru();
+    }
+  }, [tab]);
 
   return (
     <>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <Typography variant="h4" sx={{ mb: 3 }}>
-          {`${kelas?.Pelajaran?.nama_pelajaran || "-"} - ${kelas?.Kelas.nama_kelas || "-"}`}
+          {`${kelas?.Pelajaran?.nama_pelajaran || "-"} - ${
+            kelas?.Kelas?.nama_kelas || "-"
+          }`}
         </Typography>
 
         <Button
@@ -151,8 +122,8 @@ export default function DetailKelasGuruPage() {
         <Tab label="Daftar Siswa" />
         <Tab label="Presensi" />
         <Tab label="Module" />
-        <Tab label="Penilaian" />
-        <Tab label="Pengumuman"/>
+        <Tab label="Nilai Siswa" />
+        <Tab label="Pengumuman" />
       </Tabs>
 
       {/* Materi */}
@@ -167,43 +138,32 @@ export default function DetailKelasGuruPage() {
       {/* Module */}
       {tab === 3 && <TabModule />}
 
-      {/* Penilaian */}
+      {/* Nilai Siswa */}
       {tab === 4 && (
         <>
-          <TableTemplate
-            key={"penilaian"}
-            title={"Penilaian"}
-            columns={columnsPenilaian}
-            rows={rowsPenilaian}
-            initialRowsPerPage={10}
-            tableHeight={400}
-            isCheckbox={false}
-            isCreate={false}
-            onUpload={handleOpenUpload}
-            onDownload={handleDownloadPenilaian}
-          />
-
-          {/* Dialog Upload */}
-          <Dialog open={openUpload} onClose={handleCloseUpload} fullWidth maxWidth="sm">
-            <DialogTitle>Upload File XLSX</DialogTitle>
-            <DialogContent dividers>
-              <TextField
-                type="file"
-                fullWidth
-                required
-                inputProps={{ accept: ".xlsx,.csv" }}
-                onChange={handleFileChange}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleCloseUpload} color="primary">
-                Batal
-              </Button>
-              <Button onClick={handleConfirmUpload} variant="contained" color="primary">
-                Upload
-              </Button>
-            </DialogActions>
-          </Dialog>
+        {console.log(rowsNilaiSiswa)}
+        {console.log(nilaiSiswa)}
+          {loadingSiswa ? (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <TableTemplate
+              isLoading={loadingSiswa}
+              key={"nilai"}
+              title={"Nilai Siswa"}
+              columns={nilaiSiswa}
+              rows={rowsNilaiSiswa}
+              initialRowsPerPage={10}
+              tableHeight={400}
+              isCheckbox={false}
+              isUpdate={false}
+              isDelete={false}
+              isUpload={false}
+              isCreate={false}
+              isDownload={false}
+            />
+          )}
         </>
       )}
 

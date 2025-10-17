@@ -1,4 +1,3 @@
-// src/pages/classes/guru/DetailModuleGuruPage.jsx
 import React, { useState, useEffect } from "react";
 import {
   Box,
@@ -15,6 +14,7 @@ import {
   Stack,
   CircularProgress,
   MenuItem,
+  Chip,
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import TableTemplate from "../../../components/tables/TableTemplate";
@@ -24,6 +24,11 @@ import { getModulById, updateModul } from "../../../services/modulService";
 import { getListSiswaByKelasTahunAjaran } from "../../../services/kelasSiswaService";
 import { ToastSuccess, ToastError } from "../../../composables/sweetalert";
 import { downloadPengumpulanModulZip } from "../../../services/pengumpulanModulService";
+import {
+  getNilaiByModul,
+  createNilai,
+  updateNilai,
+} from "../../../services/nilaiService";
 
 export default function DetailModuleGuruPage() {
   const navigate = useNavigate();
@@ -81,7 +86,7 @@ export default function DetailModuleGuruPage() {
         return;
       }
 
-      if(payload.id_created_by !== userId) {
+      if (payload.id_created_by !== userId) {
         navigate(-1);
         return;
       }
@@ -89,7 +94,9 @@ export default function DetailModuleGuruPage() {
       const rawStart = payload.start_date ?? null;
       const rawEnd = payload.end_date ?? null;
       const parsedStart = rawStart ? new Date(rawStart) : new Date();
-      const parsedEnd = rawEnd ? new Date(rawEnd) : new Date(parsedStart.getTime() + 60 * 60 * 1000);
+      const parsedEnd = rawEnd
+        ? new Date(rawEnd)
+        : new Date(parsedStart.getTime() + 60 * 60 * 1000);
 
       setModuleInfo({
         id_modul: payload.id_modul,
@@ -108,12 +115,10 @@ export default function DetailModuleGuruPage() {
       setStartTime(parsedStart);
       setEndTime(parsedEnd);
 
-      // simpan data pengumpulan mentah untuk merge nanti
       const pengumpulan = payload.pengumpulan ?? [];
       await fetchListSiswa(payload.id_kelas_tahun_ajaran, pengumpulan);
     } catch (err) {
       console.error("fetchModul error:", err);
-      ToastError.fire({ title: "Gagal memuat data modul" });
       setModuleInfo(null);
     } finally {
       setLoading(false);
@@ -127,7 +132,6 @@ export default function DetailModuleGuruPage() {
       const res = await getListSiswaByKelasTahunAjaran(idKelasTahunAjaran);
       const siswaList = res?.data || [];
 
-      // merge siswa + pengumpulan (pakai id_user)
       const merged = siswaList.map((s) => {
         const found = pengumpulan.find((p) => p.id_siswa === s.id_user);
         return {
@@ -189,9 +193,12 @@ export default function DetailModuleGuruPage() {
 
   const handleSaveEdit = async () => {
     const newErrors = {};
-    if (!editData.nama_modul?.trim()) newErrors.nama_modul = "Nama modul wajib diisi";
-    if (!editData.jenis_modul?.trim()) newErrors.jenis_modul = "Jenis modul wajib diisi";
-    if (startTime > endTime) newErrors.deadline = "Waktu mulai tidak boleh lebih dari waktu selesai";
+    if (!editData.nama_modul?.trim())
+      newErrors.nama_modul = "Nama modul wajib diisi";
+    if (!editData.jenis_modul?.trim())
+      newErrors.jenis_modul = "Jenis modul wajib diisi";
+    if (startTime > endTime)
+      newErrors.deadline = "Waktu mulai tidak boleh lebih dari waktu selesai";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -216,7 +223,83 @@ export default function DetailModuleGuruPage() {
       fetchModul();
     } catch (err) {
       console.error("updateModul error:", err);
-      ToastError.fire({ title: "Gagal memperbarui modul" });
+    }
+  };
+
+  // =================== Penilaian ===================
+  const [openNilai, setOpenNilai] = useState(false);
+  const [rowsNilai, setRowsNilai] = useState([]);
+  const [loadingNilai, setLoadingNilai] = useState(false);
+
+  const fetchNilai = async () => {
+    if (!moduleInfo?.id_modul) return;
+    setLoadingNilai(true);
+    try {
+      const res = await getNilaiByModul(moduleInfo.id_modul);
+      const nilaiData = res?.data || [];
+
+      const merged = rowsPengumpulan.map((s) => {
+        const found = nilaiData.find((n) => n.id_siswa === s.id_user);
+        return {
+          ...s,
+          nilai: found ? found.nilai : "",
+          id_nilai: found ? found.id_nilai : null,
+        };
+      });
+
+      setRowsNilai(merged);
+    } catch (err) {
+      console.error("fetchNilai error:", err);
+    } finally {
+      setLoadingNilai(false);
+    }
+  };
+
+  const handleOpenNilai = () => {
+    setOpenNilai(true);
+    fetchNilai();
+  };
+
+  const handleChangeNilai = (id_user, value) => {
+    let parsed = parseFloat(value);
+    if (parsed < 0) parsed = 0;
+    if (parsed > 100) parsed = 100;
+    const newRows = rowsNilai.map((r) =>
+      r.id_user === id_user ? { ...r, nilai: parsed } : r
+    );
+    setRowsNilai(newRows);
+  };
+
+  const handleSaveNilai = async () => {
+    try {
+      const dataToSave = rowsNilai
+        .filter((r) => r.nilai !== "" && !isNaN(r.nilai))
+        .map((r) => ({
+          id_nilai: r.id_nilai || null,
+          id_modul: moduleInfo.id_modul,
+          id_kelas_tahun_ajaran: moduleInfo.id_kelas_tahun_ajaran,
+          id_siswa: r.id_user,
+          nama: r.nama,
+          nilai: parseInt(r.nilai),
+        }));
+
+      if (dataToSave.length === 0) {
+        ToastError.fire({ title: "Tidak ada nilai yang diisi" });
+        return;
+      }
+
+      const hasExisting = dataToSave.some((r) => r.id_nilai);
+      if (hasExisting) {
+        await updateNilai(dataToSave);
+      } else {
+        await createNilai(dataToSave);
+      }
+
+      ToastSuccess.fire({ title: "Nilai berhasil disimpan" });
+      setOpenNilai(false);
+      fetchNilai();
+    } catch (err) {
+      console.error("handleSaveNilai error:", err);
     }
   };
 
@@ -278,20 +361,35 @@ export default function DetailModuleGuruPage() {
         }}
       >
         <Typography variant="h6">
-          {semuaSudah ? "Semua Siswa Sudah Mengumpulkan" : "Masih Ada yang Belum Mengumpulkan"}
+          {semuaSudah
+            ? "Semua Siswa Sudah Mengumpulkan"
+            : "Masih Ada yang Belum Mengumpulkan"}
         </Typography>
         <Typography variant="body2" sx={{ mt: 1 }}>
           {timeLeft}
         </Typography>
 
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={() => downloadPengumpulanModulZip(modulId)}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 2,
+            justifyContent: "center",
+            mt: 2,
+          }}
         >
-          Download Semua Pengumpulan (ZIP)
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => downloadPengumpulanModulZip(modulId)}
+          >
+            Download Semua Pengumpulan (ZIP)
+          </Button>
+
+          <Button variant="contained" color="success" onClick={handleOpenNilai}>
+            Penilaian
+          </Button>
+        </Box>
       </Box>
 
       <Grid container spacing={2}>
@@ -317,11 +415,15 @@ export default function DetailModuleGuruPage() {
                   ["Status Modul", moduleInfo.status_modul],
                   [
                     "Deadline",
-                    `${formatterDateTime.format(startTime)} - ${formatterDateTime.format(endTime)} WIB`,
+                    `${formatterDateTime.format(startTime)} - ${formatterDateTime.format(
+                      endTime
+                    )} WIB`,
                   ],
                 ].map(([label, value], i) => (
                   <Box key={i} sx={{ display: "flex", my: 1 }}>
-                    <Typography sx={{ width: "45%", fontWeight: 500 }}>{label}</Typography>
+                    <Typography sx={{ width: "45%", fontWeight: 500 }}>
+                      {label}
+                    </Typography>
                     <Typography sx={{ width: "5%" }}>:</Typography>
                     <Typography sx={{ width: "50%" }}>{value ?? "-"}</Typography>
                   </Box>
@@ -389,42 +491,35 @@ export default function DetailModuleGuruPage() {
               select
               label="Tipe File Modul"
               value={editData.tipe_file_modul || "PDF"}
-              onChange={(e) => setEditData({ ...editData, tipe_file_modul: e.target.value })}
+              onChange={(e) =>
+                setEditData({ ...editData, tipe_file_modul: e.target.value })
+              }
               fullWidth
               size="small"
             >
               <MenuItem value="PDF">PDF</MenuItem>
-              <MenuItem value="PPT">PPT</MenuItem>
-              <MenuItem value="Word">Word</MenuItem>
+              <MenuItem value="DOCX">DOCX</MenuItem>
+              <MenuItem value="PPTX">PPTX</MenuItem>
+              <MenuItem value="ZIP">ZIP</MenuItem>
             </TextField>
-
             <TextField
-              label="Start Date"
               type="datetime-local"
+              label="Mulai"
               value={formatDateTimeLocal(startTime)}
-              onChange={(e) => {
-                const d = new Date(e.target.value);
-                if (!Number.isNaN(d.getTime())) setStartTime(d);
-              }}
+              onChange={(e) => setStartTime(new Date(e.target.value))}
               fullWidth
               size="small"
             />
             <TextField
-              label="End Date"
               type="datetime-local"
+              label="Selesai"
               value={formatDateTimeLocal(endTime)}
-              onChange={(e) => {
-                const d = new Date(e.target.value);
-                if (!Number.isNaN(d.getTime())) setEndTime(d);
-              }}
+              onChange={(e) => setEndTime(new Date(e.target.value))}
               fullWidth
               size="small"
+              error={!!errors.deadline}
+              helperText={errors.deadline}
             />
-            {errors.deadline && (
-              <Typography color="error" variant="body2">
-                {errors.deadline}
-              </Typography>
-            )}
           </Stack>
         </DialogContent>
         <DialogActions>
@@ -435,16 +530,82 @@ export default function DetailModuleGuruPage() {
         </DialogActions>
       </Dialog>
 
-      <style>
-        {`
-          input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-            filter: ${theme.palette.mode === "dark" ? "invert(1)" : "invert(0)"};
-          }
-          input[type="datetime-local"] {
-            color-scheme: ${theme.palette.mode};
-          }
-        `}
-      </style>
+      {/* Dialog Penilaian */}
+      <Dialog open={openNilai} onClose={() => setOpenNilai(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Penilaian Siswa</DialogTitle>
+        <DialogContent dividers>
+          {loadingNilai ? (
+            <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <>
+              {/* HEADER */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  px: 1,
+                  fontWeight: 600,
+                  borderBottom: "2px solid #ccc",
+                  pb: 1,
+                }}
+              >
+                <Typography sx={{ flex: 2 }}>Nama Siswa</Typography>
+                <Typography sx={{ flex: 2 }}>Status Pengumpulan</Typography>
+                <Typography sx={{ flex: 1 }}>Nilai</Typography>
+              </Box>
+
+              {/* LIST SISWA */}
+              {rowsNilai.map((r, idx) => (
+                <Box
+                  key={idx}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    px: 1,
+                    py: 1,
+                    borderBottom: "1px solid #eee",
+                    gap: 2,
+                  }}
+                >
+                  {/* NAMA */}
+                  <Typography sx={{ flex: 2 }}>{r.nama}</Typography>
+
+                  {/* STATUS CHIP */}
+                  <Box sx={{ flex: 2 }}>
+                    <Chip
+                      label={r.isSubmitted ? "Sudah Mengumpulkan" : "Belum Mengumpulkan"}
+                      color={r.isSubmitted ? "success" : "error"}
+                      variant="outlined"
+                      sx={{ fontWeight: 600 }}
+                    />
+                  </Box>
+
+                  {/* INPUT NILAI */}
+                  <TextField
+                    type="number"
+                    size="small"
+                    label="Nilai"
+                    sx={{ flex: 1 }}
+                    value={r.nilai ?? ""}
+                    onChange={(e) => handleChangeNilai(r.id_user, e.target.value)}
+                    inputProps={{ min: 0, max: 100, step: 1 }}
+                  />
+                </Box>
+              ))}
+            </>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenNilai(false)}>Batal</Button>
+          <Button onClick={handleSaveNilai} variant="contained" color="primary">
+            Simpan Nilai
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

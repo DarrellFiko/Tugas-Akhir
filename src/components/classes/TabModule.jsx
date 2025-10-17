@@ -136,18 +136,13 @@ export default function TabModule() {
         status_modul: data.status_modul,
       };
 
-      const res = await createModul(body);
-      if (res?.message === "Modul berhasil dibuat") {
-        ToastSuccess.fire({ title: "Modul berhasil dibuat!" });
-        setOpenDialog(false);
-        reset();
-        fetchData();
-      } else {
-        ToastError.fire({ title: "Gagal membuat modul" });
-      }
+      await createModul(body);
+      ToastSuccess.fire({ title: "Modul berhasil dibuat!" });
+      setOpenDialog(false);
+      reset();
+      fetchData();
     } catch (err) {
       console.error(err);
-      ToastError.fire({ title: "Terjadi kesalahan saat membuat modul" });
     }
   };
 
@@ -160,16 +155,11 @@ export default function TabModule() {
       });
       if (!confirm.isConfirmed) return;
 
-      const res = await deleteModul(id_modul);
-      if (res?.message === "Modul berhasil dihapus") {
-        ToastSuccess.fire({ title: "Modul berhasil dihapus" });
-        fetchData();
-      } else {
-        ToastError.fire({ title: "Gagal menghapus modul" });
-      }
+      await deleteModul(id_modul);
+      ToastSuccess.fire({ title: "Modul berhasil dihapus" });
+      fetchData();
     } catch (err) {
       console.error(err);
-      ToastError.fire({ title: "Terjadi kesalahan saat menghapus modul" });
     }
   };
 

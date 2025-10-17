@@ -47,3 +47,12 @@ export const deleteRaporKelasSiswa = async (id, tipe) => {
   const res = await getAPI.delete(ENDPOINTS.KELAS_SISWA.DELETE_RAPOR(id, tipe));
   return res.data;
 };
+
+// ================== DOWNLOAD RAPOR BERDASARKAN TAHUN AJARAN ==================
+export const downloadRaporByTahunAjaran = async (id_tahun_ajaran, tipe) => {
+  const res = await getAPI.get(
+    ENDPOINTS.KELAS_SISWA.DOWNLOAD_RAPOR_BY_TAHUN_AJARAN(id_tahun_ajaran, tipe),
+    { responseType: "blob" } // penting supaya file bisa didownload
+  );
+  return res.data;
+};

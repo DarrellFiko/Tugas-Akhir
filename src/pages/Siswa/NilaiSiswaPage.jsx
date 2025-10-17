@@ -1,114 +1,208 @@
-import { Box, Button, Typography, Select, MenuItem, FormControl, InputLabel, Grid } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Grid,
+  CircularProgress,
+  Divider,
+} from "@mui/material";
 import TableTemplate from "../../components/tables/TableTemplate";
-import { useRef, useState } from "react";
-import PrintOutlinedIcon from "@mui/icons-material/PrintOutlined";
+import { useRef, useState, useEffect } from "react";
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined";
+import { getNilaiSiswaByTahunAjaran } from "../../services/nilaiService";
+import { downloadRaporByTahunAjaran } from "../../services/kelasSiswaService";
+import { ToastError } from "../../composables/sweetalert";
+import { getSimpleTahunAjaran } from "../../services/tahunAjaranService";
 
 export default function NilaiSiswaPage() {
   const printRef = useRef();
+  const [tahunAjaranList, setTahunAjaranList] = useState([]);
+  const [selectedTahun, setSelectedTahun] = useState("");
+  const [nilaiData, setNilaiData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [selectedTipe, setSelectedTipe] = useState("ganjil"); // default
 
-  // Data kelas
-  const kelasList = [
-    { id: 1, value: "X-IPA-1 Semester Gasal" },
-    { id: 2, value: "X-IPA-2 Semester Gasal" },
-    { id: 3, value: "X-IPS-1 Semester Genap" },
-    { id: 4, value: "X-IPS-2 Semester Genap" },
-  ];
+  // ================== FETCH TAHUN AJARAN ==================
+  const fetchTahunAjaran = async () => {
+    try {
+      const res = await getSimpleTahunAjaran();
+      const data = res?.data || [];
+      setTahunAjaranList(data);
 
-  // Default pilih data terakhir
-  const [selectedKelas, setSelectedKelas] = useState(kelasList[kelasList.length - 1].id);
-
-  const columns = [
-    { field: "pelajaran", label: "Pelajaran", width: "200px" },
-    { field: "pengajar", label: "Pengajar", width: "200px" },
-    { field: "uh1", label: "UH 1", width: "100px" },
-    { field: "uh2", label: "UH 2", width: "100px" },
-    { field: "pretest1", label: "Pretest 1", width: "120px" },
-    { field: "posttest1", label: "Posttest 1", width: "120px" },
-    { field: "uts", label: "UTS", width: "100px" },
-    { field: "uh3", label: "UH 3", width: "100px" },
-    { field: "uh4", label: "UH 4", width: "100px" },
-    { field: "uas", label: "UAS", width: "100px" },
-    { field: "nilaiAkhir", label: "Nilai Akhir", width: "120px" },
-    { field: "grade", label: "Grade", width: "80px" },
-  ];
-
-  const rows = [
-    { pelajaran: "Matematika", pengajar: "Darrell Fiko", uh1: 80, uh2: 75, pretest1: 70, posttest1: 85, uts: 78, uh3: 82, uh4: 88, uas: 90, nilaiAkhir: 83, grade: "A" },
-    { pelajaran: "Bahasa Indonesia", pengajar: "Alexander Putra", uh1: 85, uh2: 80, pretest1: 72, posttest1: 88, uts: 82, uh3: 84, uh4: 86, uas: 89, nilaiAkhir: 84, grade: "A" },
-  ];
-
-  const handlePrintRapor = () => {
-    const kelas = kelasList.find((k) => k.id === selectedKelas);
-    console.log("Cetak rapor kelas:", kelas.id, kelas.value);
+      if (data.length > 0) {
+        const last = data[data.length - 1];
+        setSelectedTahun(last.id_tahun_ajaran);
+      }
+    } catch (err) {
+      console.error("Error fetch tahun ajaran:", err);
+    }
   };
 
-  const handleChangeKelas = (e) => {
-    const kelasId = e.target.value;
-    const kelas = kelasList.find((k) => k.id === kelasId);
-    setSelectedKelas(kelasId);
-    console.log("Selected Kelas -> ID:", kelas.id, "Value:", kelas.value);
+  useEffect(() => {
+    fetchTahunAjaran();
+  }, []);
+
+  // ================== FETCH NILAI ==================
+  const fetchNilai = async (id_tahun_ajaran) => {
+    if (!id_tahun_ajaran) return;
+
+    try {
+      setLoading(true);
+      const res = await getNilaiSiswaByTahunAjaran(id_tahun_ajaran);
+
+      if (res.message !== "success") {
+        setNilaiData({});
+        return;
+      }
+
+      const dataPelajaran = Object.fromEntries(
+        Object.entries(res).filter(([key]) => key !== "message")
+      );
+      setNilaiData(dataPelajaran);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedTahun) fetchNilai(selectedTahun);
+  }, [selectedTahun]);
+
+  // ================== HANDLE DOWNLOAD ==================
+  const handleDownloadRapor = async () => {
+    if (!selectedTahun || !selectedTipe) return;
+    try {
+      setLoading(true);
+      const res = await downloadRaporByTahunAjaran(selectedTahun, selectedTipe);
+
+      if (res.status === 400 || res?.data?.message) {
+        ToastError.fire({
+          title: res?.data?.message || "Gagal download rapor. Periksa data terlebih dahulu.",
+        });
+        return;
+      }
+
+      // Jika response Blob lanjutkan download
+      const url = window.URL.createObjectURL(new Blob([res]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `rapor_${selectedTipe}_${selectedTahun}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (err) {
+      console.error(err);
+      if (err.response?.status === 400) {
+        ToastError.fire({
+          title: err.response?.data?.message || "Data rapor tidak ditemukan.",
+        });
+      } else {
+        ToastError.fire({ title: "Terjadi kesalahan saat mengunduh rapor." });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       {/* Header */}
       <Grid container spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        {/* Judul */}
         <Grid item xs={12} sm={6}>
           <Typography variant="h4">Nilai Akademik</Typography>
         </Grid>
 
-        {/* Dropdown + Button */}
         <Grid item xs={12} sm={6}>
-          <Box sx={{ display: "flex", gap: 2, flexDirection: { xs: "column", sm: "row" }, justifyContent: "flex-end" }}>
-            {/* Dropdown Kelas */}
-            <FormControl size="small" sx={{ minWidth: 200, flex: 1 }}>
-              <InputLabel id="kelas-select-label">Pilih Kelas</InputLabel>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              flexDirection: { xs: "column", sm: "row" },
+              justifyContent: "flex-end",
+            }}
+          >
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel>Tahun Ajaran</InputLabel>
               <Select
-                labelId="kelas-select-label"
-                value={selectedKelas}
-                onChange={handleChangeKelas}
-                label="Pilih Kelas"
+                label="Tahun Ajaran"
+                value={selectedTahun}
+                onChange={(e) => setSelectedTahun(e.target.value)}
               >
-                {kelasList.map((kelas) => (
-                  <MenuItem key={kelas.id} value={kelas.id}>
-                    {kelas.value}
+                {tahunAjaranList.map((th) => (
+                  <MenuItem key={th.id_tahun_ajaran} value={th.id_tahun_ajaran}>
+                    {th.nama}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            {/* Print Button */}
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>Tipe Rapor</InputLabel>
+              <Select
+                label="Tipe Rapor"
+                value={selectedTipe}
+                onChange={(e) => setSelectedTipe(e.target.value)}
+              >
+                <MenuItem value="ganjil">Ganjil</MenuItem>
+                <MenuItem value="genap">Genap</MenuItem>
+              </Select>
+            </FormControl>
+
             <Button
               variant="contained"
               color="primary"
-              endIcon={<PrintOutlinedIcon />}
-              onClick={handlePrintRapor}
-              fullWidth
+              endIcon={<DownloadOutlinedIcon />}
+              onClick={handleDownloadRapor}
+              disabled={loading}
+              loading={loading}
             >
-              Cetak Rapor
+              Download Rapor
             </Button>
           </Box>
         </Grid>
       </Grid>
 
-      {/* Table */}
+      {/* Table Section */}
       <Box ref={printRef} sx={{ width: "100%", maxWidth: "100%" }}>
-        <TableTemplate
-          key={"nilai"}
-          title="Nilai Akademik"
-          columns={columns}
-          rows={rows}
-          initialRowsPerPage={999}
-          tableHeight="auto"
-          isCheckbox={false}
-          isUpdate={false}
-          isDelete={false}
-          isUpload={false}
-          isCreate={false}
-          isDownload={false}
-          isPagination={false}
-        />
+        {loading ? (
+          <Box sx={{ textAlign: "center", py: 5 }}>
+            <CircularProgress />
+          </Box>
+        ) : Object.keys(nilaiData).length === 0 ? (
+          <Typography variant="body1" align="center" sx={{ py: 4 }}>
+            Tidak ada data nilai untuk tahun ajaran ini.
+          </Typography>
+        ) : (
+          Object.entries(nilaiData).map(([namaPelajaran, data]) => (
+            <Box key={namaPelajaran} sx={{ mb: 5 }}>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                {namaPelajaran}
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <TableTemplate
+                key={namaPelajaran}
+                title={namaPelajaran}
+                columns={data.headers}
+                rows={data.rows}
+                initialRowsPerPage={999}
+                tableHeight="auto"
+                isCheckbox={false}
+                isUpdate={false}
+                isDelete={false}
+                isUpload={false}
+                isCreate={false}
+                isDownload={false}
+                isPagination={false}
+              />
+            </Box>
+          ))
+        )}
       </Box>
     </>
   );

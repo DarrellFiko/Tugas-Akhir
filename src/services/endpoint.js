@@ -87,6 +87,7 @@ export const ENDPOINTS = {
     UPLOAD_RAPOR: (id, tipe) => `/kelas-siswa/upload-rapor/${id}/${tipe}`,
     DELETE_RAPOR: (id, tipe) => `/kelas-siswa/delete-rapor/${id}/${tipe}`,
     DELETE: (id) => `/kelas-siswa/${id}`,
+    DOWNLOAD_RAPOR_BY_TAHUN_AJARAN: (id_tahun_ajaran, tipe) => `/kelas-siswa/download-rapor-tahun-ajaran/${id_tahun_ajaran}/${tipe}`,
   },
 
   MATERI: {
@@ -123,5 +124,17 @@ export const ENDPOINTS = {
     DELETE: (id_pengumpulan_modul) => `/pengumpulan-modul/${id_pengumpulan_modul}`,
     DOWNLOAD: (id_pengumpulan_modul) => `/pengumpulan-modul/download/${id_pengumpulan_modul}`,
     DOWNLOAD_ZIP: (id_modul) => `/pengumpulan-modul/download-zip/${id_modul}`,
+  },
+
+  NILAI: {
+    CREATE: "/nilai",
+    GET_ALL: "/nilai",
+    GET_BY_ID: (id_nilai) => `/nilai/${id_nilai}`,
+    UPDATE: "/nilai",
+    DELETE: (id_nilai) => `/nilai/${id_nilai}`,
+    GET_BY_MODUL: (id_modul) => `/nilai?id_modul=${id_modul}`,
+    GET_BY_UJIAN: (id_ujian) => `/nilai?id_ujian=${id_ujian}`,
+    GET_BY_KELAS_GURU: (id_kelas_tahun_ajaran) => `/nilai/guru/${id_kelas_tahun_ajaran}`,
+    GET_BY_SISWA: (id_tahun_ajaran) => `/nilai/siswa/${id_tahun_ajaran}`,
   },
 };
