@@ -10,10 +10,10 @@ import KelasPage from "../pages/General/KelasPage";
 import ChartPage from "../pages/ChartPage";
 import SweetAlertPage from "../pages/SweetAlertPage";
 import BackendPage from "../pages/BackendPage";
+import UjianPage from "../pages/General/UjianPage";
 
 // Siswa
 import NilaiSiswaPage from "../pages/Siswa/NilaiSiswaPage";
-import UjianSiswaPage from "../pages/Siswa/Ujian/UjianSiswaPage";
 import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
 import DetailKelasSiswaPage from "../pages/Siswa/Kelas/DetailKelasSiswaPage";
 
@@ -21,7 +21,6 @@ import DetailKelasSiswaPage from "../pages/Siswa/Kelas/DetailKelasSiswaPage";
 import DetailKelasGuruPage from "../pages/Guru/Kelas/DetailKelasGuruPage";
 import DetailModuleGuruPage from "../pages/Guru/Kelas/DetailModuleGuruPage";
 import DetailPresensiGuruPage from "../pages/Guru/Kelas/DetailPresensiGuruPage";
-import UjianGuruPage from "../pages/Guru/Ujian/UjianGuruPage";
 import DetailUjianGuruPage from "../pages/Guru/Ujian/DetailUjianGuruPage";
 import FormUjianGuruPage from "../pages/Guru/Ujian/FormUjianGuruPage";
 
@@ -72,7 +71,7 @@ const studentRoutes = [
       { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Pelajaran", icon: <CalendarMonthOutlinedIcon /> },
       { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
       { path: "/nilai", element: <NilaiSiswaPage />, label: "Nilai Akademik", icon: <SchoolOutlinedIcon /> },
-      { path: "/ujian", element: <UjianSiswaPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
+      { path: "/ujian", element: <UjianPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
     ],
   },
   {
@@ -98,7 +97,7 @@ const teacherRoutes = [
     items: [
       { path: "/jadwal", element: <JadwalPage />, label: "Jadwal Mengajar", icon: <CalendarMonthOutlinedIcon /> },
       { path: "/kelas", element: <KelasPage />, label: "Kelas Online", icon: <MenuBookOutlinedIcon /> },
-      { path: "/ujian", element: <UjianGuruPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
+      { path: "/ujian", element: <UjianPage />, label: "Ujian Online", icon: <BorderColorOutlinedIcon /> },
     ],
   },
   {

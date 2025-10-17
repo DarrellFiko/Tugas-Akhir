@@ -1,9 +1,8 @@
-import readXlsFile from "read-excel-file";
 import * as XLSX from "xlsx";
 import moment from "moment/min/moment-with-locales";
 moment.locale("id");
-
 // import 'moment/locale/en-gb';
+
 export const formatDate = (date, format = "dddd, DD MMMM YYYY", language = "id") => {
   const dt = date instanceof Date ? date : new Date(date);
   return moment(dt).locale(language).format(format);
@@ -14,7 +13,7 @@ export const formatRelativeTime = (date) => {
   return moment(date).locale("id").fromNow();
 };
 
-// Fungsi parsing file Excel/CSV → columns & rows
+// Fungsi parsing file Excel/CSV columns & rows
 export const handleUploadFile = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -58,42 +57,6 @@ export const handleUploadFile = (file) => {
     reader.readAsArrayBuffer(file);
   });
 };
-
-// // Upload Excel file and validate headers
-// export const handleUploadFile = async (file, headers, onSuccess, onError) => {
-//   try {
-//     let itemsData = [];
-//     let headersData = [];
-
-//     const datas = await readXlsFile(file);
-//     headersData = datas[0];
-
-//     itemsData = datas.slice(1).map((row) => {
-//       const obj = {};
-//       datas[0].forEach((key, i) => {
-//         obj[key] = row[i];
-//       });
-//       return obj;
-//     });
-
-//     const headersValue = headers.map((header) => header.value);
-//     const headersEqual =
-//       headersData.length === headersValue.length &&
-//       headersData
-//         .slice()
-//         .sort()
-//         .every((v, i) => v === headersValue.slice().sort()[i]);
-
-//     if (headersEqual) {
-//       onSuccess && onSuccess(itemsData);
-//     } else {
-//       onError &&
-//         onError("Headers are not equal! Please check your file before upload.");
-//     }
-//   } catch (err) {
-//     onError && onError("Failed to read the file.");
-//   }
-// };
 
 // Download data as Excel
 export const handleDownloadFile = (items, fileName = "download") => {
