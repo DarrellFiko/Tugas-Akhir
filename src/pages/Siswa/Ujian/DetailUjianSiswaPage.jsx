@@ -2,17 +2,16 @@ import { useEffect, useState } from "react";
 import { Box, Button, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import TableTemplate from "../../../components/tables/TableTemplate";
-import { ToastError, ToastSuccess, PopupDelete } from "../../../composables/sweetalert";
-import { deleteUjian, getAllUjian } from "../../../services/ujianService";
+import { ToastError } from "../../../composables/sweetalert";
+import { getAllUjian } from "../../../services/ujianService";
 import { formatDate } from "../../../utils/utils";
 import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
-export default function DetailUjianGuruPage() {
+export default function DetailUjianSiswaPage() {
   const { idKelasTahunAjaran } = useParams();
   const navigate = useNavigate();
   const [kelas, setKelas] = useState(null);
-
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -28,7 +27,7 @@ export default function DetailUjianGuruPage() {
       }
     } catch (err) {
       console.error(err);
-      ToastError.fire({ title: "Gagal memuat data soal!" });
+      ToastError.fire({ title: "Gagal memuat data ujian!" });
     } finally {
       setLoading(false);
     }
@@ -41,52 +40,75 @@ export default function DetailUjianGuruPage() {
   };
 
   useEffect(() => {
-    fetchKelasTahunAjaran()
+    fetchKelasTahunAjaran();
   }, []);
 
   useEffect(() => {
     if (idKelasTahunAjaran) fetchData();
   }, [idKelasTahunAjaran]);
 
+  // ================== VALIDASI WAKTU ==================
+  const getUjianStatus = (start, end) => {
+    const now = new Date();
+    const startTime = new Date(start);
+    const endTime = new Date(end);
+
+    if (now < startTime) return "belum";
+    if (now > endTime) return "selesai";
+    return "aktif";
+  };
+
+  // ================== TABLE COLUMNS ==================
   const columns = [
-    { field: "jenis_ujian", label: "Jenis Ujian", width: "300px" },
+    { field: "jenis_ujian", label: "Jenis Ujian", width: "200px" },
     {
       field: "start_date",
       label: "Waktu Mulai",
       width: "300px",
-      render: (value) => formatDate(value, "dddd, DD-MMMM-YYYY, HH:mm"),
+      render: (value) => formatDate(value, "dddd, DD MMMM YYYY, HH:mm"),
     },
     {
       field: "end_date",
       label: "Waktu Selesai",
       width: "300px",
-      render: (value) => formatDate(value, "dddd, DD-MMMM-YYYY, HH:mm"),
+      render: (value) => formatDate(value, "dddd, DD MMMM YYYY, HH:mm"),
+    },
+    {
+      field: "action",
+      label: "Aksi",
+      width: "200px",
+      render: (value, row) => {
+        const status = getUjianStatus(row.start_date, row.end_date);
+
+        let buttonLabel = "Kerjakan";
+        let buttonColor = "primary";
+        let disabled = false;
+
+        if (status === "belum") {
+          buttonLabel = "Belum Dimulai";
+          buttonColor = "inherit";
+          disabled = true;
+        } else if (status === "selesai") {
+          buttonLabel = "Sudah Berakhir";
+          buttonColor = "inherit";
+          disabled = true;
+        }
+
+        return (
+          <Button
+            variant="contained"
+            color={buttonColor}
+            disabled={disabled}
+            onClick={() =>
+              navigate(`/ujian/detail/${idKelasTahunAjaran}/form/${row.id_ujian}`)
+            }
+          >
+            {buttonLabel}
+          </Button>
+        );
+      },
     },
   ];
-
-  // ================== HANDLER ==================
-  const handleCreate = () => {
-    navigate(`/ujian/detail/${idKelasTahunAjaran}/create`);
-  };
-
-  const handleEdit = (row) => {
-    navigate(`/ujian/detail/${idKelasTahunAjaran}/edit/${row.id_ujian}`);
-  };
-
-  const handleDelete = async (row) => {
-    const confirm = await PopupDelete.fire({
-      title: "Yakin ingin menghapus ujian ini?",
-    });
-    if (confirm.isConfirmed) {
-      try {
-        await deleteUjian(row.id_ujian);
-        ToastSuccess.fire({ title: "Ujian berhasil dihapus!" });
-        fetchData();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  };
 
   // ================== RENDER ==================
   return (
@@ -123,9 +145,9 @@ export default function DetailUjianGuruPage() {
         initialRowsPerPage={10}
         isUpload={false}
         isDownload={false}
-        onCreate={handleCreate}
-        onUpdate={handleEdit}
-        onDelete={handleDelete}
+        isUpdate={false}
+        isDelete={false}
+        isCreate={false}
       />
     </Box>
   );

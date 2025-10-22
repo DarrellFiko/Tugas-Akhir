@@ -11,13 +11,13 @@ export async function createSoal(formData) {
   return res.data;
 }
 
-// ================== GET ALL (Guru - tampilkan jawaban benar) ==================
+// ================== GET ALL (Guru) ==================
 export async function getAllSoalGuru(id_kelas_tahun_ajaran) {
   const res = await getAPI.get(ENDPOINTS.SOAL.GET_ALL_GURU(id_kelas_tahun_ajaran));
   return res.data;
 }
 
-// ================== GET ALL (Siswa - sembunyikan jawaban benar) ==================
+// ================== GET ALL (Siswa) ==================
 export async function getAllSoalSiswa(id_ujian) {
   const res = await getAPI.get(ENDPOINTS.SOAL.GET_ALL_SISWA(id_ujian));
   return res.data;
@@ -51,4 +51,10 @@ export async function downloadSoalImage(id_soal) {
     responseType: "blob",
   });
   return res;
+}
+
+// ================== GET RANDOM SOAL (untuk siswa) ==================
+export async function getRandomSoal(id_ujian) {
+  const res = await getAPI.get(ENDPOINTS.SOAL.GET_RANDOM(id_ujian));
+  return res.data;
 }

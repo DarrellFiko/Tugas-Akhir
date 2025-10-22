@@ -16,6 +16,8 @@ import UjianPage from "../pages/General/UjianPage";
 import NilaiSiswaPage from "../pages/Siswa/NilaiSiswaPage";
 import DetailModuleSiswaPage from "../pages/Siswa/Kelas/DetailModuleSiswaPage";
 import DetailKelasSiswaPage from "../pages/Siswa/Kelas/DetailKelasSiswaPage";
+import DetailUjianSiswaPage from "../pages/Siswa/Ujian/DetailUjianSiswaPage";
+import FormUjianSiswaPage from "../pages/Siswa/Ujian/FormUjianSiswaPage";
 
 // Guru
 import DetailKelasGuruPage from "../pages/Guru/Kelas/DetailKelasGuruPage";
@@ -80,6 +82,8 @@ const studentRoutes = [
       { path: "/profile", element: <ProfilePage /> },
       { path: "/kelas/detail/:id", element: <DetailKelasSiswaPage /> },
       { path: "/kelas/detail/:id/module/:modulId", element: <DetailModuleSiswaPage /> },
+      { path: "/ujian/detail/:idKelasTahunAjaran", element: <DetailUjianSiswaPage /> },
+      { path: "/ujian/detail/:idKelasTahunAjaran/form/:idUjian", element: <FormUjianSiswaPage /> },
       // { path: "*", element: <NotFoundPage /> },
     ],
   },

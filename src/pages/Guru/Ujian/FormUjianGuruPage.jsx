@@ -409,6 +409,12 @@ export default function FormUjianGuruPage() {
     if (!formData.jenisUjian) newErrors.jenisUjian = "Jenis ujian wajib diisi";
     if (formData.soal.length === 0) newErrors.soal = "Minimal 1 soal diperlukan";
 
+    const start = new Date(formData.startDate);
+    const end = new Date(formData.endDate);
+    if (start >= end) {
+      newErrors.date = "Tanggal mulai harus lebih kecil dari tanggal berakhir";
+    }
+
     formData.soal.forEach((s) => {
       if (!s.pertanyaan || !String(s.pertanyaan).trim())
         newErrors[`soal-${s.id}-pertanyaan`] = "Pertanyaan wajib diisi";
@@ -559,6 +565,8 @@ export default function FormUjianGuruPage() {
             value={formData.startDate}
             onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
             InputLabelProps={{ shrink: true }}
+            error={!!errors.date}
+            helperText={errors.date}
           />
         </Grid>
 
@@ -570,6 +578,8 @@ export default function FormUjianGuruPage() {
             value={formData.endDate}
             onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
             InputLabelProps={{ shrink: true }}
+            error={!!errors.date}
+            helperText={errors.date}
           />
         </Grid>
       </Grid>

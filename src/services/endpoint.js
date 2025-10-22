@@ -154,5 +154,11 @@ export const ENDPOINTS = {
     UPDATE: (id_soal) => `/soal/${id_soal}`,
     DELETE: (id_soal) => `/soal/${id_soal}`,
     DOWNLOAD_GAMBAR: (id_soal) => `/soal/download/${id_soal}`,
+    GET_RANDOM: (id_ujian) => `/soal/random/${id_ujian}`,
+  },
+
+  JAWABAN_UJIAN: {
+    CREATE: "/jawaban-ujian",
+    GET_ALL: "/jawaban-ujian",
   },
 };
