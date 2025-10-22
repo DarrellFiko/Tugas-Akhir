@@ -59,7 +59,7 @@ export const handleUploadFile = (file) => {
 };
 
 // Download data as Excel
-export const handleDownloadFile = (items, fileName = "download") => {
+export const handleDownloadFileExcel = (items, fileName = "download") => {
   try {
     const worksheet = XLSX.utils.json_to_sheet(items);
     const workbook = XLSX.utils.book_new();

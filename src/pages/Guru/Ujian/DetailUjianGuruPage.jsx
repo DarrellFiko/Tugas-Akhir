@@ -1,73 +1,127 @@
-import React, { useState } from "react";
-import { Box } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Button, Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import TableTemplate from "../../../components/tables/TableTemplate";
-
-// dummy data awal
-const initialData = [
-  {
-    id: 1,
-    jenisUjian: "UTS",
-    totalSiswa: 30,
-    totalMengumpulkan: 28,
-    waktu: "2025-09-20T09:00",
-    durasi: 90,
-  },
-  {
-    id: 2,
-    jenisUjian: "UAS",
-    totalSiswa: 30,
-    totalMengumpulkan: 30,
-    waktu: "2025-12-15T13:00",
-    durasi: 120,
-  },
-];
+import { deleteSoal } from "../../../services/soalService";
+import { ToastError, ToastSuccess, PopupDelete } from "../../../composables/sweetalert";
+import { deleteUjian, getAllUjian } from "../../../services/ujianService";
+import { formatDate } from "../../../utils/utils";
+import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 export default function DetailUjianGuruPage() {
-  const { id } = useParams(); // id ujian detail
+  const { idKelasTahunAjaran } = useParams();
   const navigate = useNavigate();
-  const [rows, setRows] = useState(initialData);
+  const [kelas, setKelas] = useState(null);
 
-  const columns = [
-    { field: "jenisUjian", label: "Jenis Ujian", width: "150px" },
-    { field: "totalSiswa", label: "Total Siswa", width: "120px" },
-    { field: "totalMengumpulkan", label: "Total Mengumpulkan", width: "180px" },
-    {
-      field: "waktu",
-      label: "Waktu Pelaksanaan",
-      width: "220px",
-      render: (val) => {
-        const date = new Date(val);
-        return date.toLocaleString("id-ID", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        });
-      },
-    },
-    { field: "durasi", label: "Durasi (menit)", width: "150px" },
-  ];
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const handleCreate = () => {
-    navigate(`/ujian/detail/${id}/create`);
-  };
-
-  const handleEdit = (row) => {
-    navigate(`/ujian/detail/${id}/edit/${row.id}`);
-  };
-
-  const handleDelete = (row) => {
-    if (window.confirm("Yakin ingin menghapus data ini?")) {
-      setRows((prev) => prev.filter((r) => r.id !== row.id));
+  // ================== FETCH DATA ==================
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllUjian(idKelasTahunAjaran);
+      if (res?.data) {
+        setRows(res.data);
+      } else {
+        setRows([]);
+      }
+    } catch (err) {
+      console.error(err);
+      ToastError.fire({ title: "Gagal memuat data soal!" });
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Fetch detail kelas
+  const fetchKelasTahunAjaran = async () => {
+    const res = await getKelasTahunAjaranById(idKelasTahunAjaran);
+    setKelas(res.data);
+  };
+
+  useEffect(() => {
+    fetchKelasTahunAjaran()
+  }, []);
+
+  useEffect(() => {
+    if (idKelasTahunAjaran) fetchData();
+  }, [idKelasTahunAjaran]);
+
+  const columns = [
+    { field: "jenis_ujian", label: "Jenis Ujian", width: "300px" },
+    {
+      field: "start_date",
+      label: "Waktu Mulai",
+      width: "300px",
+      render: (value) => formatDate(value, "dddd, DD-MMMM-YYYY, HH:mm"),
+    },
+    {
+      field: "end_date",
+      label: "Waktu Selesai",
+      width: "300px",
+      render: (value) => formatDate(value, "dddd, DD-MMMM-YYYY, HH:mm"),
+    },
+  ];
+
+  // ================== HANDLER ==================
+  const handleCreate = () => {
+    navigate(`/ujian/detail/${idKelasTahunAjaran}/create`);
+  };
+
+  const handleEdit = (row) => {
+    navigate(`/ujian/detail/${idKelasTahunAjaran}/edit/${row.id_ujian}`);
+  };
+
+  const handleDelete = async (row) => {
+    const confirm = await PopupDelete.fire({
+      title: "Yakin ingin menghapus ujian ini?",
+    });
+    if (confirm.isConfirmed) {
+      try {
+        await deleteUjian(row.id_ujian);
+        ToastSuccess.fire({ title: "Ujian berhasil dihapus!" });
+        fetchData();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  // ================== RENDER ==================
   return (
     <Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="h4" sx={{ mb: 3 }}>
+          {`${kelas?.Pelajaran?.nama_pelajaran || "-"} - ${
+            kelas?.Kelas?.nama_kelas || "-"
+          }`}
+        </Typography>
+
+        <Button
+          variant="contained"
+          color="warning"
+          startIcon={<ArrowBackOutlinedIcon />}
+          onClick={() => navigate("/ujian")}
+          sx={{ mb: 2 }}
+        >
+          Kembali
+        </Button>
+      </Box>
+
       <TableTemplate
+        isLoading={loading}
         title="Daftar Ujian"
         columns={columns}
         rows={rows}
-        initialRowsPerPage={5}
+        initialRowsPerPage={10}
         isUpload={false}
         isDownload={false}
         onCreate={handleCreate}

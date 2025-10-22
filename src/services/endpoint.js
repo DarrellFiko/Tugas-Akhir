@@ -137,4 +137,22 @@ export const ENDPOINTS = {
     GET_BY_KELAS_GURU: (id_kelas_tahun_ajaran) => `/nilai/guru/${id_kelas_tahun_ajaran}`,
     GET_BY_SISWA: (id_tahun_ajaran) => `/nilai/siswa/${id_tahun_ajaran}`,
   },
+
+  UJIAN: {
+    CREATE: "/ujian",
+    GET_ALL: "/ujian",
+    GET_BY_ID: (id_ujian) => `/ujian/${id_ujian}`,
+    UPDATE: (id_ujian) => `/ujian/${id_ujian}`,
+    DELETE: (id_ujian) => `/ujian/${id_ujian}`,
+  },
+
+  SOAL: {
+    CREATE: "/soal",
+    GET_ALL_GURU: (id_ujian) => `/soal/guru${id_ujian ? `?id_kelas_tahun_ajaran=${id_ujian}` : ""}`,
+    GET_ALL_SISWA: (id_ujian) => `/soal/siswa${id_ujian ? `?id_ujian=${id_ujian}` : ""}`,
+    GET_BY_ID: (id_soal) => `/soal/${id_soal}`,
+    UPDATE: (id_soal) => `/soal/${id_soal}`,
+    DELETE: (id_soal) => `/soal/${id_soal}`,
+    DOWNLOAD_GAMBAR: (id_soal) => `/soal/download/${id_soal}`,
+  },
 };

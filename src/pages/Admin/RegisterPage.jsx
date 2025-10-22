@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import TableTemplate from "../../components/tables/TableTemplate";
-import { handleDownloadFile, handleUploadFile } from "../../utils/utils";
+import { handleDownloadFileExcel, handleUploadFile } from "../../utils/utils";
 import {
   ToastError,
   ToastSuccess,
@@ -323,7 +323,7 @@ export default function RegisterPage() {
       return;
     }
     const rowsWithPassword = rows.map((row) => ({ ...row, password: "" }));
-    const success = handleDownloadFile(rowsWithPassword, "users");
+    const success = handleDownloadFileExcel(rowsWithPassword, "users");
     if (success) ToastSuccess.fire({ title: "Download Success!" });
     else ToastError.fire({ title: "Download Failed!" });
   };

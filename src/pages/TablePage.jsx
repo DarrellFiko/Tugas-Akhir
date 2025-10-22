@@ -7,7 +7,7 @@ import {
   ToastSuccess,
   ToastError,
 } from "../composables/sweetalert";
-import { handleDownloadFile, handleUploadFile } from "../utils/utils";
+import { handleDownloadFileExcel, handleUploadFile } from "../utils/utils";
 
 export default function TablePage() {
   const columns = [
@@ -57,7 +57,7 @@ export default function TablePage() {
   };
 
   const handleDownload = () => {
-    const success = handleDownloadFile(rows, "mydata");
+    const success = handleDownloadFileExcel(rows, "mydata");
     if (success) ToastSuccess.fire({ title: "Download Success!" });
     else ToastError.fire({ title: "Download Failed!" });
   };

@@ -8,7 +8,7 @@ import {
   deleteBarang,
 } from "../services/barangService";
 import TableTemplate from "../components/tables/TableTemplate";
-import { handleDownloadFile } from "../utils/utils";
+import { handleDownloadFileExcel } from "../utils/utils";
 
 export default function BackendPage() {
   const [barang, setBarang] = useState([]);
@@ -43,7 +43,7 @@ export default function BackendPage() {
   };
 
   const handleDownload = () => {
-    const success = handleDownloadFile(barang, "mydata");
+    const success = handleDownloadFileExcel(barang, "mydata");
     if (success) ToastSuccess.fire({ title: "Download Success!" });
     else ToastError.fire({ title: "Download Failed!" });
   };
