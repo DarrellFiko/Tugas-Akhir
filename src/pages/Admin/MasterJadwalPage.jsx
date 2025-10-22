@@ -58,45 +58,37 @@ export default function MasterJadwalPage() {
   });
 
   const columns = [
-    {
-      field: "TahunAjaran",
-      label: "Tahun Ajaran",
-      width: 200,
-      render: (row) => row?.nama || "-",
-      sortable: true,
-    },
-    {
-      field: "Kelas",
-      label: "Kelas",
-      width: 200,
-      render: (row) => row?.nama_kelas || "-",
-      sortable: true,
-    },
-    {
-      field: "Pelajaran",
-      label: "Pelajaran",
-      width: 200,
-      render: (row) => row?.nama_pelajaran || "-",
-      sortable: true,
-    },
-    {
-      field: "GuruPengampu",
-      label: "Guru Pengampu",
-      width: 250,
-      render: (row) => row.nama || "-",
-      sortable: true,
-    },
+    { field: "nama_tahun_ajaran", label: "Tahun Ajaran", width: 200, sortable: true },
+    { field: "nama_kelas", label: "Kelas", width: 200, sortable: true },
+    { field: "nama_pelajaran", label: "Pelajaran", width: 200, sortable: true },
+    { field: "nama_guru_pengampu", label: "Guru Pengampu", width: 250, sortable: true },
     { field: "hari", label: "Hari", width: 150, sortable: true },
     { field: "jam_mulai", label: "Jam Mulai", width: 150, sortable: true },
     { field: "jam_selesai", label: "Jam Selesai", width: 150, sortable: true },
   ];
 
+  const transformJadwalRows = (data) => {
+    return (data || []).map((item) => ({
+      id_jadwal: item.id_jadwal,
+      id_kelas_tahun_ajaran: item.id_kelas_tahun_ajaran,
+      hari: item.hari,
+      jam_mulai: item.jam_mulai,
+      jam_selesai: item.jam_selesai,
+      nama_tahun_ajaran: item.TahunAjaran?.nama || "-",
+      nama_kelas: item.Kelas?.nama_kelas || "-",
+      nama_pelajaran: item.Pelajaran?.nama_pelajaran || "-",
+      nama_guru_pengampu: item.GuruPengampu?.nama || "-",
+    }));
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const res = await getAllJadwal();
-      setRows(res.data || []);
+      setRows(transformJadwalRows(res.data || []));
     } catch (err) {
+      console.error("Gagal fetch jadwal:", err);
+      ToastError.fire({ title: "Gagal mengambil data jadwal" });
     } finally {
       setLoading(false);
     }

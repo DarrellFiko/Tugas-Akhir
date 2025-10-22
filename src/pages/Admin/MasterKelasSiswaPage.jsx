@@ -70,13 +70,7 @@ export default function MasterKelasSiswaPage() {
   const columns = [
     { field: "kelas", label: "Kelas", width: 200, sortable: true, },
     { field: "tahunAjaran", label: "Tahun Ajaran", width: 200, sortable: true, },
-    {
-      field: "siswa",
-      label: "Siswa",
-      width: 250,
-      render: (value, row) => row.siswa?.nama || "-",
-      sortable: true,
-    },
+    { field: "siswa", label: "Siswa", width: 250, sortable: true, },
     {
       field: "rapor_ganjil",
       label: "Rapor Ganjil",
@@ -165,19 +159,25 @@ export default function MasterKelasSiswaPage() {
     },
   ];
 
+  const transformKelasSiswaRows = (data) => {
+    return (data || []).map((item) => ({
+      id_kelas_siswa: item.id_kelas_siswa,
+      id_kelas: item.kelas?.id_kelas || null,
+      kelas: item.kelas?.nama_kelas || "-",
+      id_tahun_ajaran: item.tahunAjaran?.id_tahun_ajaran || null,
+      tahunAjaran: item.tahunAjaran?.nama || "-",
+      id_siswa: item.siswa?.id_user || null,
+      siswa: item.siswa.nama || null,
+      rapor_ganjil: item.rapor_ganjil || null,
+      rapor_genap: item.rapor_genap || null,
+    }));
+  };
+
   const fetchData = async () => {
     setLoading(true);
     try {
       const res = await getAllKelasSiswa();
-      const formatted = res.data.map((item) => ({
-        ...item,
-        kelas: item.kelas?.nama_kelas || "-",
-        tahunAjaran: item.tahunAjaran?.nama || "-",
-        siswa: item.siswa || null,
-        rapor_ganjil: item.rapor_ganjil || null,
-        rapor_genap: item.rapor_genap || null,
-      }));
-      setRows(formatted);
+      setRows(transformKelasSiswaRows(res.data || []));
     } catch (err) {
       console.error("Gagal fetch kelas siswa:", err);
     } finally {

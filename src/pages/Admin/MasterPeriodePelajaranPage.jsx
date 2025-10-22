@@ -64,47 +64,40 @@ export default function MasterPeriodePelajaranPage() {
   });
 
   const columns = [
-    {
-      field: "TahunAjaran",
-      label: "Tahun Ajaran",
-      width: 200,
-      sortable: true,
-      render: (row) => row.nama || "-",
-    },
-    {
-      field: "Kelas",
-      label: "Kelas",
-      width: 200,
-      sortable: true,
-      render: (row) => row.nama_kelas || "-",
-    },
-    {
-      field: "Pelajaran",
-      label: "Pelajaran",
-      width: 200,
-      sortable: true,
-      render: (row) => row.nama_pelajaran || "-",
-    },
-    {
-      field: "GuruPengampu",
-      label: "Guru Pengampu",
-      width: 250,
-      sortable: true,
-      render: (row) => row.nama || "-",
-    },
+    { field: "nama_tahun_ajaran", label: "Tahun Ajaran", width: 200, sortable: true },
+    { field: "nama_kelas", label: "Kelas", width: 200, sortable: true },
+    { field: "nama_pelajaran", label: "Pelajaran", width: 200, sortable: true },
+    { field: "nama_guru_pengampu", label: "Guru Pengampu", width: 250, sortable: true },
   ];
+
+  const transformRows = (data) => {
+    return (data || []).map((item) => ({
+      id_kelas_tahun_ajaran: item.id_kelas_tahun_ajaran,
+      id_tahun_ajaran: item.id_tahun_ajaran,
+      id_kelas: item.id_kelas,
+      id_pelajaran: item.id_pelajaran,
+      guru_pengampu: item.guru_pengampu,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+      deleted_at: item.deleted_at,
+      nama_tahun_ajaran: item.TahunAjaran?.nama || "-",
+      nama_kelas: item.Kelas?.nama_kelas || "-",
+      nama_pelajaran: item.Pelajaran?.nama_pelajaran || "-",
+      nama_guru_pengampu: item.GuruPengampu?.nama || "-",
+    }));
+  };
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const res = await getAllKelasTahunAjaran();
-      setRows(res.data || []);
+      setRows(transformRows(res.data || []));
     } catch (err) {
       console.error("Gagal fetch data:", err);
-      ToastError.fire({ title: "Gagal mengambil data" });
     }
     setLoading(false);
   };
+
 
   const fetchOptions = async () => {
     setOptionLoading(true);
