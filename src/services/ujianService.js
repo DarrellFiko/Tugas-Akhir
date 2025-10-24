@@ -15,6 +15,12 @@ export async function getAllUjian(id_kelas_tahun_ajaran) {
   return res.data;
 }
 
+// ================== GET PERIKSA UJIAN ==================
+export async function getPeriksaUjian(id_ujian) {
+  const res = await getAPI.get(ENDPOINTS.UJIAN.GET_PERIKSA(id_ujian));
+  return res.data;
+}
+
 // ================== GET BY ID ==================
 export async function getUjianById(id_ujian) {
   const res = await getAPI.get(ENDPOINTS.UJIAN.GET_BY_ID(id_ujian));

@@ -507,7 +507,7 @@ export default function FormUjianGuruPage() {
   return (
     <Box component="form" onSubmit={handleSubmit} sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h4" sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ }}>
           Form Ujian Guru
         </Typography>
 

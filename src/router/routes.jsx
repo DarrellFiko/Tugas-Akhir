@@ -25,6 +25,8 @@ import DetailModuleGuruPage from "../pages/Guru/Kelas/DetailModuleGuruPage";
 import DetailPresensiGuruPage from "../pages/Guru/Kelas/DetailPresensiGuruPage";
 import DetailUjianGuruPage from "../pages/Guru/Ujian/DetailUjianGuruPage";
 import FormUjianGuruPage from "../pages/Guru/Ujian/FormUjianGuruPage";
+import PeriksaUjianGuruPage from "../pages/Guru/Ujian/PeriksaUjianGuruPage";
+import PeriksaDetailUjianGuruPage from "../pages/Guru/Ujian/PeriksaDetailUjianGuruPage";
 
 // Admin
 import RegisterPage from "../pages/Admin/RegisterPage";
@@ -114,6 +116,8 @@ const teacherRoutes = [
       { path: "/ujian/detail/:idKelasTahunAjaran", element: <DetailUjianGuruPage /> },
       { path: "/ujian/detail/:idKelasTahunAjaran/create", element: <FormUjianGuruPage /> },
       { path: "/ujian/detail/:idKelasTahunAjaran/edit/:idUjian", element: <FormUjianGuruPage /> },
+      { path: "/ujian/detail/:idKelasTahunAjaran/periksa/:idUjian", element: <PeriksaUjianGuruPage /> },
+      { path: "/ujian/detail/:idKelasTahunAjaran/periksa/:idUjian/:idUser", element: <PeriksaDetailUjianGuruPage /> },
       // { path: "*", element: <NotFoundPage /> },
     ],
   },

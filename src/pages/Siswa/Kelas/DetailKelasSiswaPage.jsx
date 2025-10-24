@@ -39,7 +39,7 @@ export default function DetailKelasSiswaPage() {
           alignItems: "center",
         }}
       >
-        <Typography variant="h4" sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ }}>
           {kelas?.title || "Detail Kelas"}
         </Typography>
 

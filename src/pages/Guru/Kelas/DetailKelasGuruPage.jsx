@@ -93,7 +93,7 @@ export default function DetailKelasGuruPage() {
           alignItems: "center",
         }}
       >
-        <Typography variant="h4" sx={{ mb: 3 }}>
+        <Typography variant="h4" sx={{ }}>
           {`${kelas?.Pelajaran?.nama_pelajaran || "-"} - ${
             kelas?.Kelas?.nama_kelas || "-"
           }`}

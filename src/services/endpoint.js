@@ -142,6 +142,7 @@ export const ENDPOINTS = {
     CREATE: "/ujian",
     GET_ALL: "/ujian",
     GET_BY_ID: (id_ujian) => `/ujian/${id_ujian}`,
+    GET_PERIKSA: (id_ujian) => `/ujian/${id_ujian}/periksa`,
     UPDATE: (id_ujian) => `/ujian/${id_ujian}`,
     DELETE: (id_ujian) => `/ujian/${id_ujian}`,
   },
