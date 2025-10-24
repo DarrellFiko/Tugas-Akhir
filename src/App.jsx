@@ -13,6 +13,8 @@ import {
   Navigate,
   matchPath,
 } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser, clearUser } from "./stores/userSlice.js";
 
 // Import Others
 import { lightTheme, darkTheme } from "./plugins/theme";
@@ -40,9 +42,7 @@ function AppContent({
   onLogout,
   isUjian,
 }) {
-  const nama = localStorage.getItem("authUser");
-  const profilePicture = localStorage.getItem("profilePicture");
-
+  const { nama, profilePicture } = useSelector((state) => state.user); // Ambil dari Redux
   const isMobile = useIsMobile();
   const location = useLocation();
 
@@ -139,6 +139,7 @@ function AppContent({
 }
 
 export default function App() {
+  const dispatch = useDispatch(); // Redux dispatch
   const [isSidebar, setIsSidebar] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem("isDarkTheme");
@@ -162,7 +163,6 @@ export default function App() {
 
       const token = response.token;
       const userRole = response.role ? response.role.toLowerCase() : "";
-      console.log(response);
 
       localStorage.setItem("authToken", token);
       localStorage.setItem("id_user", response.id_user);
@@ -171,6 +171,16 @@ export default function App() {
       localStorage.setItem("role", userRole);
 
       setRole(userRole);
+
+      // Simpan user ke Redux
+      dispatch(
+        setUser({
+          id_user: response.id_user,
+          nama: response.nama,
+          role: userRole,
+          profilePicture: response.profile_picture,
+        })
+      );
     } catch (err) {
       console.error("Login failed:", err);
     }
@@ -186,8 +196,12 @@ export default function App() {
     localStorage.removeItem("role");
     localStorage.removeItem("profilePicture");
     localStorage.removeItem("isUjian");
+
     setRole(null);
     setIsUjian(false);
+
+    // Reset Redux state
+    dispatch(clearUser());
   };
 
   // listen role & ujian changes
@@ -206,6 +220,25 @@ export default function App() {
     localStorage.setItem("isDarkTheme", JSON.stringify(isDark));
     applyThemeVariables(isDark ? darkTheme : lightTheme);
   }, [isDark]);
+
+  // Saat reload, ambil user dari localStorage ke Redux
+  useEffect(() => {
+    const nama = localStorage.getItem("authUser");
+    const profilePicture = localStorage.getItem("profilePicture");
+    const id_user = localStorage.getItem("id_user");
+    const role = localStorage.getItem("role");
+
+    if (nama && id_user) {
+      dispatch(
+        setUser({
+          id_user,
+          nama,
+          role,
+          profilePicture,
+        })
+      );
+    }
+  }, [dispatch]);
 
   return (
     <ThemeProvider theme={isDark ? darkTheme : lightTheme}>

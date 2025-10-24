@@ -1,9 +1,10 @@
-// src/main.jsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
+import { Provider } from "react-redux";
 import App from "./App.jsx";
-import logo from "./assets/images/logoTarakanita.png";  
+import logo from "./assets/images/logoTarakanita.png";
+import "./index.css";
+import { store } from "./stores/index.js";
 
 // Dynamically set favicon
 const setFavicon = (iconUrl) => {
@@ -15,11 +16,12 @@ const setFavicon = (iconUrl) => {
   }
   link.href = iconUrl;
 };
-
 setFavicon(logo);
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <App />
+    <Provider store={store}>
+      <App />
+    </Provider>
   </StrictMode>
 );

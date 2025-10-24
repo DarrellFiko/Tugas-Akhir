@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { updateProfilePicture } from "../../stores/userSlice";
 import {
   Box,
   Paper,
@@ -21,6 +23,7 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { getProfile, requestOtp, resetPassword, updateUser } from "../../services/authService.js";
 
 export default function ProfilePage() {
+  const dispatch = useDispatch();
   const [editMode, setEditMode] = useState(false);
   const [avatar, setAvatar] = useState("/broken-image.jpg");
   const [openPreview, setOpenPreview] = useState(false);
@@ -64,6 +67,11 @@ export default function ProfilePage() {
           await updateUser(profile.id_user, body);
 
           ToastSuccess.fire({ title: "Edit Profile Success" });
+
+          // Update Redux supaya sidebar langsung berubah
+          if (avatarFile) {
+            dispatch(updateProfilePicture(avatar));
+          }
 
           setAvatarFile(null);
         } catch (err) {
@@ -289,17 +297,9 @@ export default function ProfilePage() {
       </Paper>
 
       {/* Avatar Preview Dialog */}
-      <Dialog
-        open={openPreview}
-        onClose={() => setOpenPreview(false)}
-        maxWidth="sm"
-      >
+      <Dialog open={openPreview} onClose={() => setOpenPreview(false)} maxWidth="sm">
         <DialogContent sx={{ p: 0 }}>
-          <img
-            src={avatar}
-            alt="avatar preview"
-            style={{ width: "100%", height: "auto" }}
-          />
+          <img src={avatar} alt="avatar preview" style={{ width: "100%", height: "auto" }} />
         </DialogContent>
       </Dialog>
 
@@ -339,12 +339,7 @@ export default function ProfilePage() {
               <Button onClick={handleClosePasswordDialog} color="primary">
                 Batal
               </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSavePassword}
-                loading={loading}
-              >
+              <Button variant="contained" color="primary" onClick={handleSavePassword} disabled={loading}>
                 Save
               </Button>
             </DialogActions>
@@ -366,11 +361,9 @@ export default function ProfilePage() {
                     onChange={(e) => {
                       const val = e.target.value.replace(/[^0-9]/g, "");
                       if (!val) return;
-
                       const newOtp = [...otp];
-                      newOtp[i] = val[0]; // hanya 1 digit
+                      newOtp[i] = val[0];
                       setOtp(newOtp);
-
                       if (i < 5 && otpRefs.current[i + 1]) otpRefs.current[i + 1].focus();
                     }}
                     onKeyDown={(e) => {
@@ -395,18 +388,10 @@ export default function ProfilePage() {
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button
-                onClick={() => setStepPassword(1)}
-                color="warning"
-              >
+              <Button onClick={() => setStepPassword(1)} color="warning">
                 Back
               </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSendOtp}
-                loading={loading}
-              >
+              <Button variant="contained" color="primary" onClick={handleSendOtp} disabled={loading}>
                 Send
               </Button>
             </DialogActions>
@@ -443,8 +428,8 @@ export default function ProfilePage() {
                 Orang Tua
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              {renderField("Nama Ayah     ", "nama_ayah")}
-              {renderField("Nama Ibu      ", "nama_ibu")}
+              {renderField("Nama Ayah", "nama_ayah")}
+              {renderField("Nama Ibu", "nama_ibu")}
               {renderField("HP Orang Tua", "telp_ortu")}
             </Paper>
 
