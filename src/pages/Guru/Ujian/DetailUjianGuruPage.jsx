@@ -62,6 +62,16 @@ export default function DetailUjianGuruPage() {
       width: "300px",
       render: (value) => formatDate(value, "dddd, DD-MMMM-YYYY, HH:mm"),
     },
+    {
+      field: "periksa",
+      label: "Periksa",
+      width: "300px",
+      render: (value, row) => (
+        <Button variant="contained" color="primary" onClick={() => navigate(`/ujian/detail/${idKelasTahunAjaran}/periksa/${row.id_ujian}`)}>
+          Periksa Ujian
+        </Button>
+      ),
+    },
   ];
 
   // ================== HANDLER ==================

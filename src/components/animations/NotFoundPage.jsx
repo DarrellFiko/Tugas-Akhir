@@ -345,7 +345,7 @@ export default function NotFoundPage() {
         variant="contained"
         disableElevation
         size="large"
-        onClick={() => navigate("/")}
+        onClick={() => navigate(-1)}
       >
         Back
       </Button>

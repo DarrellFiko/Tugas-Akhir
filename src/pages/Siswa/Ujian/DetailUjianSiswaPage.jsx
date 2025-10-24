@@ -75,16 +75,21 @@ export default function DetailUjianSiswaPage() {
     },
     {
       field: "action",
-      label: "Aksi",
+      label: "Action",
       width: "200px",
       render: (value, row) => {
+        // Cek status ujian berdasarkan waktu
         const status = getUjianStatus(row.start_date, row.end_date);
 
         let buttonLabel = "Kerjakan";
         let buttonColor = "primary";
         let disabled = false;
 
-        if (status === "belum") {
+        if (row.status === false) {
+          buttonLabel = row.notes || "Tidak dapat diakses";
+          buttonColor = "inherit";
+          disabled = true;
+        } else if (status === "belum") {
           buttonLabel = "Belum Dimulai";
           buttonColor = "inherit";
           disabled = true;
@@ -107,7 +112,7 @@ export default function DetailUjianSiswaPage() {
           </Button>
         );
       },
-    },
+    }
   ];
 
   // ================== RENDER ==================

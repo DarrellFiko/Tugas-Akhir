@@ -7,6 +7,7 @@ import { getUjianById } from "../../../services/ujianService";
 import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 import { getRandomSoal } from "../../../services/soalService";
 import { createJawabanUjian } from "../../../services/jawabanUjianService";
+import TextEditor from "../../../components/inputs/TextEditor";
 
 export default function FormUjianSiswaPage() {
   const { idKelasTahunAjaran, idUjian } = useParams();
@@ -21,6 +22,8 @@ export default function FormUjianSiswaPage() {
   const [isLocked, setIsLocked] = useState(true);
   const [soal, setSoal] = useState(null);
   const [jawaban, setJawaban] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState(null); 
+  const [nomorSoal, setNomorSoal] = useState(0);
 
   const id_user = localStorage.getItem("id_user");
 
@@ -52,10 +55,9 @@ export default function FormUjianSiswaPage() {
           ToastError.fire({
             title: "Anda tidak terdaftar untuk mengikuti ujian ini.",
           });
-          navigate(-1);
-          return;
+          return navigate(-1);
         }
-
+        setNomorSoal(data.jumlah_soal_dijawab + 1)
         setUjian(data);
         setStartTime(new Date(data.start_date));
         setEndTime(new Date(data.end_date));
@@ -212,19 +214,40 @@ export default function FormUjianSiswaPage() {
   // ================== SUBMIT JAWABAN ==================
   const handleSubmit = async () => {
     try {
-      if (!jawaban || !soal) {
+      if (!soal) {
+        ToastError.fire({ title: "Soal tidak ditemukan" });
+        return;
+      }
+
+      // validasi
+      if (
+        (soal.jenis_soal === "isian" && !jawaban.trim()) ||
+        (soal.jenis_soal !== "isian" && (jawaban === "" || jawaban === null))
+      ) {
         ToastError.fire({ title: "Jawaban tidak boleh kosong" });
         return;
       }
 
+      // tentukan payload sesuai jenis soal
+      let payloadJawaban;
+      if (soal.jenis_soal === "isian") {
+        payloadJawaban = jawaban.trim(); // kirim teks langsung
+      } else {
+        payloadJawaban = selectedIndex; // kirim index (angka / array)
+      }
+
+      // kirim ke backend
       await createJawabanUjian({
         id_ujian: idUjian,
         id_soal: soal.id_soal,
-        jawaban,
+        jawaban: payloadJawaban,
       });
 
-      fetchSoal()
+      // lanjut ke soal berikut
+      setNomorSoal((prev) => prev + 1);
       setJawaban("");
+      setSelectedIndex(null);
+      fetchSoal();
     } catch (err) {
       console.error(err);
       ToastError.fire({ title: "Gagal menyimpan jawaban" });
@@ -263,9 +286,11 @@ export default function FormUjianSiswaPage() {
       <hr />
       <Box sx={{ textAlign: "center" }}>
         {soal && (
-          <Typography variant="body1" sx={{ my: 2 }}>
-            {timeLeft}
-          </Typography>
+          <Box>
+            <Typography variant="body1" sx={{ my: 2 }}>
+              Total {ujian.jumlah_total_soal} Soal - {timeLeft}
+            </Typography>
+          </Box>
         )}
       </Box>
 
@@ -275,7 +300,7 @@ export default function FormUjianSiswaPage() {
           soal ? (
             <Box>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                {soal.text_soal}
+                {nomorSoal}. {soal.text_soal}
               </Typography>
 
               {soal.gambar_url && (
@@ -303,11 +328,17 @@ export default function FormUjianSiswaPage() {
                           p: 1,
                           cursor: "pointer",
                         }}
-                        onClick={() => setJawaban(opt)}
+                        onClick={() => {
+                          setJawaban(opt);
+                          setSelectedIndex(idx);
+                        }}
                       >
                         <Radio
                           checked={jawaban === opt}
-                          onChange={() => setJawaban(opt)}
+                          onChange={() => {
+                            setJawaban(opt);
+                            setSelectedIndex(idx);
+                          }}
                           value={opt}
                           sx={{ mr: 1 }}
                         />
@@ -335,14 +366,24 @@ export default function FormUjianSiswaPage() {
                         onClick={() => {
                           setJawaban((prev) => {
                             const arr = Array.isArray(prev) ? [...prev] : [];
-                            return arr.includes(opt)
+                            const updated = arr.includes(opt)
                               ? arr.filter((j) => j !== opt)
                               : [...arr, opt];
+                            const parsed = JSON.parse(soal.list_jawaban);
+                            const selectedIdx = updated.map((j) =>
+                              parsed.indexOf(j)
+                            );
+                            setSelectedIndex(selectedIdx);
+                            return updated;
                           });
                         }}
                       >
                         <Checkbox
-                          checked={Array.isArray(jawaban) ? jawaban.includes(opt) : false}
+                          checked={
+                            Array.isArray(jawaban)
+                              ? jawaban.includes(opt)
+                              : false
+                          }
                           value={opt}
                           sx={{ mr: 1 }}
                         />
@@ -352,18 +393,18 @@ export default function FormUjianSiswaPage() {
                 </Box>
               )}
 
-              {/* ===== Isian / Uraian ===== */}
+              {/* ===== Isian ===== */}
               {soal.jenis_soal === "isian" && (
-                <TextField
-                  id="jawaban-isian"
-                  fullWidth
-                  label="Jawaban Anda"
-                  value={jawaban}
-                  onChange={(e) => setJawaban(e.target.value)}
-                  multiline
-                  rows={3}
-                  variant="outlined"
-                />
+                <Box sx={{ my: 2 }}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    Jawaban Anda:
+                  </Typography>
+                  <TextEditor
+                    value={jawaban}
+                    onChange={setJawaban}
+                    // onSend={handleSubmit}
+                  />
+                </Box>
               )}
 
               <Button
@@ -397,7 +438,9 @@ export default function FormUjianSiswaPage() {
             <Button
               variant="contained"
               color="warning"
-              onClick={() => navigate(`/ujian/detail/${idKelasTahunAjaran}`)}
+              onClick={() =>
+                navigate(`/ujian/detail/${idKelasTahunAjaran}`)
+              }
             >
               Kembali
             </Button>

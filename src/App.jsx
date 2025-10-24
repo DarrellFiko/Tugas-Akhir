@@ -19,7 +19,7 @@ import { lightTheme, darkTheme } from "./plugins/theme";
 import { applyThemeVariables } from "./plugins/themeVariables";
 import { getRoutes } from "./router/routes.jsx";
 import useIsMobile from "./plugins/useIsMobile.js";
-import './App.css';
+import "./App.css";
 
 // Import Components
 import NavigationAppbar from "./components/navigations/NavigationAppBar";
@@ -28,7 +28,7 @@ import NotFoundPage from "./pages/NotFoundPage.jsx";
 import LoginPage from "./pages/General/LoginPage.jsx";
 
 // Import Services
-import * as userService from "./services/authService.js"; 
+import * as userService from "./services/authService.js";
 
 function AppContent({
   isDark,
@@ -38,8 +38,8 @@ function AppContent({
   routes,
   onLogin,
   onLogout,
+  isUjian,
 }) {
-  
   const nama = localStorage.getItem("authUser");
   const profilePicture = localStorage.getItem("profilePicture");
 
@@ -88,27 +88,32 @@ function AppContent({
   // --- Layout normal (sudah login) ---
   return (
     <Box display="flex">
-      <NavigationSidebar
-        isMobile={isMobile}
-        isSidebar={isSidebar}
-        handleSidebar={setIsSidebar}
-        routes={routes}
-        nama={nama}
-        profilePicture={profilePicture}
-      />
+      {/* Sidebar akan hilang saat sedang ujian */}
+      {!isUjian && (
+        <NavigationSidebar
+          isMobile={isMobile}
+          isSidebar={isSidebar}
+          handleSidebar={setIsSidebar}
+          routes={routes}
+          nama={nama}
+          profilePicture={profilePicture}
+        />
+      )}
 
       <Box
         component="main"
         flexGrow={1}
         sx={{ mx: isMobile ? 0 : 3, minWidth: 0 }}
       >
-        <NavigationAppbar
-          isMobile={isMobile}
-          handleSideBar={setIsSidebar}
-          isDark={isDark}
-          setIsDark={setIsDark}
-          onLogout={onLogout}
-        />
+        {!isUjian && (
+          <NavigationAppbar
+            isMobile={isMobile}
+            handleSideBar={setIsSidebar}
+            isDark={isDark}
+            setIsDark={setIsDark}
+            onLogout={onLogout}
+          />
+        )}
 
         <Box
           width="100%"
@@ -123,11 +128,7 @@ function AppContent({
           <Routes>
             {routes.flatMap((section) =>
               section.items.map((item) => (
-                <Route
-                  key={item.path}
-                  path={item.path}
-                  element={item.element}
-                />
+                <Route key={item.path} path={item.path} element={item.element} />
               ))
             )}
           </Routes>
@@ -145,6 +146,10 @@ export default function App() {
   });
 
   const [role, setRole] = useState(localStorage.getItem("role"));
+  const [isUjian, setIsUjian] = useState(
+    localStorage.getItem("isUjian") === "true"
+  );
+
   const routes = getRoutes(role);
 
   // handler login
@@ -157,7 +162,7 @@ export default function App() {
 
       const token = response.token;
       const userRole = response.role ? response.role.toLowerCase() : "";
-      console.log(response)
+      console.log(response);
 
       localStorage.setItem("authToken", token);
       localStorage.setItem("id_user", response.id_user);
@@ -168,27 +173,32 @@ export default function App() {
       setRole(userRole);
     } catch (err) {
       console.error("Login failed:", err);
-      // Optionally show a popup error
     }
   };
 
   // handler logout
   const handleLogout = async () => {
-    await userService.logout()
-       
+    await userService.logout();
+
     localStorage.removeItem("authToken");
     localStorage.removeItem("id_user");
     localStorage.removeItem("authUser");
     localStorage.removeItem("role");
     localStorage.removeItem("profilePicture");
+    localStorage.removeItem("isUjian");
     setRole(null);
+    setIsUjian(false);
   };
 
-  // listen role changes
+  // listen role & ujian changes
   useEffect(() => {
-    const checkRole = () => setRole(localStorage.getItem("role"));
-    window.addEventListener("storage", checkRole);
-    return () => window.removeEventListener("storage", checkRole);
+    const checkStorage = () => {
+      setRole(localStorage.getItem("role"));
+      setIsUjian(localStorage.getItem("isUjian") === "true");
+    };
+
+    window.addEventListener("storage", checkStorage);
+    return () => window.removeEventListener("storage", checkStorage);
   }, []);
 
   // theme persistence
@@ -210,6 +220,7 @@ export default function App() {
           routes={routes}
           onLogin={handleLogin}
           onLogout={handleLogout}
+          isUjian={isUjian}
         />
       </Router>
     </ThemeProvider>
