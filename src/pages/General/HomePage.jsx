@@ -23,6 +23,7 @@ import { createKomentar, deleteKomentar, updateKomentar } from "../../services/k
 
 export default function HomePage() {
   const [loading, setLoading] = useState(false);
+  const [loadingCreate, setLoadingCreate] = useState(false);
   const [pengumuman, setPengumuman] = useState([]);
   const [commentInputs, setCommentInputs] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
@@ -104,6 +105,7 @@ export default function HomePage() {
 
   // ================== SAVE (CREATE/UPDATE) ==================
   const onSubmit = async (data) => {
+    setLoadingCreate(true);
     try {
       // Validasi file (hanya pdf)
       if (!editMode && !data.file) {
@@ -136,6 +138,7 @@ export default function HomePage() {
     } catch (err) {
       console.error("Gagal simpan pengumuman:", err);
     }
+    setLoadingCreate(false);
   };
 
   // ================== DELETE ==================
@@ -199,6 +202,16 @@ export default function HomePage() {
     }, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (openDialog && !editMode) {
+      reset({
+        judul: "",
+        isi: "",
+        file: null,
+      });
+    }
+  }, [openDialog, editMode, reset]);
 
   return (
     <>
@@ -278,7 +291,7 @@ export default function HomePage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
+          <Button disabled={loadingCreate} loading={loadingCreate} onClick={handleSubmit(onSubmit)} variant="contained">
             {editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>

@@ -24,6 +24,7 @@ import { createKomentar, deleteKomentar, updateKomentar } from "../../services/k
 
 export default function TabPengumuman() {
   const [loading, setLoading] = useState(false);
+  const [loadingCreate, setLoadingCreate] = useState(false);
   const [pengumuman, setPengumuman] = useState([]);
   const [commentInputs, setCommentInputs] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
@@ -85,6 +86,7 @@ export default function TabPengumuman() {
 
   const handleUpdateComment = async (id_komentar, text) => {
     if (!text.trim()) return;
+    setLoading(true);
     try {
       await updateKomentar(id_komentar, { komentar: text });
       ToastSuccess.fire({ title: "Komentar berhasil diupdate" });
@@ -92,6 +94,7 @@ export default function TabPengumuman() {
     } catch (error) {
       console.error("Gagal update komentar:", error);
     }
+    setLoading(false);
   };
 
   const handleDeleteComment = async (id_komentar) => {
@@ -106,6 +109,7 @@ export default function TabPengumuman() {
 
   // ================== CREATE / UPDATE PENGUMUMAN ==================
   const onSubmit = async (data) => {
+    setLoadingCreate(true);
     try {
       if (data.file && data.file.type !== "application/pdf") {
         ToastError.fire({ title: "Hanya file PDF yang diperbolehkan!" });
@@ -121,6 +125,7 @@ export default function TabPengumuman() {
         await updatePengumuman(editData.id_pengumuman, formData);
         ToastSuccess.fire({ title: "Berhasil Mengubah Pengumuman" });
       } else {
+        formData.append("id_kelas_tahun_ajaran", id)
         await createPengumuman(formData);
         ToastSuccess.fire({ title: "Berhasil Membuat Pengumuman" });
       }
@@ -133,6 +138,7 @@ export default function TabPengumuman() {
     } catch (err) {
       console.error("Gagal simpan pengumuman:", err);
     }
+    setLoadingCreate(false);
   };
 
   // ================== DELETE ==================
@@ -195,6 +201,16 @@ export default function TabPengumuman() {
     const interval = setInterval(fetchPengumuman, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (openDialog && !editMode) {
+      reset({
+        judul: "",
+        isi: "",
+        file: null,
+      });
+    }
+  }, [openDialog, editMode, reset]);
 
   return (
     <>
@@ -276,7 +292,7 @@ export default function TabPengumuman() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
+          <Button disabled={loadingCreate} loading={loadingCreate} onClick={handleSubmit(onSubmit)} variant="contained">
             {editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>
