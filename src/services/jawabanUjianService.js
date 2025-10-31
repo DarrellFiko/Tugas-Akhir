@@ -14,3 +14,9 @@ export async function getAllJawabanUjian(id_soal) {
   const res = await getAPI.get(`${ENDPOINTS.JAWABAN_UJIAN.GET_ALL}?id_soal=${id_soal}`);
   return res.data;
 }
+
+// ================== UPDATE NILAI (Guru memeriksa jawaban isian) ==================
+export async function updateJawabanUjian(id_jawaban, body) {
+  const res = await getAPI.put(ENDPOINTS.JAWABAN_UJIAN.UPDATE(id_jawaban), body);
+  return res.data;
+}

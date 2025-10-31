@@ -1,4 +1,3 @@
-// src/pages/ujian/PeriksaDetailUjianGuruPage.jsx
 import { useEffect, useState } from "react";
 import {
   Box,
@@ -14,12 +13,14 @@ import {
   Grid,
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
-import { useParams, useNavigate } from "react-router-dom";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { useParams, useNavigate } from "react-router-dom";
 import { getPeriksaUjianDetail } from "../../../services/ujianService";
 import TextEditor from "../../../components/inputs/TextEditor";
 import useIsMobile from "../../../plugins/useIsMobile";
+import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
+import { updateJawabanUjian } from "../../../services/jawabanUjianService";
 
 export default function PeriksaDetailUjianGuruPage() {
   const { idUjian, idUser } = useParams();
@@ -27,9 +28,11 @@ export default function PeriksaDetailUjianGuruPage() {
   const isMobile = useIsMobile();
 
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [ujianDetail, setUjianDetail] = useState(null);
   const [soalList, setSoalList] = useState([]);
 
+  // ================= FETCH DETAIL =================
   const fetchDetail = async () => {
     try {
       setLoading(true);
@@ -55,14 +58,38 @@ export default function PeriksaDetailUjianGuruPage() {
     }
   };
 
-  const handleScoreChange = (id_soal, newScore) => {
-    setSoalList((prev) =>
-      prev.map((s) =>
-        s.id_soal === id_soal ? { ...s, nilai_siswa: Number(newScore) } : s
-      )
-    );
+  // ================= SIMPAN NILAI ISIAN =================
+  const handleSaveNilai = async () => {
+    try {
+      setSaving(true);
+
+      // Ambil semua soal isian
+      const isianSoal = soalList.filter((s) => s.jenis_soal === "isian");
+      if (isianSoal.length === 0) {
+        ToastError.fire({ title: "Tidak ada soal isian untuk diperiksa" });
+        return;
+      }
+
+      for (const soal of isianSoal) {
+        const nilai = Number(soal.nilai_siswa) || 0;
+        const keterangan = soal.keterangan || null;
+
+        // Pastikan ada id_jawaban sebelum update
+        if (soal.id_jawaban) {
+          await updateJawabanUjian(soal.id_jawaban, { nilai, keterangan });
+        }
+      }
+
+      await fetchDetail(); // refresh data setelah update semua
+      ToastSuccess.fire({ title: "Semua nilai isian berhasil diperbarui" });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
   };
 
+  // ================= UI =================
   if (loading) {
     return (
       <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
@@ -126,7 +153,6 @@ export default function PeriksaDetailUjianGuruPage() {
           const jawabanSiswa = parseJSON(soal.jawaban_siswa);
 
           let benar = false;
-
           if (soal.jenis_soal === "pilihan_ganda_satu") {
             benar = jawabanBenar === jawabanSiswa;
           } else if (soal.jenis_soal === "pilihan_ganda_banyak") {
@@ -136,7 +162,6 @@ export default function PeriksaDetailUjianGuruPage() {
                 jawabanBenar.every((v) => jawabanSiswa.includes(v));
             }
           } else {
-            // Soal isian — tidak perlu indikator
             benar = null;
           }
 
@@ -144,16 +169,20 @@ export default function PeriksaDetailUjianGuruPage() {
             <Card key={soal.id_soal} sx={{ mb: 3 }}>
               <CardContent>
                 {/* HEADER SOAL */}
-                <Grid container spacing={1} alignItems="center" justifyContent="space-between">
-                  <Grid item size={{ xs: 12, sm: 9 }} sm="auto">
+                <Grid
+                  container
+                  spacing={1}
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Grid item size={{ xs: 12, sm: 9 }}>
                     <Typography variant="subtitle1">
                       Soal {index + 1} ({soal.jenis_soal})
                     </Typography>
                   </Grid>
 
-                  {/* indikator benar/salah */}
                   {benar !== null && (
-                    <Grid item size={{ xs: 12, sm: 3 }} sm="auto">
+                    <Grid item size={{ xs: 12, sm: 3 }}>
                       <Typography
                         color={benar ? "success.main" : "error.main"}
                         sx={{
@@ -161,11 +190,13 @@ export default function PeriksaDetailUjianGuruPage() {
                           alignItems: "center",
                           gap: 0.5,
                           justifyContent: isMobile ? "flex-start" : "flex-end",
-                          mt: isMobile ? 0.5 : 0, 
                         }}
                       >
                         {benar ? (
-                          <CheckCircleOutlineIcon color="success" fontSize="small" />
+                          <CheckCircleOutlineIcon
+                            color="success"
+                            fontSize="small"
+                          />
                         ) : (
                           <HighlightOffIcon color="error" fontSize="small" />
                         )}
@@ -230,32 +261,51 @@ export default function PeriksaDetailUjianGuruPage() {
                   </Box>
                 )}
 
-                {/* Jawaban isian */}
+                {/* ISIAN */}
                 {soal.jenis_soal === "isian" && (
                   <Box sx={{ mt: 2 }}>
-                    <Typography sx={{ mb: 1, fontWeight: 500 }}>Jawaban Siswa:</Typography>
+                    <Typography sx={{ mb: 1, fontWeight: 500 }}>
+                      Jawaban Siswa:
+                    </Typography>
 
                     <TextEditor
                       value={jawabanSiswa || ""}
-                      onChange={(val) => {
+                      onChange={(val) =>
                         setSoalList((prev) =>
                           prev.map((s) =>
-                            s.id_soal === soal.id_soal ? { ...s, jawaban_siswa: val } : s
+                            s.id_soal === soal.id_soal
+                              ? { ...s, jawaban_siswa: val }
+                              : s
                           )
-                        );
-                      }}
+                        )
+                      }
                     />
 
-                    {/* Input nilai (score) di bawah editor */}
-                    <Box sx={{ mt: 2, display: "flex", alignItems: "center", gap: 1 }}>
+                    {/* INPUT NILAI DENGAN MUI */}
+                    <Box
+                      sx={{
+                        mt: 2,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                      }}
+                    >
                       <Typography fontWeight={500}>Score:</Typography>
-                      <input
+                      <TextField
                         type="number"
-                        min="0"
-                        max={soal.score}
-                        value={soal.nilai_siswa || 0}
+                        size="small"
+                        inputProps={{
+                          min: 0,
+                          max: soal.score,
+                        }}
+                        onWheel={(e) => e.target.blur()} 
+                        sx={{ width: 120 }}
+                        value={soal.nilai_siswa || null}
                         onChange={(e) => {
-                          const newScore = parseFloat(e.target.value) || 0;
+                          const newScore = Math.min(
+                            soal.score,
+                            Math.max(0, Number(e.target.value))
+                          );
                           setSoalList((prev) =>
                             prev.map((s) =>
                               s.id_soal === soal.id_soal
@@ -264,17 +314,10 @@ export default function PeriksaDetailUjianGuruPage() {
                             )
                           );
                         }}
-                        style={{
-                          width: 80,
-                          padding: "6px 8px",
-                          borderRadius: 6,
-                          border: "1px solid #ccc",
-                          outline: "none",
-                        }}
                       />
-                      <Typography sx={{ fontSize: "0.9rem", opacity: 0.6 }}>
-                        dari {soal.score}
-                      </Typography>
+                      <Typography
+                        sx={{ fontSize: "0.9rem", opacity: 0.6 }}
+                      >{`/ ${soal.score}`}</Typography>
                     </Box>
                   </Box>
                 )}
@@ -293,14 +336,27 @@ export default function PeriksaDetailUjianGuruPage() {
 
                 {/* Input skor juga untuk semua tipe soal (readonly untuk PG) */}
                 {soal.jenis_soal !== "isian" && (
-                  <TextField
-                    type="number"
-                    label="Nilai Soal"
-                    size="small"
-                    sx={{ mt: 2, width: "150px" }}
-                    value={soal.nilai_siswa ?? 0}
-                    disabled
-                  />
+                  <Box
+                    sx={{
+                      mt: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                    }}
+                  >
+                    <Typography fontWeight={500}>Score:</Typography>
+                    <TextField
+                      type="number"
+                      size="small"
+                      onWheel={(e) => e.target.blur()} 
+                      sx={{  width: "150px" }}
+                      value={soal.nilai_siswa ?? 0}
+                      disabled
+                    />
+                    <Typography
+                      sx={{ fontSize: "0.9rem", opacity: 0.6 }}
+                    >{`/ ${soal.score}`}</Typography>
+                  </Box>
                 )}
               </CardContent>
             </Card>
@@ -310,14 +366,15 @@ export default function PeriksaDetailUjianGuruPage() {
         <Typography>Tidak ada soal untuk ujian ini</Typography>
       )}
 
-      {/* Simpan Perubahan */}
+      {/* SIMPAN PERUBAHAN */}
       <Button
         variant="contained"
         color="primary"
         sx={{ mt: 2 }}
-        onClick={() => console.log("Simpan nilai:", soalList)}
+        disabled={saving}
+        onClick={handleSaveNilai}
       >
-        Simpan Nilai
+        {saving ? "Menyimpan..." : "Simpan Nilai"}
       </Button>
     </Box>
   );

@@ -683,6 +683,7 @@ export default function FormUjianGuruPage() {
                 label="Score"
                 type="number"
                 inputProps={{ min: 0, max: 100 }}
+                onWheel={(e) => e.target.blur()} 
                 value={s.score}
                 onChange={(e) => handleSoalChange(s.id, "score", e.target.value)}
                 sx={{ width: "100px" }}

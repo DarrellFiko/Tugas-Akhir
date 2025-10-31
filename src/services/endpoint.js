@@ -162,5 +162,6 @@ export const ENDPOINTS = {
   JAWABAN_UJIAN: {
     CREATE: "/jawaban-ujian",
     GET_ALL: "/jawaban-ujian",
+    UPDATE: (id_jawaban) => `/jawaban-ujian/${id_jawaban}`,
   },
 };
