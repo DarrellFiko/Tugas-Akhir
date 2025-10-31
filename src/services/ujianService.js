@@ -17,7 +17,16 @@ export async function getAllUjian(id_kelas_tahun_ajaran) {
 
 // ================== GET PERIKSA UJIAN ==================
 export async function getPeriksaUjian(id_ujian) {
-  const res = await getAPI.get(ENDPOINTS.UJIAN.GET_PERIKSA(id_ujian));
+  const res = await getAPI.get(ENDPOINTS.UJIAN.GET_PERIKSA_UJIAN(id_ujian));
+  return res.data;
+}
+
+// ==================  GET DETAIL PERIKSA UJIAN JAWABAN SISWA ==================
+export async function getPeriksaUjianDetail(id_ujian, id_user) {
+  const res = await getAPI.post(
+    ENDPOINTS.UJIAN.GET_DETAIL_PERIKSA_UJIAN(id_ujian),
+    { id_user }
+  );
   return res.data;
 }
 

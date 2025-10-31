@@ -172,7 +172,7 @@ export default function LoginPage({ onLogin }) {
                   color="text.secondary"
                   sx={{ mb: 3 }}
                 >
-                  Enter your username and password to login
+                  Masukkan username dan password anda untuk login
                 </Typography>
 
                 <form onSubmit={handleSubmit(onSubmit)}>

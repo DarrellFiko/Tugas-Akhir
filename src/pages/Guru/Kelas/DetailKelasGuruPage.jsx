@@ -121,7 +121,7 @@ export default function DetailKelasGuruPage() {
         <Tab label="Materi" />
         <Tab label="Daftar Siswa" />
         <Tab label="Presensi" />
-        <Tab label="Module" />
+        <Tab label="Modul" />
         <Tab label="Nilai Siswa" />
         <Tab label="Pengumuman" />
       </Tabs>

@@ -246,6 +246,9 @@ export default function TabMateri({ idKelasTahunAjaran }) {
             {selectedRow?.nama}
           </Typography>
           <Typography variant="body2" gutterBottom>
+            Deskripsi: {selectedRow?.deskripsi}
+          </Typography>
+          <Typography variant="body2" gutterBottom>
             Pertemuan: {selectedRow?.pertemuan}
           </Typography>
 

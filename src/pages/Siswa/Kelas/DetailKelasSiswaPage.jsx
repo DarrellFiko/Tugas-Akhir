@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -14,10 +14,11 @@ import TabDaftarSiswa from "../../../components/classes/TabDaftarSiswa";
 import TabPresensi from "../../../components/classes/TabPresensi";
 
 import TabModule from "../../../components/classes/TabModule";
+import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 
 export default function DetailKelasSiswaPage() {
   const location = useLocation();
-  const { kelas } = location.state || {};
+  const [kelas, setKelas] = useState(null)
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -28,6 +29,20 @@ export default function DetailKelasSiswaPage() {
     setTab(newValue);
     localStorage.setItem("detailKelasSiswaTab", newValue);
   };
+
+  // Fetch detail kelas
+  const fetchKelasTahunAjaran = async () => {
+    try {
+      const res = await getKelasTahunAjaranById(id);
+      setKelas(res.data);
+    } catch (error) {
+      navigate("/kelas");
+    }
+  };
+
+  useEffect(() => {
+    fetchKelasTahunAjaran()
+  }, [])
 
   return (
     <>
@@ -40,7 +55,7 @@ export default function DetailKelasSiswaPage() {
         }}
       >
         <Typography variant="h4" sx={{ }}>
-          {kelas?.title || "Detail Kelas"}
+          Detail Kelas { kelas?.Pelajaran?.nama_pelajaran }
         </Typography>
 
         <Button

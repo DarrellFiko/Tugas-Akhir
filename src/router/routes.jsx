@@ -128,7 +128,7 @@ const adminRoutes = [
     section: "General",
     items: [
       { path: "/dashboard", element: <HomePage />, label: "Pengumuman", icon: <AnnouncementOutlinedIcon /> },
-      { path: "/register", element: <RegisterPage />, label: "Register", icon: <PersonAddAltOutlinedIcon /> },
+      { path: "/register", element: <RegisterPage />, label: "Manajemen User", icon: <PersonAddAltOutlinedIcon /> },
     ],
   },
   {

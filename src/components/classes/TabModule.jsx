@@ -176,8 +176,8 @@ export default function TabModule() {
   };
 
   const columnsModule = [
-    { field: "namaModule", label: "Nama Module", width: "250px" },
-    { field: "jenisModule", label: "Jenis Module", width: "120px" },
+    { field: "namaModule", label: "Nama Modul", width: "250px" },
+    { field: "jenisModule", label: "Jenis Modul", width: "120px" },
     { field: "sifat", label: "Sifat", width: "100px" },
     {
       field: "start_date",

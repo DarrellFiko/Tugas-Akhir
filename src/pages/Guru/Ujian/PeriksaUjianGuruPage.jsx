@@ -56,7 +56,7 @@ export default function PeriksaUjianGuruPage() {
     <>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
         <Typography variant="h4" sx={{ }}>
-          {data?.ujian?.jenis_ujian || "-"} - {data?.ujian?.kelas_tahun_ajaran?.pelajaran?.nama_pelajaran || "-"}
+          {data?.ujian?.jenis_ujian || "-"} - {data?.ujian?.kelas_tahun_ajaran?.Pelajaran?.nama_pelajaran || "-"}
         </Typography>
 
         <Button
