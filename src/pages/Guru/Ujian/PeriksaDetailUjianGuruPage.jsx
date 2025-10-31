@@ -269,6 +269,7 @@ export default function PeriksaDetailUjianGuruPage() {
                     </Typography>
 
                     <TextEditor
+                      disabled
                       value={jawabanSiswa || ""}
                       onChange={(val) =>
                         setSoalList((prev) =>

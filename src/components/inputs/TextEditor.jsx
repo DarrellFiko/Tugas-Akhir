@@ -43,7 +43,7 @@ lowlight.registerLanguage("html", html);
 lowlight.registerLanguage("javascript", javascript);
 lowlight.registerLanguage("css", css);
 
-export default function TextEditor({ value, onChange }) {
+export default function TextEditor({ value, onChange, disabled = false }) {
   const theme = useTheme();
   const [emojiAnchor, setEmojiAnchor] = useState(null);
   const [colorAnchor, setColorAnchor] = useState(null);
@@ -64,6 +64,7 @@ export default function TextEditor({ value, onChange }) {
       }),
     ],
     content: value || "",
+    editable: !disabled,
     editorProps: {
       attributes: {
         class:
@@ -140,6 +141,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Heading">
           <IconButton
             size="small"
+            disabled={disabled}
             onClick={(e) => setHeadingAnchor(e.currentTarget)}
           >
             <TitleIcon fontSize="small" />
@@ -149,6 +151,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Bold">
           <IconButton
             size="small"
+            disabled={disabled}
             color={editor.isActive("bold") ? "primary" : "default"}
             onClick={() => editor.chain().focus().toggleBold().run()}
           >
@@ -159,6 +162,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Italic">
           <IconButton
             size="small"
+            disabled={disabled}
             color={editor.isActive("italic") ? "primary" : "default"}
             onClick={() => editor.chain().focus().toggleItalic().run()}
           >
@@ -169,6 +173,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Underline">
           <IconButton
             size="small"
+            disabled={disabled}
             color={editor.isActive("underline") ? "primary" : "default"}
             onClick={() => editor.chain().focus().toggleUnderline().run()}
           >
@@ -179,6 +184,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Strikethrough">
           <IconButton
             size="small"
+            disabled={disabled}
             color={editor.isActive("strike") ? "primary" : "default"}
             onClick={() => editor.chain().focus().toggleStrike().run()}
           >
@@ -189,6 +195,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Code Inline">
           <IconButton
             size="small"
+            disabled={disabled}
             color={editor.isActive("code") ? "primary" : "default"}
             onClick={() => editor.chain().focus().toggleCode().run()}
           >
@@ -199,6 +206,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Bullet List">
           <IconButton
             size="small"
+            disabled={disabled}
             color={editor.isActive("bulletList") ? "primary" : "default"}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
           >
@@ -209,6 +217,7 @@ export default function TextEditor({ value, onChange }) {
         <Tooltip title="Numbered List">
           <IconButton
             size="small"
+            disabled={disabled}
             color={editor.isActive("orderedList") ? "primary" : "default"}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
           >
@@ -217,25 +226,25 @@ export default function TextEditor({ value, onChange }) {
         </Tooltip>
 
         <Tooltip title="Insert Link">
-          <IconButton size="small" onClick={addLink}>
+          <IconButton size="small" disabled={disabled} onClick={addLink}>
             <LinkIcon fontSize="small" />
           </IconButton>
         </Tooltip>
 
         <Tooltip title="Text Color">
-          <IconButton size="small" onClick={(e) => setColorAnchor(e.currentTarget)}>
+          <IconButton size="small" disabled={disabled} onClick={(e) => setColorAnchor(e.currentTarget)}>
             <PaletteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
 
         <Tooltip title="Emoji">
-          <IconButton size="small" onClick={(e) => setEmojiAnchor(e.currentTarget)}>
+          <IconButton size="small" disabled={disabled} onClick={(e) => setEmojiAnchor(e.currentTarget)}>
             <EmojiEmotionsIcon fontSize="small" />
           </IconButton>
         </Tooltip>
 
         <Tooltip title="Simbol">
-          <IconButton size="small" onClick={(e) => setSymbolAnchor(e.currentTarget)}>
+          <IconButton size="small" disabled={disabled} onClick={(e) => setSymbolAnchor(e.currentTarget)}>
             <FunctionsIcon fontSize="small" />
           </IconButton>
         </Tooltip>
