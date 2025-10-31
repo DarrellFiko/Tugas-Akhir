@@ -67,95 +67,71 @@ export default function MasterKelasSiswaPage() {
     defaultValues: defaultFormValues,
   });
 
+  // === 📄 Kolom tabel baru dengan 4 jenis rapor ===
+  const renderRaporActions = (value, row, label) => (
+    <Box sx={{ display: "flex", gap: 1 }}>
+      <Tooltip title={`Upload ${label}`}>
+        <IconButton
+          color="success"
+          size="small"
+          onClick={() => handleOpenUpload(row, label)}
+        >
+          <UploadFileOutlined />
+        </IconButton>
+      </Tooltip>
+
+      <Tooltip title={`Lihat ${label}`}>
+        <IconButton
+          color="primary"
+          size="small"
+          onClick={() => handleViewRapor(value)}
+          disabled={!value}
+        >
+          <VisibilityOutlined />
+        </IconButton>
+      </Tooltip>
+
+      {value && (
+        <Tooltip title={`Hapus ${label}`}>
+          <IconButton
+            color="error"
+            size="small"
+            onClick={() => handleDeleteRapor(row, label)}
+          >
+            <DeleteOutline />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Box>
+  );
+
   const columns = [
-    { field: "kelas", label: "Kelas", width: 200, sortable: true, },
-    { field: "tahunAjaran", label: "Tahun Ajaran", width: 200, sortable: true, },
-    { field: "siswa", label: "Siswa", width: 250, sortable: true, },
+    { field: "kelas", label: "Kelas", width: 200, sortable: true },
+    { field: "tahunAjaran", label: "Tahun Ajaran", width: 200, sortable: true },
+    { field: "siswa", label: "Siswa", width: 250, sortable: true },
     {
-      field: "rapor_ganjil",
-      label: "Rapor Ganjil",
+      field: "rapor_tengah_ganjil",
+      label: "Rapor Tengah Ganjil",
       width: 220,
-      render: (value, row) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Tooltip title="Upload Rapor Ganjil">
-            <IconButton
-              color="success"
-              size="small"
-              onClick={() => {
-                handleOpenUpload(row, "ganjil");
-              }}
-            >
-              <UploadFileOutlined />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Lihat Rapor Ganjil">
-            <IconButton
-              color="primary"
-              size="small"
-              onClick={() => handleViewRapor(value)}
-              disabled={!value}
-            >
-              <VisibilityOutlined />
-            </IconButton>
-          </Tooltip>
-
-          {value && (
-            <Tooltip title="Hapus Rapor Ganjil">
-              <IconButton
-                color="error"
-                size="small"
-                onClick={() => handleDeleteRapor(row, "ganjil")}
-              >
-                <DeleteOutline />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
-      ),
+      render: (v, r) => renderRaporActions(v, r, "tengah_ganjil"),
     },
     {
-      field: "rapor_genap",
-      label: "Rapor Genap",
+      field: "rapor_akhir_ganjil",
+      label: "Rapor Akhir Ganjil",
       width: 220,
-      render: (value, row) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Tooltip title="Upload Rapor Genap">
-            <IconButton
-              color="success"
-              size="small"
-              onClick={() => {
-                handleOpenUpload(row, "genap");
-              }}
-            >
-              <UploadFileOutlined />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Lihat Rapor Genap">
-            <IconButton
-              color="primary"
-              size="small"
-              onClick={() => handleViewRapor(value)}
-              disabled={!value}
-            >
-              <VisibilityOutlined />
-            </IconButton>
-          </Tooltip>
-
-          {value && (
-            <Tooltip title="Hapus Rapor Genap">
-              <IconButton
-                color="error"
-                size="small"
-                onClick={() => handleDeleteRapor(row, "genap")}
-              >
-                <DeleteOutline />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
-      ),
+      render: (v, r) => renderRaporActions(v, r, "akhir_ganjil"),
+    },
+    {
+      field: "rapor_tengah_genap",
+      label: "Rapor Tengah Genap",
+      width: 220,
+      render: (v, r) => renderRaporActions(v, r, "tengah_genap"),
+    },
+    {
+      field: "rapor_akhir_genap",
+      label: "Rapor Akhir Genap",
+      width: 220,
+      render: (v, r) => renderRaporActions(v, r, "akhir_genap"),
     },
   ];
 
@@ -168,8 +144,10 @@ export default function MasterKelasSiswaPage() {
       tahunAjaran: item.tahunAjaran?.nama || "-",
       id_siswa: item.siswa?.id_user || null,
       siswa: item.siswa.nama || null,
-      rapor_ganjil: item.rapor_ganjil || null,
-      rapor_genap: item.rapor_genap || null,
+      rapor_tengah_ganjil: item.rapor_tengah_ganjil || null,
+      rapor_akhir_ganjil: item.rapor_akhir_ganjil || null,
+      rapor_tengah_genap: item.rapor_tengah_genap || null,
+      rapor_akhir_genap: item.rapor_akhir_genap || null,
     }));
   };
 
@@ -231,7 +209,11 @@ export default function MasterKelasSiswaPage() {
     try {
       const formData = new FormData();
       formData.append("rapor", file);
-      await uploadRaporKelasSiswa(selectedRow.id_kelas_siswa, selectedRaporType, formData);
+      await uploadRaporKelasSiswa(
+        selectedRow.id_kelas_siswa,
+        selectedRaporType,
+        formData
+      );
       ToastSuccess.fire({ title: "Rapor berhasil diupload" });
       handleCloseUploadDialog();
       fetchData();
@@ -249,7 +231,7 @@ export default function MasterKelasSiswaPage() {
 
   const handleDeleteRapor = async (row, tipe) => {
     const confirm = await PopupDelete.fire({
-      title: `Hapus rapor ${tipe}?`,
+      title: `Hapus rapor ${tipe.replace("_", " ")}?`,
       text: "File akan dihapus secara permanen.",
     });
     if (!confirm.isConfirmed) return;
@@ -257,7 +239,7 @@ export default function MasterKelasSiswaPage() {
     setLoading(true);
     try {
       await deleteRaporKelasSiswa(row.id_kelas_siswa, tipe);
-      ToastSuccess.fire({ title: `Rapor ${tipe} berhasil dihapus` });
+      ToastSuccess.fire({ title: `Rapor ${tipe.replace("_", " ")} berhasil dihapus` });
       fetchData();
     } catch (err) {
       console.error("Gagal hapus rapor:", err);
@@ -341,10 +323,14 @@ export default function MasterKelasSiswaPage() {
         />
       </Box>
 
+      {/* === Dialog Tambah === */}
       <Dialog open={openDialog} onClose={handleCancel} fullWidth maxWidth="sm">
         <DialogTitle>Tambah Kelas Siswa</DialogTitle>
         <DialogContent dividers>
-          <Box component="form" sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+          <Box
+            component="form"
+            sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+          >
             <Controller
               name="id_kelas"
               control={control}
@@ -420,6 +406,7 @@ export default function MasterKelasSiswaPage() {
         </DialogActions>
       </Dialog>
 
+      {/* === Dialog Upload === */}
       <Dialog
         open={openUploadDialog}
         onClose={handleCloseUploadDialog}
@@ -427,7 +414,7 @@ export default function MasterKelasSiswaPage() {
         maxWidth="sm"
       >
         <DialogTitle>
-          Upload Rapor {selectedRaporType === "ganjil" ? "Ganjil" : "Genap"}
+          Upload Rapor {selectedRaporType?.replace("_", " ")}
         </DialogTitle>
         <DialogContent dividers>
           <Typography variant="body2" sx={{ mb: 2 }}>

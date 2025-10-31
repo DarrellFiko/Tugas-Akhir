@@ -24,7 +24,8 @@ export default function NilaiSiswaPage() {
   const [selectedTahun, setSelectedTahun] = useState("");
   const [nilaiData, setNilaiData] = useState({});
   const [loading, setLoading] = useState(false);
-  const [selectedTipe, setSelectedTipe] = useState("ganjil"); // default
+
+  const [selectedTipe, setSelectedTipe] = useState("rapor_tengah_ganjil"); // default
 
   // ================== FETCH TAHUN AJARAN ==================
   const fetchTahunAjaran = async () => {
@@ -92,7 +93,7 @@ export default function NilaiSiswaPage() {
       const url = window.URL.createObjectURL(new Blob([res]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `rapor_${selectedTipe}_${selectedTahun}.pdf`);
+      link.setAttribute("download", `${selectedTipe}_${selectedTahun}.pdf`);
       document.body.appendChild(link);
       link.click();
       link.parentNode.removeChild(link);
@@ -142,15 +143,17 @@ export default function NilaiSiswaPage() {
               </Select>
             </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
+            <FormControl size="small" sx={{ minWidth: 180 }}>
               <InputLabel>Tipe Rapor</InputLabel>
               <Select
                 label="Tipe Rapor"
                 value={selectedTipe}
                 onChange={(e) => setSelectedTipe(e.target.value)}
               >
-                <MenuItem value="ganjil">Ganjil</MenuItem>
-                <MenuItem value="genap">Genap</MenuItem>
+                <MenuItem value="rapor_tengah_ganjil">Tengah Semester Ganjil</MenuItem>
+                <MenuItem value="rapor_akhir_ganjil">Akhir Semester Ganjil</MenuItem>
+                <MenuItem value="rapor_tengah_genap">Tengah Semester Genap</MenuItem>
+                <MenuItem value="rapor_akhir_genap">Akhir Semester Genap</MenuItem>
               </Select>
             </FormControl>
 
@@ -160,9 +163,8 @@ export default function NilaiSiswaPage() {
               endIcon={<DownloadOutlinedIcon />}
               onClick={handleDownloadRapor}
               disabled={loading}
-              loading={loading}
             >
-              Download Rapor
+              {loading ? "Mengunduh..." : "Download Rapor"}
             </Button>
           </Box>
         </Grid>
