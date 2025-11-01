@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Button, TextField, Radio, Checkbox } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { ToastError } from "../../../composables/sweetalert";
+import { PopupError, ToastError } from "../../../composables/sweetalert";
 import { getUjianById } from "../../../services/ujianService";
 import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 import { getRandomSoal } from "../../../services/soalService";
@@ -87,59 +87,40 @@ export default function FormUjianSiswaPage() {
   }, [idUjian, idKelasTahunAjaran]);
 
   // ================== CEK & KUNCI SELAMA UJIAN BERLANGSUNG ==================
+  useEffect(() => {
+    if (!isLocked) return;
 
-  const handlePopState = () => {
-    window.history.pushState(null, null, window.location.pathname);
-    alert("Anda tidak dapat meninggalkan halaman selama ujian berlangsung.");
-  };
+    // Cegah shortcut keluar / refresh
+    const handleKeyDown = (e) => {
+      if (
+        (e.ctrlKey && e.key === "w") ||
+        (e.altKey && e.key === "F4") ||
+        e.key === "F5" ||
+        (e.ctrlKey && e.key === "r")
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        PopupError.fire({ title: "Shortcut dinonaktifkan selama ujian berlangsung.", html: "" });
+      }
+    };
 
-  const handleKeyDown = (e) => {
-    if (
-      (e.ctrlKey && e.key === "w") ||
-      (e.altKey && e.key === "F4") ||
-      e.key === "F5" ||
-      (e.ctrlKey && e.key === "r")
-    ) {
-      e.preventDefault();
-      e.stopPropagation();
-      alert("Shortcut dinonaktifkan selama ujian berlangsung.");
-    }
-  };
+    // Deteksi jika siswa meninggalkan tab
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        PopupError.fire({ title: "Anda meninggalkan tab ujian! Harap tetap berada di halaman ujian.", html: "" });
+      }
+    };
 
-  const handleVisibilityChange = () => {
-    if (document.hidden) {
-      alert("Anda meninggalkan halaman ujian! Harap tetap di halaman ujian.");
-    }
-  };
+    // Pasang listener
+    window.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-  // Helper untuk bersihkan semua event listener
-  const releaseExamLock = () => {
-    window.removeEventListener("popstate", handlePopState);
-    window.removeEventListener("keydown", handleKeyDown);
-    document.removeEventListener("visibilitychange", handleVisibilityChange);
-  };
-
-  // useEffect(() => {
-  //   if (!startTime || !endTime) return;
-
-  //   const now = new Date();
-  //   const locked = now >= startTime && now < endTime;
-  //   setIsLocked(locked);
-
-  //   if (!locked) {
-  //     releaseExamLock();
-  //     return;
-  //   }
-
-  //   window.addEventListener("popstate", handlePopState);
-  //   window.addEventListener("keydown", handleKeyDown);
-  //   document.addEventListener("visibilitychange", handleVisibilityChange);
-  //   window.history.pushState(null, null, window.location.pathname);
-
-  //   return () => {
-  //     releaseExamLock();
-  //   };
-  // }, [startTime, endTime]);
+    // Bersihkan saat komponen unmount
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [isLocked]);
 
   useEffect(() => {
     if (isLocked) {
