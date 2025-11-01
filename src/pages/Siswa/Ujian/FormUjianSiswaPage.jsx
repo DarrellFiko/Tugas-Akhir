@@ -26,6 +26,7 @@ export default function FormUjianSiswaPage() {
   const [jawaban, setJawaban] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(null); 
   const [nomorSoal, setNomorSoal] = useState(0);
+  const [hasLeftTab, setHasLeftTab] = useState(false);
 
   const id_user = localStorage.getItem("id_user");
 
@@ -108,6 +109,7 @@ export default function FormUjianSiswaPage() {
     const handleVisibilityChange = () => {
       if (document.hidden) {
         PopupError.fire({ title: "Anda meninggalkan tab ujian! Harap tetap berada di halaman ujian.", html: "" });
+        setHasLeftTab(true);
       }
     };
 
@@ -224,7 +226,9 @@ export default function FormUjianSiswaPage() {
         id_ujian: idUjian,
         id_soal: soal.id_soal,
         jawaban: payloadJawaban,
+        ...(hasLeftTab ? { keterangan: "Siswa Telah Meninggalkan Tab" } : {}),
       });
+      setHasLeftTab(false);
 
       // lanjut ke soal berikut
       setNomorSoal((prev) => prev + 1);

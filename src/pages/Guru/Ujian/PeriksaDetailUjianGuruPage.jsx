@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ClickAwayListener } from "@mui/material";
 import {
   Box,
   Button,
@@ -11,8 +12,11 @@ import {
   Checkbox,
   TextField,
   Grid,
+  Tooltip,
+  IconButton,
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import { useParams, useNavigate } from "react-router-dom";
@@ -31,6 +35,17 @@ export default function PeriksaDetailUjianGuruPage() {
   const [saving, setSaving] = useState(false);
   const [ujianDetail, setUjianDetail] = useState(null);
   const [soalList, setSoalList] = useState([]);
+  const [openTooltipIndex, setOpenTooltipIndex] = useState(null);
+
+  const handleTooltipToggle = (index) => {
+    if (isMobile) {
+      setOpenTooltipIndex((prev) => (prev === index ? null : index));
+    }
+  };
+
+  const handleTooltipClose = () => {
+    setOpenTooltipIndex(null);
+  };
 
   // ================= FETCH DETAIL =================
   const fetchDetail = async () => {
@@ -177,7 +192,61 @@ export default function PeriksaDetailUjianGuruPage() {
                 >
                   <Grid item size={{ xs: 12, sm: 9 }}>
                     <Typography variant="subtitle1">
-                      Soal {index + 1} ({soal.jenis_soal})
+                      Soal {index + 1} ({soal.jenis_soal == "pilihan_ganda_satu" ? "Pilihan Ganda 1 Jawaban" : soal.jenis_soal == "pilihan_ganda_banyak" ? "Pilihan Ganda Banyak Jawaban" : "Isian"})
+
+                      {soal.keterangan && (
+                        <>
+                          {isMobile ? (
+                            <ClickAwayListener onClickAway={handleTooltipClose}>
+                              <Box component="span">
+                                <Tooltip
+                                  title={
+                                    <Typography sx={{ color: "error.main", fontWeight: 500 }}>
+                                      {soal.keterangan}
+                                    </Typography>
+                                  }
+                                  arrow
+                                  open={openTooltipIndex === index}
+                                  onClose={handleTooltipClose}
+                                  disableFocusListener
+                                  disableHoverListener
+                                  disableTouchListener
+                                  placement="top"
+                                  interactive
+                                >
+                                  <IconButton
+                                    size="small"
+                                    sx={{ px: 0.5 }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleTooltipToggle(index);
+                                    }}
+                                  >
+                                    <InfoOutlinedIcon fontSize="small" color="info" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Box>
+                            </ClickAwayListener>
+                          ) : (
+                            <Tooltip
+                              title={
+                                <Typography sx={{ color: "error.main", fontWeight: 500 }}>
+                                  {soal.keterangan}
+                                </Typography>
+                              }
+                              arrow
+                              placement="top"
+                              enterDelay={200}
+                              leaveDelay={100}
+                            >
+                              <IconButton size="small" sx={{ p: 0.5 }}>
+                                <InfoOutlinedIcon fontSize="small" color="info" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </>
+                      )}
+
                     </Typography>
                   </Grid>
 
