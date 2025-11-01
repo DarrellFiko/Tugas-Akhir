@@ -15,6 +15,7 @@ import {
 } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./stores/userSlice.js";
+import { setUjianMode, resetUjianMode } from "./stores/ujianSlice.js"; 
 
 // Import Others
 import { lightTheme, darkTheme } from "./plugins/theme";
@@ -89,7 +90,7 @@ function AppContent({
   return (
     <Box display="flex">
       {/* Sidebar akan hilang saat sedang ujian */}
-      {!isUjian && (
+      {(!isUjian || isUjian === false) && (
         <NavigationSidebar
           isMobile={isMobile}
           isSidebar={isSidebar}
@@ -105,15 +106,13 @@ function AppContent({
         flexGrow={1}
         sx={{ mx: isMobile ? 0 : 3, minWidth: 0 }}
       >
-        {!isUjian && (
-          <NavigationAppbar
-            isMobile={isMobile}
-            handleSideBar={setIsSidebar}
-            isDark={isDark}
-            setIsDark={setIsDark}
-            onLogout={onLogout}
-          />
-        )}
+        <NavigationAppbar
+          isMobile={isMobile}
+          handleSideBar={setIsSidebar}
+          isDark={isDark}
+          setIsDark={setIsDark}
+          onLogout={onLogout}
+        />
 
         <Box
           width="100%"
@@ -147,9 +146,7 @@ export default function App() {
   });
 
   const [role, setRole] = useState(localStorage.getItem("role"));
-  const [isUjian, setIsUjian] = useState(
-    localStorage.getItem("isUjian") === "true"
-  );
+  const isUjian = useSelector((state) => state.ujian.isUjian);
 
   const routes = getRoutes(role);
 
@@ -195,25 +192,14 @@ export default function App() {
     localStorage.removeItem("authUser");
     localStorage.removeItem("role");
     localStorage.removeItem("profilePicture");
-    localStorage.removeItem("isUjian");
 
     setRole(null);
-    setIsUjian(false);
+    dispatch(clearUser());
+    dispatch(resetUjianMode());
 
     // Reset Redux state
     dispatch(clearUser());
   };
-
-  // listen role & ujian changes
-  useEffect(() => {
-    const checkStorage = () => {
-      setRole(localStorage.getItem("role"));
-      setIsUjian(localStorage.getItem("isUjian") === "true");
-    };
-
-    window.addEventListener("storage", checkStorage);
-    return () => window.removeEventListener("storage", checkStorage);
-  }, []);
 
   // theme persistence
   useEffect(() => {

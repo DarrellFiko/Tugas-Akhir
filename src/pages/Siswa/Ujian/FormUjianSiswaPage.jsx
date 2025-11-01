@@ -1,4 +1,3 @@
-// src/pages/siswa/FormUjianSiswaPage.jsx
 import { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Button, TextField, Radio, Checkbox } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
@@ -8,10 +7,13 @@ import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranServi
 import { getRandomSoal } from "../../../services/soalService";
 import { createJawabanUjian } from "../../../services/jawabanUjianService";
 import TextEditor from "../../../components/inputs/TextEditor";
+import { useDispatch } from "react-redux";
+import { setUjianMode, resetUjianMode } from "../../../stores/ujianSlice";
 
 export default function FormUjianSiswaPage() {
   const { idKelasTahunAjaran, idUjian } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [ujian, setUjian] = useState(null);
   const [kelasTahunAjaran, setKelasTahunAjaran] = useState(null);
@@ -142,16 +144,16 @@ export default function FormUjianSiswaPage() {
   useEffect(() => {
     if (isLocked) {
       // ujian sedang berlangsung
-      localStorage.setItem("isExamMode", "true");
+      dispatch(setUjianMode(true));
     } else {
       // ujian belum mulai atau sudah selesai
-      localStorage.removeItem("isExamMode");
+      dispatch(resetUjianMode());
     }
 
     return () => {
-      localStorage.removeItem("isExamMode");
+      dispatch(resetUjianMode());
     };
-  }, [isLocked]);
+  }, [isLocked, soal, dispatch]);
 
   // ================== COUNTDOWN TIMER ==================
   useEffect(() => {
