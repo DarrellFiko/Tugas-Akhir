@@ -271,12 +271,23 @@ export default function FormUjianGuruPage() {
       soal: prev.soal.map((s) => {
         if (s.id === id) {
           const updatedOptions = s.options.filter((_, i) => i !== idx);
+
           let updatedJawaban = s.jawaban;
+
           if (Array.isArray(s.jawaban)) {
-            updatedJawaban = s.jawaban.filter((j) => j !== idx);
-          } else if (s.jawaban === idx) {
-            updatedJawaban = null;
+            // Untuk pilihan ganda banyak jawaban
+            updatedJawaban = s.jawaban
+              .filter((j) => j !== idx) // buang jawaban yang dihapus
+              .map((j) => (j > idx ? j - 1 : j)); // sesuaikan index setelah penghapusan
+          } else if (typeof s.jawaban === "number") {
+            // Untuk pilihan ganda satu jawaban
+            if (s.jawaban === idx) {
+              updatedJawaban = null; // jika jawaban yang dihapus adalah jawaban benar
+            } else if (s.jawaban > idx) {
+              updatedJawaban = s.jawaban - 1; // geser index jawaban jika perlu
+            }
           }
+
           return { ...s, options: updatedOptions, jawaban: updatedJawaban };
         }
         return s;

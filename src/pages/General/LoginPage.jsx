@@ -48,8 +48,8 @@ export default function LoginPage({ onLogin }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      username: "siswa01",
-      password: "123",
+      username: "",
+      password: "",
     },
   });
 
@@ -208,6 +208,15 @@ export default function LoginPage({ onLogin }) {
                     variant="subtitle2"
                     color="text.secondary"
                     sx={{ mt: 2 }}
+                    {...register("password", {
+                      required: "Password is required",
+                      minLength: {
+                        value: 3,
+                        message: "Password must be at least 3 characters",
+                      },
+                    })}
+                    error={!!errors.username}
+                    helperText={errors.username?.message}
                   >
                     Password
                   </Typography>

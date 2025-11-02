@@ -80,7 +80,7 @@ export default function TabPresensi({ idKelasTahunAjaran }) {
     {
       field: "tanggal",
       label: "Hari / Tanggal",
-      width: "200px",
+      width: "300px",
       render: (value) => formatDate(value),
     },
     { field: "judul", label: "Judul", width: "400px" },

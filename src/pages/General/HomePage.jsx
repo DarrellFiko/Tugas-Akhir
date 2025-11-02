@@ -110,10 +110,12 @@ export default function HomePage() {
       // Validasi file (hanya pdf)
       if (!editMode && !data.file) {
         ToastError.fire({ title: "File wajib diupload" });
+        setLoadingCreate(false);
         return;
       }
       if (data.file && data.file.type !== "application/pdf") {
         ToastError.fire({ title: "Hanya file PDF yang diperbolehkan!" });
+        setLoadingCreate(false);
         return;
       }
 

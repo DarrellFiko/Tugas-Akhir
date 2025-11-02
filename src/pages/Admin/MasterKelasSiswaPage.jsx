@@ -67,7 +67,7 @@ export default function MasterKelasSiswaPage() {
     defaultValues: defaultFormValues,
   });
 
-  // === 📄 Kolom tabel baru dengan 4 jenis rapor ===
+  // ===  Kolom tabel baru dengan 4 jenis rapor ===
   const renderRaporActions = (value, row, label) => (
     <Box sx={{ display: "flex", gap: 1 }}>
       <Tooltip title={`Upload ${label}`}>
@@ -314,12 +314,14 @@ export default function MasterKelasSiswaPage() {
           columns={columns}
           rows={rows}
           keyProperty="id_kelas_siswa"
-          isUpdate={false}
+          isUpdate
           isDelete
           isUpload={false}
           isDownload={false}
           onCreate={openCreateDialog}
+          onUpdate={handleDelete}
           onDelete={handleDelete}
+          
         />
       </Box>
 
@@ -337,10 +339,10 @@ export default function MasterKelasSiswaPage() {
               rules={{ required: "Kelas wajib dipilih" }}
               render={({ field }) => (
                 <Autocomplete
-                  {...field}
                   options={kelasList}
                   getOptionLabel={(opt) => opt.nama_kelas || ""}
-                  onChange={(_, val) => field.onChange(val?.id_kelas || null)}
+                  value={kelasList.find((k) => k.id_kelas === field.value) || null}
+                  onChange={(_, val) => field.onChange(val ? val.id_kelas : null)}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -359,10 +361,10 @@ export default function MasterKelasSiswaPage() {
               rules={{ required: "Tahun ajaran wajib dipilih" }}
               render={({ field }) => (
                 <Autocomplete
-                  {...field}
                   options={tahunAjaranList}
                   getOptionLabel={(opt) => opt.nama || ""}
-                  onChange={(_, val) => field.onChange(val?.id_tahun_ajaran || null)}
+                  value={tahunAjaranList.find((t) => t.id_tahun_ajaran === field.value) || null}
+                  onChange={(_, val) => field.onChange(val ? val.id_tahun_ajaran : null)}
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -381,10 +383,10 @@ export default function MasterKelasSiswaPage() {
               rules={{ required: "Siswa wajib dipilih" }}
               render={({ field }) => (
                 <Autocomplete
-                  {...field}
                   options={siswaList}
                   getOptionLabel={(opt) => opt.nama || ""}
-                  onChange={(_, val) => field.onChange(val?.id_user || null)}
+                  value={siswaList.find((s) => s.id_user === field.value) || null}
+                  onChange={(_, val) => field.onChange(val ? val.id_user : null)}
                   renderInput={(params) => (
                     <TextField
                       {...params}

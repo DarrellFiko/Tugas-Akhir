@@ -288,12 +288,15 @@ export default function DetailModuleGuruPage() {
         return;
       }
 
-      const hasExisting = dataToSave.some((r) => r.id_nilai);
-      if (hasExisting) {
-        await updateNilai(dataToSave);
-      } else {
-        await createNilai(dataToSave);
-      }
+      // Pisahkan data create & update
+      const newNilai = dataToSave.filter((r) => !r.id_nilai);
+      const existingNilai = dataToSave.filter((r) => r.id_nilai);
+
+      const promises = [];
+      if (newNilai.length > 0) promises.push(createNilai(newNilai));
+      if (existingNilai.length > 0) promises.push(updateNilai(existingNilai));
+
+      await Promise.all(promises);
 
       ToastSuccess.fire({ title: "Nilai berhasil disimpan" });
       setOpenNilai(false);
