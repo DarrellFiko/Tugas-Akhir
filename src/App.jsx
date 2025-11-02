@@ -25,7 +25,7 @@ import useIsMobile from "./plugins/useIsMobile.js";
 import "./App.css";
 
 // Import Components
-import NavigationAppbar from "./components/navigations/NavigationAppBar";
+import NavigationAppbar from "./components/navigations/NavigationAppbar";
 import NavigationSidebar from "./components/navigations/NavigationSidebar";
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 import LoginPage from "./pages/General/LoginPage.jsx";
