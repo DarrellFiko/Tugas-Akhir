@@ -121,7 +121,7 @@ const teacherRoutes = [
       // { path: "*", element: <NotFoundPage /> },
     ],
   },
-];
+]; 
 
 const adminRoutes = [
   {
