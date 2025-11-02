@@ -141,7 +141,7 @@ const adminRoutes = [
       { path: "/jadwal", element: <MasterJadwalPage />, label: "Jadwal Belajar", icon: <CalendarMonthOutlinedIcon /> },
       { path: "/kelas-siswa", element: <MasterKelasSiswaPage />, label: "Kelas Siswa", icon: <LaptopChromebookOutlinedIcon /> },
     ],
-  },
+  }, 
   {
     section: "dont-show",
     items: [
