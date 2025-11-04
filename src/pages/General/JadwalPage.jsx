@@ -112,40 +112,43 @@ export default function JadwalPage() {
   return (
     <>
       {/* HEADER */}
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h4" sx={{ }}>
-          Jadwal Pelajaran
-        </Typography>
+      <Grid container spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
+        <Grid item size={{ xs: 12, sm: 6 }}>
+          <Typography variant="h4">Jadwal Pelajaran</Typography>
+        </Grid>
 
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
-          {/* Select Tahun Ajaran */}
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Tahun Ajaran</InputLabel>
-            <Select
-              label="Tahun Ajaran"
-              value={selectedTahun}
-              onChange={(e) => setSelectedTahun(e.target.value)}
+        {/* Dropdown Tahun Ajaran */}
+        <Grid item size={{ xs: 12, sm: "auto" }}>
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center"}}>
+            {/* Select Tahun Ajaran */}
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel>Tahun Ajaran</InputLabel>
+              <Select
+                label="Tahun Ajaran"
+                value={selectedTahun}
+                onChange={(e) => setSelectedTahun(e.target.value)}
+              >
+                {tahunAjaranList.map((th) => (
+                  <MenuItem key={th.id_tahun_ajaran} value={th.id_tahun_ajaran}>
+                    {th.nama}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Print Button */}
+            <Button
+              variant="contained"
+              color="primary"
+              endIcon={<PrintOutlinedIcon />}
+              onClick={() => handlePrint(printRef)}
+              disabled={isLoading}
             >
-              {tahunAjaranList.map((th) => (
-                <MenuItem key={th.id_tahun_ajaran} value={th.id_tahun_ajaran}>
-                  {th.nama}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {/* Print Button */}
-          <Button
-            variant="contained"
-            color="primary"
-            endIcon={<PrintOutlinedIcon />}
-            onClick={() => handlePrint(printRef)}
-            disabled={isLoading}
-          >
-            {isLoading ? "Memuat..." : "Cetak Jadwal"}
-          </Button>
-        </Box>
-      </Box>
+              {isLoading ? "Memuat..." : "Cetak Jadwal"}
+            </Button>
+          </Box>
+        </Grid>
+      </Grid>
 
       {/* CONTENT */}
       <Box ref={printRef}>

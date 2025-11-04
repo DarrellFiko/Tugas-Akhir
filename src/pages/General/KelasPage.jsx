@@ -83,7 +83,7 @@ export default function KelasPage() {
     <>
       {/* Header */}
       <Grid container spacing={2} alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6}>
+        <Grid item size={{ xs: 12, sm: 6 }}>
           <Typography variant="h4">Kelas Online</Typography>
         </Grid>
 
