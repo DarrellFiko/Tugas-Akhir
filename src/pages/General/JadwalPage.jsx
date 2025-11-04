@@ -70,10 +70,10 @@ export default function JadwalPage() {
 
       if (data.length > 0) {
         // const last = data[data.length - 1];
-        setSelectedTahun(data[0]);
+        setSelectedTahun(data[0].id_tahun_ajaran);
 
         setIsLoading(true);
-        const jadwal = await fetchJadwalByRole(role, last.id_tahun_ajaran);
+        const jadwal = await fetchJadwalByRole(role, data[0].id_tahun_ajaran);
         setJadwalData(jadwal);
         setIsLoading(false);
       }

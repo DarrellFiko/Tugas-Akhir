@@ -43,10 +43,10 @@ export default function KelasPage() {
 
       if (data.length > 0) {
         // const last = data[data.length - 1];
-        setSelectedTahun(data[0]);
+        setSelectedTahun(data[0].id_tahun_ajaran);
 
         setIsLoading(true);
-        const kelas = await fetchPelajaranByRole(last.id_tahun_ajaran);
+        const kelas = await fetchPelajaranByRole(data[0].id_tahun_ajaran);
         setKelasList(kelas);
         setIsLoading(false);
       }
