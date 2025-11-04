@@ -269,9 +269,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
                   </Typography>
                 ) : (
                   <iframe
-                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
-                      selectedRow.file_url
-                    )}`}
+                    src={`https://docs.google.com/gview?url=${encodeURIComponent(selectedRow.file_url)}&embedded=true`}
                     width="100%"
                     height="500px"
                     title="Office Preview"

@@ -63,7 +63,8 @@ function TableTemplateHead({
   selected,
   visibleRowsMemo,
   isUpdate,
-  isDelete
+  isDelete,
+  keyProperty = "id"
 }) {
   const createSortHandler = (property) => (event) =>
     onRequestSort(event, property);
@@ -77,12 +78,12 @@ function TableTemplateHead({
               color="primary"
               indeterminate={
                 visibleRowsMemo.length > 0 &&
-                visibleRowsMemo.some((row) => selected.includes(row.id)) &&
-                !visibleRowsMemo.every((row) => selected.includes(row.id))
+                visibleRowsMemo.some((row) => selected.includes(row[keyProperty])) &&
+                !visibleRowsMemo.every((row) => selected.includes(row[keyProperty]))
               }
               checked={
                 visibleRowsMemo.length > 0 &&
-                visibleRowsMemo.every((row) => selected.includes(row.id))
+                visibleRowsMemo.every((row) => selected.includes(row[keyProperty]))
               }
               onChange={onSelectAllClick}
             />
@@ -466,6 +467,7 @@ export default function TableTemplate({
             visibleRowsMemo={visibleRowsMemo}
             isUpdate={isUpdate}
             isDelete={isDelete}
+            keyProperty={keyProperty}
           />
 
           <TableBody>
