@@ -314,12 +314,11 @@ export default function MasterKelasSiswaPage() {
           columns={columns}
           rows={rows}
           keyProperty="id_kelas_siswa"
-          isUpdate
+          isUpdate={false}
           isDelete
           isUpload={false}
           isDownload={false}
           onCreate={openCreateDialog}
-          onUpdate={handleDelete}
           onDelete={handleDelete}
           
         />
