@@ -31,6 +31,7 @@ export default function ProfilePage() {
   const [avatarFile, setAvatarFile] = useState(null);
 
   const [loading, setLoading] = useState(false);
+  const [loadingUpload, setLoadingUpload] = useState(false);
   const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
   const [stepPassword, setStepPassword] = useState(1); // 1 = password, 2 = OTP
   const [password, setPassword] = useState("");
@@ -60,6 +61,7 @@ export default function ProfilePage() {
     if (editMode) {
       const check = await PopupEdit.fire();
       if (check.isConfirmed) {
+        setLoadingUpload(true);
         try {
           const body = { ...profile };
           if (avatarFile) body.profile_picture = avatarFile;
@@ -78,6 +80,7 @@ export default function ProfilePage() {
           console.error(err);
           ToastError.fire({ title: "Gagal update profile!" });
         }
+        setLoadingUpload(false)
       } else return;
     }
     setEditMode(!editMode);

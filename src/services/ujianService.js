@@ -5,7 +5,6 @@ import { ENDPOINTS } from "./endpoint";
 // ================== CREATE ==================
 export async function createUjian(body) {
   const res = await getAPI.post(ENDPOINTS.UJIAN.CREATE, body);
-  ToastSuccess.fire({ title: "Ujian berhasil ditambahkan!" });
   return res.data;
 }
 

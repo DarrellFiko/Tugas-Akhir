@@ -7,7 +7,6 @@ export async function createSoal(formData) {
   const res = await getAPI.post(ENDPOINTS.SOAL.CREATE, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  ToastSuccess.fire({ title: "Soal berhasil ditambahkan!" });
   return res.data;
 }
 

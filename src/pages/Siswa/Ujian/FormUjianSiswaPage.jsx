@@ -18,6 +18,7 @@ export default function FormUjianSiswaPage() {
   const [ujian, setUjian] = useState(null);
   const [kelasTahunAjaran, setKelasTahunAjaran] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
   const [startTime, setStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
@@ -203,7 +204,7 @@ export default function FormUjianSiswaPage() {
         ToastError.fire({ title: "Soal tidak ditemukan" });
         return;
       }
-
+      
       // validasi
       if (
         (soal.jenis_soal === "isian" && !jawaban.trim()) ||
@@ -212,7 +213,7 @@ export default function FormUjianSiswaPage() {
         ToastError.fire({ title: "Jawaban tidak boleh kosong" });
         return;
       }
-
+      
       // tentukan payload sesuai jenis soal
       let payloadJawaban;
       if (soal.jenis_soal === "isian") {
@@ -220,7 +221,8 @@ export default function FormUjianSiswaPage() {
       } else {
         payloadJawaban = selectedIndex; // kirim index (angka / array)
       }
-
+      
+      setLoadingSubmit(true)
       // kirim ke backend
       await createJawabanUjian({
         id_ujian: idUjian,
@@ -235,10 +237,13 @@ export default function FormUjianSiswaPage() {
       setJawaban("");
       setSelectedIndex(null);
       fetchSoal();
+      setLoadingSubmit(false)
     } catch (err) {
       console.error(err);
       ToastError.fire({ title: "Gagal menyimpan jawaban" });
+      setLoadingSubmit(false)
     }
+    setLoadingSubmit(false)
   };
 
   // ================== LOADING ==================
@@ -399,6 +404,8 @@ export default function FormUjianSiswaPage() {
                 color="primary"
                 onClick={handleSubmit}
                 sx={{ mt: 3 }}
+                disabled={loadingSubmit}
+                loading={loadingSubmit}
               >
                 Kirim Jawaban
               </Button>

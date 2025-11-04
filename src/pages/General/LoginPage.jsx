@@ -64,7 +64,9 @@ export default function LoginPage({ onLogin }) {
   // Methods
   const onSubmit = (data) => {
     if (data.username && data.password) {
+      setLoading(true);
       onLogin(data);
+      setLoading(false);
     }
   };
 

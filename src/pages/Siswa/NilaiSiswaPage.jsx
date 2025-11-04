@@ -35,8 +35,8 @@ export default function NilaiSiswaPage() {
       setTahunAjaranList(data);
 
       if (data.length > 0) {
-        const last = data[data.length - 1];
-        setSelectedTahun(last.id_tahun_ajaran);
+        // const last = data[data.length - 1];
+        setSelectedTahun(data[0].id_tahun_ajaran);
       }
     } catch (err) {
       console.error("Error fetch tahun ajaran:", err);

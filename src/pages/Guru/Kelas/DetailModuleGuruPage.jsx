@@ -37,6 +37,7 @@ export default function DetailModuleGuruPage() {
   const userId = parseInt(localStorage.getItem("id_user"));
 
   const [loading, setLoading] = useState(true);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const [moduleInfo, setModuleInfo] = useState(null);
   const [rowsPengumpulan, setRowsPengumpulan] = useState([]);
   const [errors, setErrors] = useState({});
@@ -139,8 +140,8 @@ export default function DetailModuleGuruPage() {
           nis: s.nis ?? "-",
           nisn: s.nisn ?? "-",
           nama: s.nama ?? "-",
-          waktu_kumpul: found?.created_at
-            ? formatterDateTime.format(new Date(found.created_at))
+          waktu_kumpul: found?.updated_at
+            ? formatterDateTime.format(new Date(found.updated_at))
             : "-",
           status_kumpul: found ? "Sudah Mengumpulkan" : "Belum Mengumpulkan",
           isSubmitted: !!found,
@@ -306,6 +307,12 @@ export default function DetailModuleGuruPage() {
     }
   };
 
+  const handleDownload = async () => {
+    setLoadingDownload(true);
+    await downloadPengumpulanModulZip(modulId)
+    setLoadingDownload(false);
+  }
+
   // =================== Table Config ===================
   const columnsPengumpulan = [
     { field: "nis", label: "NIS", width: "150px" },
@@ -384,7 +391,9 @@ export default function DetailModuleGuruPage() {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => downloadPengumpulanModulZip(modulId)}
+            onClick={() => handleDownload()}
+            disabled={loadingDownload}
+            loading={loadingDownload}
           >
             Download Semua Pengumpulan (ZIP)
           </Button>
@@ -501,9 +510,8 @@ export default function DetailModuleGuruPage() {
               size="small"
             >
               <MenuItem value="PDF">PDF</MenuItem>
-              <MenuItem value="DOCX">DOCX</MenuItem>
               <MenuItem value="PPTX">PPTX</MenuItem>
-              <MenuItem value="ZIP">ZIP</MenuItem>
+              <MenuItem value="Docx">Docx</MenuItem>
             </TextField>
             <TextField
               type="datetime-local"

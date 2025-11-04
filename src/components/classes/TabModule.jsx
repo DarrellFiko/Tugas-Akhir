@@ -361,8 +361,8 @@ export default function TabModule() {
                     helperText={errors.tipe_file_modul?.message}
                   >
                     <MenuItem value="PDF">PDF</MenuItem>
-                    <MenuItem value="PPT">PPT</MenuItem>
-                    <MenuItem value="Word">Word</MenuItem>
+                    <MenuItem value="PPTX">PPTX</MenuItem>
+                    <MenuItem value="Docx">Docx</MenuItem>
                   </TextField>
                 )}
               />

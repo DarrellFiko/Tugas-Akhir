@@ -23,6 +23,7 @@ export default function DetailModuleSiswaPage() {
   const { modulId } = useParams();
 
   const [loading, setLoading] = useState(true);
+  const [loadingUpload, setLoadingUpload] = useState(false);
   const [moduleInfo, setModuleInfo] = useState(null);
   const [rowsPengumpulan, setRowsPengumpulan] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -101,8 +102,8 @@ export default function DetailModuleSiswaPage() {
           nis: s.nis ?? "-",
           nisn: s.nisn ?? "-",
           nama: s.nama ?? "-",
-          waktu_kumpul: found?.created_at
-            ? formatterDateTime.format(new Date(found.created_at))
+          waktu_kumpul: found?.updated_at
+            ? formatterDateTime.format(new Date(found.updated_at))
             : "-",
           status_kumpul: found ? "Sudah Mengumpulkan" : "Belum Mengumpulkan",
           isSubmitted: !!found,
@@ -154,17 +155,18 @@ export default function DetailModuleSiswaPage() {
       ToastError.fire({ title: "Pilih file terlebih dahulu!" });
       return;
     }
-
+    
     const allowedExt = moduleInfo.tipe_file_modul.toLowerCase();
     const fileExt = selectedFile.name.split(".").pop().toLowerCase();
-
+    
     if (fileExt !== allowedExt) {
       ToastError.fire({
         title: `File harus bertipe ${allowedExt.toUpperCase()}!`,
       });
       return;
     }
-
+    
+    setLoadingUpload(true)
     const formData = new FormData();
     formData.append("id_modul", moduleInfo.id_modul);
     formData.append("file_pengumpulan", selectedFile);
@@ -177,6 +179,7 @@ export default function DetailModuleSiswaPage() {
     } catch (err) {
       console.error(err);
     }
+    setLoadingUpload(false)
   };
 
   const columnsPengumpulan = [
@@ -265,7 +268,8 @@ export default function DetailModuleSiswaPage() {
               variant="outlined"
               color="warning"
               sx={{ ml: 2 }}
-              disabled={!selectedFile}
+              disabled={!selectedFile || loadingUpload}
+              loading={loadingUpload}
               onClick={handleUpload}
             >
               Upload
