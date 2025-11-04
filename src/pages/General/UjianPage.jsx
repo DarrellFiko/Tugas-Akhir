@@ -42,8 +42,8 @@ export default function UjianPage() {
       setTahunAjaranList(data);
 
       if (data.length > 0) {
-        const last = data[data.length - 1];
-        setSelectedTahun(last.id_tahun_ajaran);
+        // const last = data[data.length - 1];
+        setSelectedTahun(data[0]);
 
         setIsLoading(true);
         const kelas = await fetchPelajaranByRole(last.id_tahun_ajaran);
