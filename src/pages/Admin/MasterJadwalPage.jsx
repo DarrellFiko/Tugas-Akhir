@@ -38,6 +38,7 @@ export default function MasterJadwalPage() {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const theme = useTheme();
 
   const defaultFormValues = {
@@ -147,7 +148,7 @@ export default function MasterJadwalPage() {
   };
 
   const onSubmit = async (data) => {
-    setLoading(true);
+    setSubmitLoading(true);
     try {
       if (editMode) {
         await updateJadwal(editData.id_jadwal, data);
@@ -161,7 +162,7 @@ export default function MasterJadwalPage() {
       fetchData();
     } catch (err) {
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
@@ -332,8 +333,8 @@ export default function MasterJadwalPage() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
+          <Button onClick={handleCancel} disabled={submitLoading}>Batal</Button>
+          <Button onClick={handleSubmit(onSubmit)} disabled={submitLoading} loading={submitLoading} variant="contained">
             {editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>

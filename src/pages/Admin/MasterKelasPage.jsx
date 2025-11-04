@@ -268,15 +268,9 @@ export default function MasterKelasPage() {
             onClick={handleSubmit(onSubmit)}
             variant="contained"
             disabled={submitLoading}
-            startIcon={
-              submitLoading ? <CircularProgress size={18} color="inherit" /> : null
-            }
+            loading={loading}
           >
-            {submitLoading
-              ? "Menyimpan..."
-              : editMode
-              ? "Update"
-              : "Simpan"}
+            { editMode ? "Update" : "Simpan" }
           </Button>
         </DialogActions>
       </Dialog>

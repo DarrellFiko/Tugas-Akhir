@@ -562,17 +562,9 @@ export default function RegisterPage() {
             onClick={handleSubmit(onSubmit)}
             variant="contained"
             disabled={submitLoading}
-            startIcon={
-              submitLoading ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : null
-            }
+            loading={submitLoading}
           >
-            {submitLoading
-              ? "Menyimpan..."
-              : editMode
-              ? "Update"
-              : "Simpan"}
+            { editMode ? "Update" : "Simpan"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -639,13 +631,9 @@ export default function RegisterPage() {
             onClick={handleUploadConfirm}
             variant="contained"
             disabled={uploadLoading}
-            startIcon={
-              uploadLoading ? (
-                <CircularProgress size={18} color="inherit" />
-              ) : null
-            }
+            loading={uploadLoading}
           >
-            {uploadLoading ? "Mengupload..." : "Upload"}
+            Upload
           </Button>
         </DialogActions>
       </Dialog>

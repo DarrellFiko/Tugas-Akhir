@@ -255,15 +255,9 @@ export default function MasterTahunAjaranPage() {
             onClick={handleSubmit(onSubmit)}
             variant="contained"
             disabled={submitLoading}
-            startIcon={
-              submitLoading ? <CircularProgress size={18} color="inherit" /> : null
-            }
+            loading={submitLoading}
           >
-            {submitLoading
-              ? "Menyimpan..."
-              : editMode
-              ? "Update"
-              : "Simpan"}
+            { editMode ? "Update" : "Simpan" }
           </Button>
         </DialogActions>
       </Dialog>

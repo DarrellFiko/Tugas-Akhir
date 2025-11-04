@@ -50,6 +50,7 @@ export default function MasterKelasSiswaPage() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   const defaultFormValues = {
     id_kelas: null,
@@ -269,7 +270,7 @@ export default function MasterKelasSiswaPage() {
   };
 
   const onSubmit = async (data) => {
-    setLoading(true);
+    setSubmitLoading(true);
     try {
       await createKelasSiswa(data);
       ToastSuccess.fire({ title: "Kelas siswa berhasil ditambahkan" });
@@ -278,7 +279,7 @@ export default function MasterKelasSiswaPage() {
     } catch (err) {
       console.error("Gagal simpan:", err);
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
@@ -400,8 +401,8 @@ export default function MasterKelasSiswaPage() {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCancel}>Batal</Button>
-          <Button onClick={handleSubmit(onSubmit)} variant="contained">
+          <Button onClick={handleCancel} disabled={submitLoading}>Batal</Button>
+          <Button onClick={handleSubmit(onSubmit)} disabled={submitLoading} loading={submitLoading} variant="contained">
             Simpan
           </Button>
         </DialogActions>
