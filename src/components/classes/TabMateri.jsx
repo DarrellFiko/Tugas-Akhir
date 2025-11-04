@@ -36,6 +36,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [rows, setRows] = useState([]);
@@ -116,7 +117,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
       ToastError.fire({ title: "Hanya guru yang dapat menambahkan atau mengubah materi" });
       return;
     }
-
+    setSubmitLoading(true);
     const body = new FormData();
     body.append("id_kelas_tahun_ajaran", idKelasTahunAjaran);
     body.append("nama_materi", data.nama_materi);
@@ -145,6 +146,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
     } catch (err) {
       console.error(err);
     }
+    setSubmitLoading(false)
   };
 
   const handleDelete = async (row) => {
@@ -332,8 +334,8 @@ export default function TabMateri({ idKelasTahunAjaran }) {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseCreate}>Batal</Button>
-            <Button type="submit" variant="contained" color="primary">
+            <Button onClick={handleCloseCreate} disabled={submitLoading}>Batal</Button>
+            <Button type="submit" variant="contained" color="primary" disabled={submitLoading} loading={submitLoading}>
               {isEdit ? "Update" : "Simpan"}
             </Button>
           </DialogActions>
