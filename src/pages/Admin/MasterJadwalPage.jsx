@@ -183,10 +183,6 @@ export default function MasterJadwalPage() {
 
   return (
     <>
-      <Backdrop open={loading} sx={{ zIndex: 2000 }}>
-        <CircularProgress color="inherit" />
-      </Backdrop>
-
       <Typography variant="h4" sx={{ mb: 1 }}>
         Manajemen Jadwal Belajar
       </Typography>
@@ -196,6 +192,7 @@ export default function MasterJadwalPage() {
 
       <Box sx={{ width: "100%" }}>
         <TableTemplate
+          isLoading={loading}
           title="Daftar Jadwal Belajar"
           columns={columns}
           rows={rows}
