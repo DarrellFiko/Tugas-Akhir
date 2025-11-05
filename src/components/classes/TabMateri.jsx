@@ -259,24 +259,25 @@ export default function TabMateri({ idKelasTahunAjaran }) {
           {selectedRow?.file_url && (
             <Box sx={{ mt: 2 }}>
               {/\.(pdf)$/i.test(selectedRow.file_url) ? (
+                // PDF langsung via iframe
                 <iframe
                   src={selectedRow.file_url}
                   width="100%"
                   height="500px"
                   title="PDF Preview"
                 />
-              ) : /\.(doc|docx|ppt|pptx)$/i.test(selectedRow.file_url) ? (
+              ) : /\.(doc|docx|ppt|pptx|xls|xlsx)$/i.test(selectedRow.file_url) ? (
                 selectedRow.file_url.startsWith("http://localhost") ? (
                   <Typography color="text.secondary" align="center">
-                    Pratinjau tidak tersedia di mode lokal.
-                    Upload ke server agar dapat ditampilkan.
+                    Pratinjau tidak tersedia di mode lokal. Upload ke server agar dapat ditampilkan.
                   </Typography>
                 ) : (
                   <iframe
-                    src={`https://docs.google.com/gview?url=${encodeURIComponent(selectedRow.file_url)}&embedded=true`}
+                    src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedRow.file_url)}`}
                     width="100%"
                     height="500px"
                     title="Office Preview"
+                    style={{ border: "none" }}
                   />
                 )
               ) : (
