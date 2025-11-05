@@ -22,7 +22,7 @@ import { createUjian, getUjianById, updateUjian } from "../../../services/ujianS
 import { createSoal, updateSoal, deleteSoal } from "../../../services/soalService";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { handleDownloadFileExcel, handleUploadFile } from "../../../utils/utils";
+import { compressFile, handleDownloadFileExcel, handleUploadFile } from "../../../utils/utils";
 import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 
@@ -482,7 +482,10 @@ export default function FormUjianGuruPage() {
         form.append("score", s.score || 0);
         form.append("jawaban_benar", JSON.stringify(s.jawaban));
         form.append("list_jawaban", JSON.stringify(s.options));
-        if (s.file) form.append("gambar", s.file);
+        if (s.file) {
+          const compressedFile = await compressFile(s.file);
+          form.append("gambar", compressedFile);
+        }
 
         if (String(s.id).includes("-")) {
           await createSoal(form);

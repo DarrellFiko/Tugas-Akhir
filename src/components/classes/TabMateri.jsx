@@ -31,6 +31,7 @@ import {
   deleteMateri,
   downloadMateri,
 } from "../../services/materiService";
+import { compressFile } from "../../utils/utils";
 
 export default function TabMateri({ idKelasTahunAjaran }) {
   const [open, setOpen] = useState(false);
@@ -124,7 +125,8 @@ export default function TabMateri({ idKelasTahunAjaran }) {
     body.append("pertemuan", data.pertemuan);
     body.append("deskripsi", data.deskripsi || "");
     if (data.file && data.file.length > 0) {
-      body.append("file", data.file[0]);
+      const compressedFile = await compressFile(data.file[0]);
+      body.append("file", compressedFile);
     }
 
     try {

@@ -33,7 +33,6 @@ export async function updateSoal(id_soal, formData) {
   const res = await getAPI.put(ENDPOINTS.SOAL.UPDATE(id_soal), formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  ToastSuccess.fire({ title: "Soal berhasil diperbarui!" });
   return res.data;
 }
 

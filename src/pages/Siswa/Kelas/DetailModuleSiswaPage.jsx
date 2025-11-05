@@ -16,6 +16,7 @@ import { getModulById } from "../../../services/modulService";
 import { getListSiswaByKelasTahunAjaran } from "../../../services/kelasSiswaService";
 import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
 import { createPengumpulanModul } from "../../../services/pengumpulanModulService";
+import { compressFile } from "../../../utils/utils";
 
 export default function DetailModuleSiswaPage() {
   const navigate = useNavigate();
@@ -169,7 +170,8 @@ export default function DetailModuleSiswaPage() {
     setLoadingUpload(true)
     const formData = new FormData();
     formData.append("id_modul", moduleInfo.id_modul);
-    formData.append("file_pengumpulan", selectedFile);
+    const compressedFile = await compressFile(selectedFile);
+    formData.append("file_pengumpulan", compressedFile);
 
     try {
       const res = await createPengumpulanModul(formData);
