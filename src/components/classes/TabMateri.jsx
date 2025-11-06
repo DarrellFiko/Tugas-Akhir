@@ -128,8 +128,8 @@ export default function TabMateri({ idKelasTahunAjaran }) {
     body.append("pertemuan", data.pertemuan);
     body.append("deskripsi", data.deskripsi || "");
     if (data.file && data.file.length > 0) {
-      const compressedFile = await compressFile(data.file[0]);
-      body.append("file", compressedFile);
+      // const compressedFile = await compressFile(data.file[0]);
+      body.append("file", data.file[0]);
     }
 
     try {
