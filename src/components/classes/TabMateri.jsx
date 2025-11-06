@@ -134,9 +134,9 @@ export default function TabMateri({ idKelasTahunAjaran }) {
 
     try {
       if (isEdit && data.id_materi) {
-        // await updateMateri(data.id_materi, body);
+        await updateMateri(data.id_materi, body);
       } else {
-        // await createMateri(body);
+        await createMateri(body);
       }
 
       ToastSuccess.fire({
