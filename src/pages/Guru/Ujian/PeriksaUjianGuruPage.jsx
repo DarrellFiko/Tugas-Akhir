@@ -41,7 +41,6 @@ export default function PeriksaUjianGuruPage() {
       setLoading(true);
       try {
         const res = await getPeriksaUjian(idUjian);
-        console.log(res.data)
         setData(res.data);
       } catch (err) {
         console.error("Gagal mengambil data periksa ujian:", err);

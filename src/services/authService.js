@@ -10,7 +10,6 @@ export const login = async (body) => {
 
 export const getProfile = async () => {
   const res = await getAPI.get(ENDPOINTS.USER.GET_PROFILE);
-  console.log(res.data);
   return res.data;
 };
 

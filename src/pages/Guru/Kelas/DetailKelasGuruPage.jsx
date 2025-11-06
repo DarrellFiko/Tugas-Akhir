@@ -141,8 +141,6 @@ export default function DetailKelasGuruPage() {
       {/* Nilai Siswa */}
       {tab === 4 && (
         <>
-        {console.log(rowsNilaiSiswa)}
-        {console.log(nilaiSiswa)}
           {loadingSiswa ? (
             <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
               <CircularProgress />

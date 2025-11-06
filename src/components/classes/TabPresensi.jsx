@@ -132,7 +132,6 @@ export default function TabPresensi({ idKelasTahunAjaran }) {
       onUpdate={
         userRole === "guru"
           ? (row) => {
-              console.log(row);
               navigate(
                 `/kelas/detail/${idKelasTahunAjaran}/presensi/${row.id_berita_acara}`
               );

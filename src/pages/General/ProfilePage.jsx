@@ -285,6 +285,8 @@ export default function ProfilePage() {
           <Button
             variant="contained"
             color={editMode ? "success" : "warning"}
+            disabled={loadingUpload}
+            loading={loadingUpload}
             onClick={handleToggleEdit}
           >
             {editMode ? "Save Profile" : "Edit Profile"}

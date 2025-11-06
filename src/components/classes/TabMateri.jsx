@@ -15,6 +15,8 @@ import {
   Typography,
   TextField,
   Box,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 import { useForm } from "react-hook-form";
 import TableTemplate from "../tables/TableTemplate";
@@ -37,6 +39,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingDownload, setLoadingDownload] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -131,9 +134,9 @@ export default function TabMateri({ idKelasTahunAjaran }) {
 
     try {
       if (isEdit && data.id_materi) {
-        await updateMateri(data.id_materi, body);
+        // await updateMateri(data.id_materi, body);
       } else {
-        await createMateri(body);
+        // await createMateri(body);
       }
 
       ToastSuccess.fire({
@@ -165,6 +168,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
   };
 
   const handleDownloadFile = async (row) => {
+    setLoadingDownload(true)
     try {
       const res = await downloadMateri(row.id_materi);
       const blob = new Blob([res]);
@@ -180,6 +184,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
       console.error(err);
       ToastError.fire({ title: "Gagal mengunduh file" });
     }
+    setLoadingDownload(false)
   };
 
   const columns = [
@@ -225,6 +230,10 @@ export default function TabMateri({ idKelasTahunAjaran }) {
 
   return (
     <>
+      <Backdrop open={loadingDownload} sx={{ zIndex: 2000, color: "#fff" }}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       <TableTemplate
         key={"Materi"}
         title={"Materi"}
