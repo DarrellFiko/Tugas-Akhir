@@ -294,17 +294,20 @@ export default function RegisterPage() {
       setUploadError("File wajib diisi!");
       return;
     }
-    if (
-      !uploadFile.name.endsWith(".xlsx") &&
-      !uploadFile.name.endsWith(".xls")
-    ) {
+    if (!uploadFile.name.endsWith(".xlsx") && !uploadFile.name.endsWith(".xls")) {
       setUploadError("File harus berformat Excel (.xlsx atau .xls)");
       return;
     }
     setUploadLoading(true);
     try {
       const itemsData = await handleUploadFile(uploadFile, columns);
-      const res = await bulkRegister({ users: itemsData.rows });
+
+      const cleanedRows = itemsData.rows.map((u) => {
+        const { id, id_user, ...rest } = u;
+        return rest;
+      });
+
+      const res = await bulkRegister({ users: cleanedRows });
       ToastSuccess.fire({ title: res.message || "Bulk register success!" });
       fetchUsers();
       setOpenUploadDialog(false);

@@ -219,7 +219,7 @@ export default function MasterJadwalPage() {
                 options={ktaList}
                 getOptionLabel={(option) =>
                   option
-                    ? `${option.Pelajaran?.nama_pelajaran || "-"} - ${option.Kelas?.nama_kelas || "-"} (${option.TahunAjaran?.nama || "-"})`
+                    ? `${option.Pelajaran?.nama_pelajaran || "-"} - ${option.GuruPengampu?.nama || "-"} - ${option.Kelas?.nama_kelas || "-"} (${option.TahunAjaran?.nama || "-"})`
                     : ""
                 }
                 value={ktaList.find((k) => k.id_kelas_tahun_ajaran === field.value) || null}
@@ -229,7 +229,7 @@ export default function MasterJadwalPage() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Kelas - Tahun Ajaran"
+                    label="Periode Pelajaran"
                     margin="normal"
                     required
                     error={!!errors.id_kelas_tahun_ajaran}
