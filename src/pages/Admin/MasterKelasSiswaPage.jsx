@@ -20,7 +20,9 @@ import {
   DeleteOutline,
 } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
-
+import { Checkbox } from "@mui/material";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
 import TableTemplate from "../../components/tables/TableTemplate";
 import {
   ToastError,
@@ -39,6 +41,9 @@ import { getSimpleUsers } from "../../services/authService";
 import { getAllKelas } from "../../services/kelasService";
 import { getAllTahunAjaran } from "../../services/tahunAjaranService";
 
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
 export default function MasterKelasSiswaPage() {
   const [rows, setRows] = useState([]);
   const [kelasList, setKelasList] = useState([]);
@@ -55,7 +60,7 @@ export default function MasterKelasSiswaPage() {
   const defaultFormValues = {
     id_kelas: null,
     id_tahun_ajaran: null,
-    id_siswa: null,
+    id_siswa: [],
   };
 
   const {
@@ -272,7 +277,16 @@ export default function MasterKelasSiswaPage() {
   const onSubmit = async (data) => {
     setSubmitLoading(true);
     try {
-      await createKelasSiswa(data);
+      const { id_kelas, id_tahun_ajaran, id_siswa } = data;
+
+      for (const siswaId of id_siswa) {
+        await createKelasSiswa({
+          id_kelas,
+          id_tahun_ajaran,
+          id_siswa: siswaId,
+        });
+      }
+
       ToastSuccess.fire({ title: "Kelas siswa berhasil ditambahkan" });
       setOpenDialog(false);
       fetchData();
@@ -380,17 +394,31 @@ export default function MasterKelasSiswaPage() {
             <Controller
               name="id_siswa"
               control={control}
-              rules={{ required: "Siswa wajib dipilih" }}
+              rules={{ required: "Minimal pilih 1 siswa" }}
               render={({ field }) => (
                 <Autocomplete
+                  multiple
+                  disableCloseOnSelect
                   options={siswaList}
                   getOptionLabel={(opt) => opt.nama || ""}
-                  value={siswaList.find((s) => s.id_user === field.value) || null}
-                  onChange={(_, val) => field.onChange(val ? val.id_user : null)}
+                  value={siswaList.filter((s) => field.value.includes(s.id_user))}
+                  onChange={(_, val) => field.onChange(val.map((v) => v.id_user))}
+                  renderOption={(props, option, { selected }) => (
+                    <li {...props}>
+                      <Checkbox
+                        icon={icon}
+                        checkedIcon={checkedIcon}
+                        style={{ marginRight: 8 }}
+                        checked={selected}
+                      />
+                      {option.nama}
+                    </li>
+                  )}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Siswa"
+                      label="Pilih Siswa"
+                      placeholder="Cari siswa..."
                       error={!!errors.id_siswa}
                       helperText={errors.id_siswa?.message}
                     />
