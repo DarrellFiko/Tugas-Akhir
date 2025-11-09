@@ -403,6 +403,50 @@ export default function MasterKelasSiswaPage() {
                   getOptionLabel={(opt) => opt.nama || ""}
                   value={siswaList.filter((s) => field.value.includes(s.id_user))}
                   onChange={(_, val) => field.onChange(val.map((v) => v.id_user))}
+                  limitTags={3}
+                  renderTags={(selected, getTagProps) => {
+                    const maxVisible = 3;
+                    const visible = selected.slice(0, maxVisible);
+                    const hiddenCount = selected.length - maxVisible;
+
+                    return (
+                      <>
+                        {visible.map((option, index) => (
+                          <Typography
+                            key={index}
+                            variant="body2"
+                            sx={{
+                              bgcolor: "primary.main",
+                              color: "white",
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: 1,
+                              mr: 0.5,
+                              fontSize: "0.85rem",
+                            }}
+                            {...getTagProps({ index })}
+                          >
+                            {option.nama}
+                          </Typography>
+                        ))}
+                        {hiddenCount > 0 && (
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              bgcolor: "grey.400",
+                              color: "white",
+                              px: 1.5,
+                              py: 0.5,
+                              borderRadius: 1,
+                              fontSize: "0.85rem",
+                            }}
+                          >
+                            +{hiddenCount} siswa lagi
+                          </Typography>
+                        )}
+                      </>
+                    );
+                  }}
                   renderOption={(props, option, { selected }) => (
                     <li {...props}>
                       <Checkbox
