@@ -29,6 +29,7 @@ import {
   createNilai,
   updateNilai,
 } from "../../../services/nilaiService";
+import { ENDPOINTS } from "../../../services/endpoint";
 
 export default function DetailModuleGuruPage() {
   const navigate = useNavigate();
@@ -308,10 +309,48 @@ export default function DetailModuleGuruPage() {
   };
 
   const handleDownload = async () => {
-    setLoadingDownload(true);
-    await downloadPengumpulanModulZip(modulId)
-    setLoadingDownload(false);
-  }
+    try {
+      setLoadingDownload(true);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}${ENDPOINTS.PENGUMPULAN_MODUL.DOWNLOAD_ZIP(modulId)}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const text = await response.text();
+        let json;
+        try { json = JSON.parse(text); } catch {}
+        ToastError.fire({ title: json?.message || "Gagal mendownload ZIP!" });
+        return;
+      }
+
+      // streaming ke blob
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = `modul_${modulId}_pengumpulan.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      ToastSuccess.fire({ title: "File ZIP berhasil didownload!" });
+
+    } catch (err) {
+      ToastError.fire({ title: "Terjadi kesalahan koneksi." });
+      console.error(err);
+    } finally {
+      setLoadingDownload(false);
+    }
+  };
 
   // =================== Table Config ===================
   const columnsPengumpulan = [
