@@ -15,6 +15,7 @@ import {
   CircularProgress,
   MenuItem,
   Chip,
+  LinearProgress,
 } from "@mui/material";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import TableTemplate from "../../../components/tables/TableTemplate";
@@ -29,13 +30,14 @@ import {
   createNilai,
   updateNilai,
 } from "../../../services/nilaiService";
-import { ENDPOINTS } from "../../../services/endpoint";
 
 export default function DetailModuleGuruPage() {
   const navigate = useNavigate();
   const theme = useTheme();
   const { modulId } = useParams();
   const userId = parseInt(localStorage.getItem("id_user"));
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const [loading, setLoading] = useState(true);
   const [loadingDownload, setLoadingDownload] = useState(false);
@@ -308,48 +310,12 @@ export default function DetailModuleGuruPage() {
     }
   };
 
-  const handleDownload = async () => {
-    try {
-      setLoadingDownload(true);
-
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}${ENDPOINTS.PENGUMPULAN_MODUL.DOWNLOAD_ZIP(modulId)}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        const text = await response.text();
-        let json;
-        try { json = JSON.parse(text); } catch {}
-        ToastError.fire({ title: json?.message || "Gagal mendownload ZIP!" });
-        return;
-      }
-
-      // streaming ke blob
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-
-      a.href = url;
-      a.download = `modul_${modulId}_pengumpulan.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-
-      ToastSuccess.fire({ title: "File ZIP berhasil didownload!" });
-
-    } catch (err) {
-      ToastError.fire({ title: "Terjadi kesalahan koneksi." });
-      console.error(err);
-    } finally {
-      setLoadingDownload(false);
-    }
+  const handleDownload = () => {
+    downloadPengumpulanModulZip(
+      modulId,
+      setProgress,
+      setIsDownloading
+    );
   };
 
   // =================== Table Config ===================
@@ -421,21 +387,29 @@ export default function DetailModuleGuruPage() {
         <Box
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: "column",
             gap: 2,
             justifyContent: "center",
+            alignItems: "center",
             mt: 2,
           }}
         >
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleDownload()}
-            disabled={loadingDownload}
-            loading={loadingDownload}
+            onClick={handleDownload}
+            disabled={isDownloading}
+            startIcon={isDownloading ? <CircularProgress size={20} /> : null}
           >
-            Download Semua Pengumpulan (ZIP)
+            {isDownloading ? "Sedang Mengunduh..." : "Download Semua Pengumpulan (ZIP)"}
           </Button>
+
+          {isDownloading && (
+            <Box sx={{ width: "100%", maxWidth: 400, textAlign: "center" }}>
+              <LinearProgress variant="determinate" value={progress} />
+              <Typography sx={{ mt: 1, fontWeight: 600 }}>{progress}%</Typography>
+            </Box>
+          )}
 
           <Button variant="contained" color="success" onClick={handleOpenNilai}>
             Penilaian
