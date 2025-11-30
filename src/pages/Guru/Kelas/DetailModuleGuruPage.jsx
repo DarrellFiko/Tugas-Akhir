@@ -404,12 +404,12 @@ export default function DetailModuleGuruPage() {
             {isDownloading ? "Sedang Mengunduh..." : "Download Semua Pengumpulan (ZIP)"}
           </Button>
 
-          {isDownloading && (
+          {/* {isDownloading && (
             <Box sx={{ width: "100%", maxWidth: 400, textAlign: "center" }}>
               <LinearProgress variant="determinate" value={progress} />
               <Typography sx={{ mt: 1, fontWeight: 600 }}>{progress}%</Typography>
             </Box>
-          )}
+          )} */}
 
           <Button variant="contained" color="success" onClick={handleOpenNilai}>
             Penilaian
