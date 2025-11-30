@@ -126,7 +126,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
     body.append("id_kelas_tahun_ajaran", idKelasTahunAjaran);
     body.append("nama_materi", data.nama_materi);
     body.append("pertemuan", data.pertemuan);
-    body.append("deskripsi", data.deskripsi || "");
+    body.append("deskripsi", data.deskripsi);
     if (data.file && data.file.length > 0) {
       // const compressedFile = await compressFile(data.file[0]);
       body.append("file", data.file[0]);
