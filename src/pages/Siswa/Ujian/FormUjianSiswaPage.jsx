@@ -183,13 +183,11 @@ export default function FormUjianSiswaPage() {
         // kalau null, tandanya semua sudah dijawab
         setSoal(null);
         setIsLocked(false);
-        releaseExamLock();
       }
     } catch (err) {
       console.error(err);
       setSoal(null);
       setIsLocked(false);
-      releaseExamLock();
     }
   };
 
