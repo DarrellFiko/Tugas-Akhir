@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Box, Typography, CircularProgress, Button, TextField, Radio, Checkbox } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import { PopupError, ToastError } from "../../../composables/sweetalert";
+import { PopupError, ToastError, ToastSuccess } from "../../../composables/sweetalert";
 import { getUjianById } from "../../../services/ujianService";
 import { getKelasTahunAjaranById } from "../../../services/kelasTahunAjaranService";
 import { getRandomSoal } from "../../../services/soalService";
@@ -183,6 +183,7 @@ export default function FormUjianSiswaPage() {
         // kalau null, tandanya semua sudah dijawab
         setSoal(null);
         setIsLocked(false);
+        ToastSuccess.fire({ title: "Telah selesai mengerjakan ujian!" });
       }
     } catch (err) {
       console.error(err);
