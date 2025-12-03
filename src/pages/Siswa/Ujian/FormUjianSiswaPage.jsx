@@ -233,7 +233,7 @@ export default function FormUjianSiswaPage() {
       setHasLeftTab(false);
 
       // lanjut ke soal berikut
-      fetchSoal();
+      await fetchSoal();
       setNomorSoal((prev) => prev + 1);
       setJawaban("");
       setSelectedIndex(null);
