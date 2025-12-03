@@ -179,6 +179,7 @@ export default function FormUjianSiswaPage() {
       if (res?.data) {
         // kalau ada data, set soalnya
         setSoal(res.data);
+        return true;
       } else {
         // kalau null, tandanya semua sudah dijawab
         setSoal(null);
@@ -189,7 +190,9 @@ export default function FormUjianSiswaPage() {
       console.error(err);
       setSoal(null);
       setIsLocked(false);
+      return false;
     }
+    return false;
   };
 
   useEffect(() => {
@@ -232,8 +235,8 @@ export default function FormUjianSiswaPage() {
       setHasLeftTab(false);
 
       // lanjut ke soal berikut
-      await fetchSoal();
-      setNomorSoal((prev) => prev + 1);
+      const cekSoal = await fetchSoal();
+      if(cekSoal) setNomorSoal((prev) => prev + 1);
       setJawaban("");
       setSelectedIndex(null);
       setLoadingSubmit(false)
