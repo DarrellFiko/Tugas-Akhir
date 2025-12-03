@@ -234,6 +234,7 @@ export default function DetailModuleGuruPage() {
   const [openNilai, setOpenNilai] = useState(false);
   const [rowsNilai, setRowsNilai] = useState([]);
   const [loadingNilai, setLoadingNilai] = useState(false);
+  const [loadingSubmitNilai, setLoadingSubmitNilai] = useState(false);
 
   const fetchNilai = async () => {
     if (!moduleInfo?.id_modul) return;
@@ -275,6 +276,7 @@ export default function DetailModuleGuruPage() {
   };
 
   const handleSaveNilai = async () => {
+    setLoadingSubmitNilai(true);
     try {
       const dataToSave = rowsNilai
         .filter((r) => r.nilai !== "" && !isNaN(r.nilai))
@@ -308,6 +310,7 @@ export default function DetailModuleGuruPage() {
     } catch (err) {
       console.error("handleSaveNilai error:", err);
     }
+    setLoadingSubmitNilai(false)
   };
 
   const handleDownload = () => {
@@ -625,7 +628,7 @@ export default function DetailModuleGuruPage() {
 
         <DialogActions>
           <Button onClick={() => setOpenNilai(false)}>Batal</Button>
-          <Button onClick={handleSaveNilai} variant="contained" color="primary">
+          <Button onClick={handleSaveNilai} loading={loadingSubmitNilai} disabled={loadingSubmitNilai} variant="contained" color="primary">
             Simpan Nilai
           </Button>
         </DialogActions>
