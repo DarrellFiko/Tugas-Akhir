@@ -179,6 +179,7 @@ export default function FormUjianSiswaPage() {
       if (res?.data) {
         // kalau ada data, set soalnya
         setSoal(res.data);
+        setNomorSoal((prev) => prev + 1);
       } else {
         // kalau null, tandanya semua sudah dijawab
         setSoal(null);
@@ -234,7 +235,7 @@ export default function FormUjianSiswaPage() {
 
       // lanjut ke soal berikut
       await fetchSoal();
-      setNomorSoal((prev) => prev + 1);
+      
       setJawaban("");
       setSelectedIndex(null);
       setLoadingSubmit(false)
