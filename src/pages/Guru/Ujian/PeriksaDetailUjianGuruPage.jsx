@@ -442,9 +442,10 @@ export default function PeriksaDetailUjianGuruPage() {
         color="primary"
         sx={{ mt: 2 }}
         disabled={saving}
+        loading={saving}
         onClick={handleSaveNilai}
       >
-        {saving ? "Menyimpan..." : "Simpan Nilai"}
+        Simpan Nilai
       </Button>
     </Box>
   );

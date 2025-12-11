@@ -726,8 +726,8 @@ export default function FormUjianGuruPage() {
       </Box>
 
       <Box sx={{ textAlign: "right", mt: 3 }}>
-        <Button variant="contained" color="primary" type="submit" disabled={loadingSubmit}>
-          {loadingSubmit ? "Menyimpan..." : idUjian ? "Update Ujian" : "Simpan Ujian"}
+        <Button variant="contained" color="primary" type="submit" disabled={loadingSubmit} loading={loadingSubmit}>
+          { idUjian ? "Update Ujian" : "Simpan Ujian" }
         </Button>
       </Box>
 
