@@ -29,12 +29,13 @@ import {
   deleteModul,
 } from "../../services/modulService";
 import { formatDate } from "../../utils/utils";
+import { getRole } from "../../services/authService";
 
 export default function TabModule() {
   const navigate = useNavigate();
   const theme = useTheme();
   const { id } = useParams();
-  const userRole = localStorage.getItem("role");
+  const [userRole, setUserRole] = useState("");
 
   const [openDialog, setOpenDialog] = useState(false);
   const [rowsModule, setRowsModule] = useState([]);
@@ -111,6 +112,12 @@ export default function TabModule() {
       setLoading(false);
     }
   };
+
+  const getRoles = async () => {
+    const role = await getRole();
+    setUserRole(role.role)
+  };
+  useEffect(() => { getRoles(); }, []);
 
   useEffect(() => {
     if (id) fetchData();
@@ -223,7 +230,7 @@ export default function TabModule() {
   return (
     <>
       <TableTemplate
-        key={"modul"}
+        key={`modul-${userRole}`} 
         title={"Modul"}
         columns={columnsModule}
         rows={rowsModule}

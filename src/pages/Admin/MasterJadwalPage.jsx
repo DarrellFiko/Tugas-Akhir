@@ -195,6 +195,7 @@ export default function MasterJadwalPage() {
           isLoading={loading}
           title="Daftar Jadwal Belajar"
           columns={columns}
+          tableHeight={"auto"}
           rows={rows}
           initialRowsPerPage={10}
           isUpdate

@@ -30,12 +30,14 @@ import {
   createNilai,
   updateNilai,
 } from "../../../services/nilaiService";
+import { getUserId } from "../../../services/authService";
 
 export default function DetailModuleGuruPage() {
   const navigate = useNavigate();
   const theme = useTheme();
   const { modulId } = useParams();
-  const userId = parseInt(localStorage.getItem("id_user"));
+  const [userId, setUserId] = useState("");
+  const [loadingUser, setLoadingUser] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -157,9 +159,26 @@ export default function DetailModuleGuruPage() {
     }
   };
 
+  const getId = async () => {
+    try {
+      setLoadingUser(true);
+      const data = await getUserId();
+      setUserId(data?.id_user ?? null);
+    } catch (err) {
+      console.error("getUserId error:", err);
+      setUserId(null);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
+
+  useEffect(() => { getId();}, []);
+
   useEffect(() => {
-    if (modulId) fetchModul();
-  }, [modulId]);
+    if (!loadingUser && userId && modulId) {
+      fetchModul();
+    }
+  }, [loadingUser, userId, modulId]);
 
   // =================== Countdown ===================
   useEffect(() => {

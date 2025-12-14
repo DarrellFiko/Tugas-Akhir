@@ -354,7 +354,7 @@ export default function RegisterPage() {
           isUpload
           isUpdate
           isDelete
-          tableHeight={500}
+          tableHeight={"auto"}
           onCreate={openCreateDialog}
           onUpdate={openUpdateDialog}
           onDelete={handleDelete}

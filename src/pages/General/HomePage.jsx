@@ -20,6 +20,7 @@ import {
   downloadPengumumanFile,
 } from "../../services/pengumumanService";
 import { createKomentar, deleteKomentar, updateKomentar } from "../../services/komentarService";
+import { getRole } from "../../services/authService";
 
 export default function HomePage() {
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ export default function HomePage() {
   const [editData, setEditData] = useState(null);
   const [expanded, setExpanded] = useState(false);
 
-  const role = localStorage.getItem("role");
+  const [role, setRole] = useState("");
 
   // ============ Hook Form ============
   const {
@@ -197,6 +198,13 @@ export default function HomePage() {
     setOpenDialog(true);
   };
 
+  const getRoles = async () => {
+    const role = await getRole();
+    setRole(role.role)
+  };
+
+  // ================== EFFECT ==================
+  useEffect(() => { getRoles(); }, []);
   useEffect(() => {
     fetchPengumuman();
     const interval = setInterval(() => {

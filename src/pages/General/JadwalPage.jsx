@@ -14,10 +14,11 @@ import TableTemplate from "../../components/tables/TableTemplate";
 import { handlePrint } from "../../utils/utils";
 import { getSimpleTahunAjaran } from "../../services/tahunAjaranService";
 import { getJadwalGuru, getJadwalSiswa } from "../../services/jadwalPelajaranService";
+import { getRole } from "../../services/authService";
 
 export default function JadwalPage() {
   const printRef = useRef();
-  const role = localStorage.getItem("role")?.toLowerCase(); // pastikan lowercase agar aman
+  const [role, setRole] = useState("");
 
   // ================== STATES ==================
   const [tahunAjaranList, setTahunAjaranList] = useState([]);
@@ -82,7 +83,13 @@ export default function JadwalPage() {
     }
   };
 
-  // ================== FETCH JADWAL SAAT GANTI TAHUN ==================
+  const getRoles = async () => {
+    const role = await getRole();
+    setRole(role.role)
+  };
+
+  useEffect(() => { getRoles(); }, []);
+
   useEffect(() => {
     if (!selectedTahun) return;
     const fetch = async () => {
@@ -94,7 +101,6 @@ export default function JadwalPage() {
     fetch();
   }, [selectedTahun]);
 
-  // ================== FETCH SAAT MOUNT ==================
   useEffect(() => {
     fetchTahunAjaran();
   }, []);
@@ -108,7 +114,6 @@ export default function JadwalPage() {
       return obj;
     }, {});
 
-  // ================== RENDER ==================
   return (
     <>
       {/* HEADER */}

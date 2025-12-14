@@ -2,6 +2,8 @@ export const ENDPOINTS = {
   USER: {
     LOGIN: "/users/login",
     LOGOUT: "/users/logout",
+    GET_ROLE: "/users/role",
+    GET_ID: "/users/id",
     REGISTER: "/users/register",
     BULK_REGISTER: "/users/bulk-register",
     GET_ALL: "/users",
@@ -82,6 +84,7 @@ export const ENDPOINTS = {
   KELAS_SISWA: {
     CREATE: "/kelas-siswa",
     GET_ALL: "/kelas-siswa",
+    UPDATE: (id) => `/kelas-siswa/${id}`,
     GET_LIST_SISWA: (id_kelas_tahun_ajaran) => `/kelas-siswa/list-siswa?id_kelas_tahun_ajaran=${id_kelas_tahun_ajaran}`,
     GET_BY_ID: (id) => `/kelas-siswa/${id}`,
     UPLOAD_RAPOR: (id, tipe) => `/kelas-siswa/upload-rapor/${id}/${tipe}`,

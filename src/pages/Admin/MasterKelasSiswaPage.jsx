@@ -36,6 +36,7 @@ import {
   deleteKelasSiswa,
   uploadRaporKelasSiswa,
   deleteRaporKelasSiswa,
+  updateKelasSiswa,
 } from "../../services/kelasSiswaService";
 import { getSimpleUsers } from "../../services/authService";
 import { getAllKelas } from "../../services/kelasService";
@@ -56,6 +57,8 @@ export default function MasterKelasSiswaPage() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editRow, setEditRow] = useState(null);
 
   const defaultFormValues = {
     id_kelas: null,
@@ -259,6 +262,19 @@ export default function MasterKelasSiswaPage() {
     setOpenDialog(true);
   };
 
+  const openEditDialog = (row) => {
+    setIsEdit(true);
+    setEditRow(row);
+
+    reset({
+      id_kelas: row.id_kelas,
+      id_tahun_ajaran: row.id_tahun_ajaran,
+      id_siswa: [row.id_siswa],
+    });
+
+    setOpenDialog(true);
+  };
+
   const handleCancel = async () => {
     const hasChanges = Object.keys(defaultFormValues).some(
       (key) => watch(key) !== defaultFormValues[key]
@@ -271,6 +287,8 @@ export default function MasterKelasSiswaPage() {
       if (!confirmClose.isConfirmed) return;
     }
     reset(defaultFormValues);
+    setIsEdit(false);
+    setEditRow(null);
     setOpenDialog(false);
   };
 
@@ -279,16 +297,30 @@ export default function MasterKelasSiswaPage() {
     try {
       const { id_kelas, id_tahun_ajaran, id_siswa } = data;
 
-      for (const siswaId of id_siswa) {
-        await createKelasSiswa({
+      if (isEdit && editRow) {
+        await updateKelasSiswa(editRow.id_kelas_siswa, {
           id_kelas,
           id_tahun_ajaran,
-          id_siswa: siswaId,
+          id_siswa: id_siswa[0],
         });
+
+        ToastSuccess.fire({ title: "Data kelas siswa berhasil diperbarui" });
+      } else {
+        for (const siswaId of id_siswa) {
+          await createKelasSiswa({
+            id_kelas,
+            id_tahun_ajaran,
+            id_siswa: siswaId,
+          });
+        }
+
+        ToastSuccess.fire({ title: "Kelas siswa berhasil ditambahkan" });
       }
 
-      ToastSuccess.fire({ title: "Kelas siswa berhasil ditambahkan" });
       setOpenDialog(false);
+      setIsEdit(false);
+      setEditRow(null);
+      reset(defaultFormValues);
       fetchData();
     } catch (err) {
       console.error("Gagal simpan:", err);
@@ -328,14 +360,15 @@ export default function MasterKelasSiswaPage() {
           title="Daftar Kelas Siswa"
           columns={columns}
           rows={rows}
+          tableHeight={"auto"}
           keyProperty="id_kelas_siswa"
-          isUpdate={false}
+          isUpdate
           isDelete
           isUpload={false}
           isDownload={false}
           onCreate={openCreateDialog}
+          onUpdate={openEditDialog}
           onDelete={handleDelete}
-          
         />
       </Box>
 
@@ -395,81 +428,57 @@ export default function MasterKelasSiswaPage() {
               name="id_siswa"
               control={control}
               rules={{ required: "Minimal pilih 1 siswa" }}
-              render={({ field }) => (
-                <Autocomplete
-                  multiple
-                  disableCloseOnSelect
-                  options={siswaList}
-                  getOptionLabel={(opt) => opt.nama || ""}
-                  value={siswaList.filter((s) => field.value.includes(s.id_user))}
-                  onChange={(_, val) => field.onChange(val.map((v) => v.id_user))}
-                  limitTags={3}
-                  renderTags={(selected, getTagProps) => {
-                    const maxVisible = 3;
-                    const visible = selected.slice(0, maxVisible);
-                    const hiddenCount = selected.length - maxVisible;
-
-                    return (
-                      <>
-                        {visible.map((option, index) => (
-                          <Typography
-                            key={index}
-                            variant="body2"
-                            sx={{
-                              bgcolor: "primary.main",
-                              color: "white",
-                              px: 1.5,
-                              py: 0.5,
-                              borderRadius: 1,
-                              mr: 0.5,
-                              fontSize: "0.85rem",
-                            }}
-                            {...getTagProps({ index })}
-                          >
-                            {option.nama}
-                          </Typography>
-                        ))}
-                        {hiddenCount > 0 && (
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              bgcolor: "grey.400",
-                              color: "white",
-                              px: 1.5,
-                              py: 0.5,
-                              borderRadius: 1,
-                              fontSize: "0.85rem",
-                            }}
-                          >
-                            +{hiddenCount} siswa lagi
-                          </Typography>
-                        )}
-                      </>
-                    );
-                  }}
-                  renderOption={(props, option, { selected }) => (
-                    <li {...props}>
-                      <Checkbox
-                        icon={icon}
-                        checkedIcon={checkedIcon}
-                        style={{ marginRight: 8 }}
-                        checked={selected}
+              render={({ field }) => {
+                return (
+                  <Autocomplete
+                    multiple={!isEdit} 
+                    disableCloseOnSelect={!isEdit}
+                    options={siswaList}
+                    getOptionLabel={(opt) => opt?.nama || ""}
+                    value={
+                      isEdit
+                        ? siswaList.find((s) => s.id_user === field.value?.[0]) || null
+                        : siswaList.filter((s) => field.value.includes(s.id_user))
+                    }
+                    onChange={(_, val) => {
+                      if (isEdit) {
+                        // EDIT → simpan sebagai array 1 elemen
+                        field.onChange(val ? [val.id_user] : []);
+                      } else {
+                        // CREATE → multiple
+                        field.onChange(val.map((v) => v.id_user));
+                      }
+                    }}
+                    limitTags={3}
+                    renderOption={
+                      isEdit
+                        ? undefined
+                        : (props, option, { selected }) => (
+                            <li {...props}>
+                              <Checkbox
+                                icon={icon}
+                                checkedIcon={checkedIcon}
+                                style={{ marginRight: 8 }}
+                                checked={selected}
+                              />
+                              {option.nama}
+                            </li>
+                          )
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Pilih Siswa"
+                        placeholder={isEdit ? "Pilih siswa" : "Cari siswa..."}
+                        error={!!errors.id_siswa}
+                        helperText={errors.id_siswa?.message}
                       />
-                      {option.nama}
-                    </li>
-                  )}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Pilih Siswa"
-                      placeholder="Cari siswa..."
-                      error={!!errors.id_siswa}
-                      helperText={errors.id_siswa?.message}
-                    />
-                  )}
-                />
-              )}
+                    )}
+                  />
+                );
+              }}
             />
+
           </Box>
         </DialogContent>
         <DialogActions>

@@ -7,6 +7,15 @@ export const createKelasSiswa = async (body) => {
   return res.data;
 };
 
+// ================== UPDATE ==================
+export const updateKelasSiswa = async (id, body) => {
+  const res = await getAPI.put(
+    ENDPOINTS.KELAS_SISWA.UPDATE(id),
+    body
+  );
+  return res.data;
+};
+
 // ================== GET ALL ==================
 export const getAllKelasSiswa = async (params = {}) => {
   const res = await getAPI.get(ENDPOINTS.KELAS_SISWA.GET_ALL, { params });

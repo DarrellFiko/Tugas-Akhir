@@ -39,6 +39,7 @@ function AppContent({
   isSidebar,
   setIsSidebar,
   routes,
+  routesLoading,
   onLogin,
   onLogout,
   isUjian,
@@ -62,6 +63,9 @@ function AppContent({
     return null;
   }
 
+  if (routesLoading) {
+    return null; 
+  }
   // --- Cek NotFound ---
   const isNotFound =
     !routes.some((section) =>
@@ -138,17 +142,16 @@ function AppContent({
 }
 
 export default function App() {
-  const dispatch = useDispatch(); // Redux dispatch
+  const dispatch = useDispatch();
   const [isSidebar, setIsSidebar] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem("isDarkTheme");
     return savedTheme ? JSON.parse(savedTheme) : false;
   });
 
-  const [role, setRole] = useState(localStorage.getItem("role"));
+  const [routes, setRoutes] = useState([]);
+  const [routesLoading, setRoutesLoading] = useState(true);
   const isUjian = useSelector((state) => state.ujian.isUjian);
-
-  const routes = getRoutes(role);
 
   // handler login
   const handleLogin = async (data) => {
@@ -159,22 +162,15 @@ export default function App() {
       });
 
       const token = response.token;
-      const userRole = response.role ? response.role.toLowerCase() : "";
 
       localStorage.setItem("authToken", token);
-      localStorage.setItem("id_user", response.id_user);
       localStorage.setItem("authUser", response.nama);
       localStorage.setItem("profilePicture", response.profile_picture);
-      localStorage.setItem("role", userRole);
-
-      setRole(userRole);
-
+      loadRoutes()
       // Simpan user ke Redux
       dispatch(
         setUser({
-          id_user: response.id_user,
           nama: response.nama,
-          role: userRole,
           profilePicture: response.profile_picture,
         })
       );
@@ -188,18 +184,27 @@ export default function App() {
     await userService.logout();
 
     localStorage.removeItem("authToken");
-    localStorage.removeItem("id_user");
     localStorage.removeItem("authUser");
-    localStorage.removeItem("role");
     localStorage.removeItem("profilePicture");
 
-    setRole(null);
     dispatch(clearUser());
     dispatch(resetUjianMode());
 
     // Reset Redux state
     dispatch(clearUser());
   };
+
+  const loadRoutes = async () => {
+    setRoutesLoading(true);
+    try {
+      const tempRoutes = await getRoutes();
+      setRoutes(Array.isArray(tempRoutes) ? tempRoutes : []);
+    } finally {
+      setRoutesLoading(false);
+    }
+  };
+
+  useEffect(() => { loadRoutes() }, []);
 
   // theme persistence
   useEffect(() => {
@@ -211,15 +216,11 @@ export default function App() {
   useEffect(() => {
     const nama = localStorage.getItem("authUser");
     const profilePicture = localStorage.getItem("profilePicture");
-    const id_user = localStorage.getItem("id_user");
-    const role = localStorage.getItem("role");
 
-    if (nama && id_user) {
+    if (nama) {
       dispatch(
         setUser({
-          id_user,
           nama,
-          role,
           profilePicture,
         })
       );
@@ -231,12 +232,12 @@ export default function App() {
       <CssBaseline />
       <Router>
         <AppContent
-          key={role}
           isDark={isDark}
           setIsDark={setIsDark}
           isSidebar={isSidebar}
           setIsSidebar={setIsSidebar}
           routes={routes}
+          routesLoading={routesLoading}
           onLogin={handleLogin}
           onLogout={handleLogout}
           isUjian={isUjian}

@@ -33,7 +33,7 @@ import {
   deleteMateri,
   downloadMateri,
 } from "../../services/materiService";
-import { compressFile } from "../../utils/utils";
+import { getRole } from "../../services/authService";
 
 export default function TabMateri({ idKelasTahunAjaran }) {
   const [open, setOpen] = useState(false);
@@ -44,8 +44,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
   const [openCreate, setOpenCreate] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [rows, setRows] = useState([]);
-
-  const userRole = localStorage.getItem("role");
+  const [userRole, setUserRole] = useState("");
 
   const {
     register,
@@ -68,6 +67,14 @@ export default function TabMateri({ idKelasTahunAjaran }) {
     }
   };
 
+  const getRoles = async () => {
+    const role = await getRole();
+    setUserRole(role.role)
+  };
+  useEffect(() => {
+    getRoles();
+  }, []);
+  
   useEffect(() => {
     fetchMateri();
   }, [idKelasTahunAjaran]);
@@ -82,9 +89,17 @@ export default function TabMateri({ idKelasTahunAjaran }) {
     setSelectedRow(null);
   };
 
+  const resetValue = () => {
+    reset({
+      id_materi: null,
+      nama_materi: null,
+      pertemuan: null,
+      deskripsi: null,
+    });
+  }
   const handleOpenCreate = () => {
     if (userRole !== "guru") return ToastError.fire({ title: "Hanya guru yang dapat membuat materi" });
-    reset();
+    resetValue()
     setIsEdit(false);
     setOpenCreate(true);
   };
@@ -110,7 +125,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
       });
       if (!confirmClose.isConfirmed) return;
     }
-    reset();
+    resetValue()
     const fileInput = document.querySelector('input[type="file"]');
     if (fileInput) fileInput.value = "";
     setOpenCreate(false);
@@ -126,9 +141,8 @@ export default function TabMateri({ idKelasTahunAjaran }) {
     body.append("id_kelas_tahun_ajaran", idKelasTahunAjaran);
     body.append("nama_materi", data.nama_materi);
     body.append("pertemuan", data.pertemuan);
-    body.append("deskripsi", data.deskripsi);
+    body.append("deskripsi", data.deskripsi || "");
     if (data.file && data.file.length > 0) {
-      // const compressedFile = await compressFile(data.file[0]);
       body.append("file", data.file[0]);
     }
 
@@ -145,7 +159,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
 
       fetchMateri();
       setOpenCreate(false);
-      reset();
+      resetValue()
       const fileInput = document.querySelector('input[type="file"]');
       if (fileInput) fileInput.value = "";
     } catch (err) {
@@ -235,7 +249,7 @@ export default function TabMateri({ idKelasTahunAjaran }) {
       </Backdrop>
 
       <TableTemplate
-        key={"Materi"}
+        key={`materi-${userRole}`} 
         title={"Materi"}
         columns={columns}
         rows={rows}

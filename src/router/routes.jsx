@@ -43,6 +43,7 @@ import PersonAddAltOutlinedIcon from '@mui/icons-material/PersonAddAltOutlined';
 import SensorDoorOutlinedIcon from '@mui/icons-material/SensorDoorOutlined';
 import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
 import LaptopChromebookOutlinedIcon from '@mui/icons-material/LaptopChromebookOutlined';
+import { getRole } from "../services/authService";
 
 const loginRoutes = [
   {
@@ -142,8 +143,15 @@ const adminRoutes = [
   },
 ];
 
+const getRoles = async () => {
+  const role = await getRole();
+  return role.role;
+};
+
 // Function to get routes by role
-export function getRoutes(role) {
+export async function getRoutes() {
+  const role = await getRoles();
+
   if (!role) return [...loginRoutes];
 
   switch (role.toLowerCase()) {

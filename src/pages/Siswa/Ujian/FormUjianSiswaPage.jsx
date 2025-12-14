@@ -9,6 +9,7 @@ import { createJawabanUjian } from "../../../services/jawabanUjianService";
 import TextEditor from "../../../components/inputs/TextEditor";
 import { useDispatch } from "react-redux";
 import { setUjianMode, resetUjianMode } from "../../../stores/ujianSlice";
+import { getUserId } from "../../../services/authService";
 
 export default function FormUjianSiswaPage() {
   const { idKelasTahunAjaran, idUjian } = useParams();
@@ -29,7 +30,8 @@ export default function FormUjianSiswaPage() {
   const [nomorSoal, setNomorSoal] = useState(0);
   const [hasLeftTab, setHasLeftTab] = useState(false);
 
-  const id_user = localStorage.getItem("id_user");
+  const [id_user, setIdUser] = useState("");
+  const [loadingUser, setLoadingUser] = useState(true);
 
   // ================== FETCH DATA UJIAN ==================
   useEffect(() => {
@@ -82,11 +84,26 @@ export default function FormUjianSiswaPage() {
       }
     };
 
-    if (idUjian) {
+    if (!loadingUser && id_user && idUjian) {
       fetchKelasTahunAjaran();
       fetchUjian();
     }
-  }, [idUjian, idKelasTahunAjaran]);
+  }, [loadingUser, id_user, idUjian, idKelasTahunAjaran]);
+
+  const getId = async () => {
+    try {
+      setLoadingUser(true);
+      const data = await getUserId();
+      setIdUser(data?.id_user ?? null);
+    } catch (err) {
+      console.error("getUserId error:", err);
+      setIdUser(null);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
+  
+  useEffect(() => { getId();}, []);
 
   // ================== CEK & KUNCI SELAMA UJIAN BERLANGSUNG ==================
   useEffect(() => {

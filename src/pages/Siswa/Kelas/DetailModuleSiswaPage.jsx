@@ -16,7 +16,7 @@ import { getModulById } from "../../../services/modulService";
 import { getListSiswaByKelasTahunAjaran } from "../../../services/kelasSiswaService";
 import { ToastError, ToastSuccess } from "../../../composables/sweetalert";
 import { createPengumpulanModul } from "../../../services/pengumpulanModulService";
-import { compressFile } from "../../../utils/utils";
+import { getUserId } from "../../../services/authService";
 
 export default function DetailModuleSiswaPage() {
   const navigate = useNavigate();
@@ -31,8 +31,8 @@ export default function DetailModuleSiswaPage() {
   const [timeLeft, setTimeLeft] = useState("");
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
-
-  const userId = parseInt(localStorage.getItem("id_user"));
+  const [userId, setUserId] = useState("");
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const formatterDateTime = new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
@@ -117,10 +117,26 @@ export default function DetailModuleSiswaPage() {
     }
   };
 
+  const getId = async () => {
+    try {
+      setLoadingUser(true);
+      const data = await getUserId();
+      setUserId(data?.id_user ?? null);
+    } catch (err) {
+      console.error("getUserId error:", err);
+      setUserId(null);
+    } finally {
+      setLoadingUser(false);
+    }
+  };
+
+  useEffect(() => { getId();}, []);
 
   useEffect(() => {
-    if (modulId) fetchModul();
-  }, [modulId]);
+    if (!loadingUser && userId && modulId) {
+      fetchModul();
+    }
+  }, [loadingUser, userId, modulId]);
 
   // =================== Countdown ===================
   useEffect(() => {
@@ -170,8 +186,7 @@ export default function DetailModuleSiswaPage() {
     setLoadingUpload(true)
     const formData = new FormData();
     formData.append("id_modul", moduleInfo.id_modul);
-    const compressedFile = await compressFile(selectedFile);
-    formData.append("file_pengumpulan", compressedFile);
+    formData.append("file_pengumpulan", selectedFile);
 
     try {
       const res = await createPengumpulanModul(formData);

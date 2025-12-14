@@ -10,7 +10,7 @@ const getAPI = axios.create({
 // Add request interceptor to automatically attach token if exists
 getAPI.interceptors.request.use(
   (config) => {
-    const authToken = localStorage.getItem("authToken"); // get token from localStorage
+    const authToken = localStorage.getItem("authToken"); 
     if (authToken) {
       config.headers.Authorization = `Bearer ${authToken}`;
     }
@@ -30,9 +30,8 @@ getAPI.interceptors.response.use(
         // Unauthorized -> force logout
         localStorage.removeItem("authToken");
         localStorage.removeItem("authUser");
-        localStorage.removeItem("role");
         localStorage.removeItem("profilePicture");
-        window.location.href = "/login"; // redirect to login
+        window.location.href = "/login";
       } else if (status === 500) {
         PopupError.fire({
           title: "Server Error",
@@ -45,14 +44,13 @@ getAPI.interceptors.response.use(
         });
       }
     } else {
-      // No response (e.g., network error)
       PopupError.fire({
         title: "Network Error",
         html: "Unable to connect to the server. Please check your connection.",
       });
     }
 
-    return Promise.reject(error); // still reject so caller can catch if needed
+    return Promise.reject(error); 
   }
 );
 

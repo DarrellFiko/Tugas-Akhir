@@ -13,6 +13,16 @@ export const getProfile = async () => {
   return res.data;
 };
 
+export const getRole = async () => {
+  const res = await getAPI.get(ENDPOINTS.USER.GET_ROLE);
+  return res.data;
+};
+
+export const getUserId = async () => {
+  const res = await getAPI.get(ENDPOINTS.USER.GET_ID);
+  return res.data;
+};
+
 export const logout = async () => {
   const res = await getAPI.post(ENDPOINTS.USER.LOGOUT);
   return res.data;

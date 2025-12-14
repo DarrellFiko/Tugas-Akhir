@@ -21,7 +21,6 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
 // Import service
 import { getProfile, requestOtp, resetPassword, updateUser } from "../../services/authService.js";
-import { compressFile } from "../../utils/utils.js";
 
 export default function ProfilePage() {
   const dispatch = useDispatch();
@@ -66,7 +65,7 @@ export default function ProfilePage() {
         try {
           const body = { ...profile };
           if (avatarFile) {
-            body.profile_picture = await compressFile(avatarFile);
+            body.profile_picture = avatarFile;
           }
 
           await updateUser(profile.id_user, body);

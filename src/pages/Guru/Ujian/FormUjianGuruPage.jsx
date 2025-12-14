@@ -22,7 +22,7 @@ import { createUjian, getUjianById, updateUjian } from "../../../services/ujianS
 import { createSoal, updateSoal, deleteSoal } from "../../../services/soalService";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { compressFile, handleDownloadFileExcel, handleUploadFile } from "../../../utils/utils";
+import { handleDownloadFileExcel, handleUploadFile } from "../../../utils/utils";
 import UploadOutlinedIcon from '@mui/icons-material/UploadOutlined';
 import DownloadOutlinedIcon from '@mui/icons-material/DownloadOutlined';
 
@@ -483,7 +483,7 @@ export default function FormUjianGuruPage() {
         form.append("jawaban_benar", JSON.stringify(s.jawaban));
         form.append("list_jawaban", JSON.stringify(s.options));
         if (s.file) {
-          const compressedFile = await compressFile(s.file);
+          const compressedFile = s.file;
           form.append("gambar", compressedFile);
         }
 

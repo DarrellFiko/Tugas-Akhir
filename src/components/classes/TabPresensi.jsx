@@ -5,11 +5,13 @@ import { deleteBeritaAcara, getAllBeritaAcara } from "../../services/beritaAcara
 import TableTemplate from "../tables/TableTemplate";
 import { formatDate } from "../../utils/utils";
 import { ToastError, ToastSuccess } from "../../composables/sweetalert";
+import { getRole } from "../../services/authService";
 
 export default function TabPresensi({ idKelasTahunAjaran }) {
   const navigate = useNavigate();
   const [rowsPresensi, setRowsPresensi] = useState([]);
-  const userRole = localStorage.getItem("role");
+  const [userRole, setUserRole] = useState("");
+  const [isRoleLoading, setIsRoleLoading] = useState(true);
 
   const fetchPresensi = async () => {
     try {
@@ -31,9 +33,21 @@ export default function TabPresensi({ idKelasTahunAjaran }) {
     }
   };
 
+  const getRoles = async () => {
+    try {
+      const role = await getRole();
+      setUserRole(role.role);
+    } finally {
+      setIsRoleLoading(false);
+    }
+  };
+  useEffect(() => { getRoles(); }, []);
+
   useEffect(() => {
-    fetchPresensi();
-  }, [idKelasTahunAjaran]);
+    if (!isRoleLoading) {
+      fetchPresensi();
+    }
+  }, [idKelasTahunAjaran, isRoleLoading]);
 
   const renderStatusChip = (status) => {
     let color = "default";
@@ -112,7 +126,7 @@ export default function TabPresensi({ idKelasTahunAjaran }) {
 
   return (
     <TableTemplate
-      key={"presensi"}
+      key={userRole}
       title={"Presensi"}
       columns={columnsPresensi}
       rows={rowsPresensi}

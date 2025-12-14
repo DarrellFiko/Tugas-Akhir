@@ -21,6 +21,7 @@ import {
   downloadPengumumanFile,
 } from "../../services/pengumumanService";
 import { createKomentar, deleteKomentar, updateKomentar } from "../../services/komentarService";
+import { getRole } from "../../services/authService";
 
 export default function TabPengumuman() {
   const [loading, setLoading] = useState(false);
@@ -31,9 +32,8 @@ export default function TabPengumuman() {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(null);
   const [expanded, setExpanded] = useState(false);
-
+  const [role, setRole] = useState("");
   const { id } = useParams(); // id_kelas_tahun_ajaran dari route
-  const role = localStorage.getItem("role");
 
   // ============ Hook Form ============
   const {
@@ -195,7 +195,13 @@ export default function TabPengumuman() {
     setOpenDialog(true);
   };
 
+  const getRoles = async () => {
+    const role = await getRole();
+    setRole(role.role)
+  };
   // ================== EFFECT ==================
+  useEffect(() => { getRoles(); }, []);
+
   useEffect(() => {
     fetchPengumuman();
     const interval = setInterval(fetchPengumuman, 30000);
