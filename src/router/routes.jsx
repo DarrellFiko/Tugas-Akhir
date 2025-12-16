@@ -150,20 +150,22 @@ const getRoles = async () => {
 
 // Function to get routes by role
 export async function getRoutes() {
-  const role = await getRoles();
-
-  if (!role) return [...loginRoutes];
-
-  switch (role.toLowerCase()) {
-    case "siswa":
-      return [...studentRoutes];
-    case "guru":
-      return [...teacherRoutes];
-    case "admin":
-      return [...adminRoutes];
-    default:
-      return [...loginRoutes];
-  }
+  if(localStorage.getItem("authToken")){
+    const role = await getRoles();
+  
+    if (!role) return [...loginRoutes];
+  
+    switch (role.toLowerCase()) {
+      case "siswa":
+        return [...studentRoutes];
+      case "guru":
+        return [...teacherRoutes];
+      case "admin":
+        return [...adminRoutes];
+      default:
+        return [...loginRoutes];
+    }
+  } else return [...loginRoutes];
 }
 
 
