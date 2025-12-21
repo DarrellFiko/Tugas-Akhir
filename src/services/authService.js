@@ -4,7 +4,11 @@ import { ENDPOINTS } from "./endpoint";
 
 // ====================== AUTH ======================
 export const login = async (body) => {
-  const res = await getAPI.post(ENDPOINTS.USER.LOGIN, body);
+  const res = await getAPI.post(
+    ENDPOINTS.USER.LOGIN,
+    body,
+    { withCredentials: true } 
+  );
   return res.data;
 };
 
